@@ -30,27 +30,34 @@ export const workspacesErrors = {
   noWorkspaceAccess: "No tienes acceso a este workspace",
 };
 
-export const membersErrors = {
+export const rolesErrors = {
   unauthorized: "No tienes permisos para realizar esta acción",
-  memberNotFound: "Miembro no encontrado",
+  roleNotFound: "Rol no encontrado",
   insufficientPermissions: "No tienes los permisos necesarios para esta acción",
-  createFailed: "Error al crear el miembro",
-  deleteFailed: "Error al eliminar el miembro",
-  updateFailed: "Error al actualizar el miembro",
-  loadFailed: "Error al cargar los miembros",
-  userNotAuthenticated: "Usuario no autenticado",
+  createFailed: "Error al crear el rol",
+  deleteFailed: "Error al eliminar el rol",
+  updateFailed: "Error al actualizar el rol",
+  loadFailed: "Error al cargar los roles",
+  userNotAuthenticated: "Parece que no estás autenticado",
+  memberNotFound: "Miembro no encontrado en el workspace",
   noWorkspaceAccess: "No tienes acceso a este workspace",
-  cannotRemoveLastAdmin: "No se puede eliminar el último administrador",
-  cannotRemoveYourself: "No puedes eliminarte a ti mismo",
-  userNotFound: "Usuario no encontrado",
+  cannotEditRoles: "No tienes permiso para editar roles",
+  cannotDeleteRoles: "No tienes permiso para eliminar roles",
+  cannotCreateRoles: "No tienes permiso para crear roles",
 };
 
-export const chatErrors = {
+export const logsErrors = {
   unauthorized: "No tienes permisos para realizar esta acción",
+  logNotFound: "Log no encontrado",
+  insufficientPermissions: "No tienes los permisos necesarios para esta acción",
+  createFailed: "Error al crear el log",
+  loadFailed: "Error al cargar los logs",
   userNotAuthenticated: "Usuario no autenticado",
-  threadNotFound: "Conversación no encontrada",
-  threadAccessDenied: "No tienes acceso a esta conversación",
-  messageSendFailed: "Error al enviar el mensaje",
-  threadCreateFailed: "Error al crear la conversación",
-  loadFailed: "Error al cargar las conversaciones",
+  userNotFound: "Usuario no encontrado",
+  memberNotFound: "Miembro no encontrado en el workspace",
+  noWorkspaceAccess: "No tienes acceso a este workspace",
+  noOrganizationAccess: "No tienes acceso a esta organización",
+  customerNotFound: "Cliente no encontrado",
+  organizationNotFound: "Organización no encontrada",
+  workspaceNotFound: "Workspace no encontrado",
 };

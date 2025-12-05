@@ -11,8 +11,13 @@
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as lib_error_messages from "../lib/error_messages.js";
+import type * as lib_permissions from "../lib/permissions.js";
+import type * as logs from "../logs.js";
 import type * as resend from "../resend.js";
+import type * as roles from "../roles.js";
+import type * as upload from "../upload.js";
 import type * as users from "../users.js";
+import type * as workspaces from "../workspaces.js";
 
 import type {
   ApiFromModules,
@@ -24,8 +29,13 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
   "lib/error_messages": typeof lib_error_messages;
+  "lib/permissions": typeof lib_permissions;
+  logs: typeof logs;
   resend: typeof resend;
+  roles: typeof roles;
+  upload: typeof upload;
   users: typeof users;
+  workspaces: typeof workspaces;
 }>;
 
 /**
