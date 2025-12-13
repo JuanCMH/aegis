@@ -6,33 +6,40 @@ import {
   SelectValue,
 } from "./ui/select";
 
-interface TaxesInputProps {
+interface BondPickerProps {
   value?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  selectedBonds?: string[];
 }
 
-const rateOptions = Array.from({ length: 36 }, (_, i) => {
-  const value = 0.05 + i * 0.01;
-  const text = value.toFixed(2);
-  return { value: text, label: `${text}%` };
-});
+const bondOptions = [
+  { value: "performance", label: "Garantía de Cumplimiento" },
+  { value: "advance", label: "Garantía de Anticipo" },
+];
 
-export function TaxesInput({
+export function BondPicker({
   value,
   onChange,
   placeholder,
   disabled,
-}: TaxesInputProps) {
+  selectedBonds,
+}: BondPickerProps) {
   return (
     <Select disabled={disabled} onValueChange={onChange} value={value}>
       <SelectTrigger className="w-full">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="flex max-h-48">
-        {rateOptions.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
+        {bondOptions.map((option) => (
+          <SelectItem
+            key={option.value}
+            value={option.value}
+            className={
+              selectedBonds?.includes(option.value) ? "text-sky-500" : ""
+            }
+          >
             {option.label}
           </SelectItem>
         ))}

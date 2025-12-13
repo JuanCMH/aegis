@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { Hint } from "./hint";
+import { formatCop } from "@/lib/format-cop";
 
 interface CurrencyInputProps {
   value?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
   readOnly?: boolean;
+  disabled?: boolean;
 }
 
 export function CurrencyInput({
@@ -14,6 +16,7 @@ export function CurrencyInput({
   onChange,
   placeholder,
   readOnly,
+  disabled,
 }: CurrencyInputProps) {
   const [display, setDisplay] = useState(
     value !== undefined
@@ -24,13 +27,6 @@ export function CurrencyInput({
         }).format(Number(value))
       : "",
   );
-
-  const formatCop = (num: number) =>
-    new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0,
-    }).format(num);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
@@ -66,6 +62,7 @@ export function CurrencyInput({
         placeholder={placeholder}
         className="w-full"
         readOnly={readOnly}
+        disabled={disabled}
       />
     </Hint>
   );

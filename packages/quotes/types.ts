@@ -10,6 +10,7 @@ export type ContractDataType = {
 };
 
 export type BondDataType = {
+  name: string;
   startDate: Date;
   endDate: Date;
   days: number;
