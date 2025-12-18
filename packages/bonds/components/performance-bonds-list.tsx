@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { PerformanceBondCard } from "./performance-bond-card";
-import { PerformanceBondDataType } from "../types";
+import { BondDataType } from "../types";
 import ResultsCard from "@/packages/quotes/components/results-card";
 import { getQuoteTotals } from "@/lib/get-quote-totals";
 import { differenceInCalendarDays } from "date-fns";
@@ -19,7 +19,7 @@ interface PerformanceBondsListProps {
   setOpen: Dispatch<SetStateAction<boolean>>;
   expenses: number;
   setExpenses: Dispatch<SetStateAction<number>>;
-  performanceBondsData: Array<PerformanceBondDataType>;
+  performanceBondsData: Array<BondDataType>;
   calculateExpensesTaxes?: boolean;
   setCalculateExpensesTaxes?: Dispatch<SetStateAction<boolean>>;
   setQuoteType: Dispatch<SetStateAction<"bidBond" | "performanceBonds">>;

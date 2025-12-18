@@ -3,7 +3,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Doc } from "@/convex/_generated/dataModel";
 import { RiArrowRightLine } from "@remixicon/react";
 import { Dispatch, SetStateAction } from "react";
-import { PerformanceBondDataType } from "../types";
+import { BondDataType } from "../types";
 import { ContractDataType } from "@/packages/quotes/types";
 import { differenceInCalendarDays } from "date-fns";
 
@@ -11,8 +11,8 @@ interface BondItemProps {
   bond: Doc<"bonds">;
   contractData: ContractDataType;
   setSelectedBond: (bond: Doc<"bonds">) => void;
-  performanceBondsData: PerformanceBondDataType[];
-  setPerformanceBondsData: Dispatch<SetStateAction<PerformanceBondDataType[]>>;
+  performanceBondsData: BondDataType[];
+  setPerformanceBondsData: Dispatch<SetStateAction<BondDataType[]>>;
 }
 
 export const BondItem = ({

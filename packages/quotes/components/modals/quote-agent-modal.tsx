@@ -25,7 +25,7 @@ import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { RiAttachmentLine, RiCloseLine, RiLoader3Line } from "@remixicon/react";
 import { toast } from "sonner";
 import { ContractDataType } from "../../types";
-import { BondDataType, PerformanceBondDataType } from "@/packages/bonds/types";
+import { BondDataType } from "@/packages/bonds/types";
 import { string2Object } from "@/lib/string-to-object";
 import { addMonths } from "date-fns";
 import { useGetBondsByWorkspace } from "@/packages/bonds/api";
@@ -40,9 +40,7 @@ interface QuoteAgentModalProps {
   >;
   setContractData: Dispatch<SetStateAction<ContractDataType>>;
   setBidBondData: Dispatch<SetStateAction<BondDataType>>;
-  setPerformanceBondsData: Dispatch<
-    SetStateAction<Array<PerformanceBondDataType>>
-  >;
+  setPerformanceBondsData: Dispatch<SetStateAction<Array<BondDataType>>>;
 }
 
 export const QuoteAgentModal = ({

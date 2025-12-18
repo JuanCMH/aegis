@@ -17,15 +17,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CreateBondModal } from "./create-bond-modal";
 import { BondItem } from "../bond-item";
 import { SelectedBondModal } from "./selected-bond-modal";
-import { PerformanceBondDataType } from "../../types";
+import { BondDataType } from "../../types";
 import { ContractDataType } from "@/packages/quotes/types";
 
 interface BondsModalProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   contractData: ContractDataType;
-  performanceBondsData: PerformanceBondDataType[];
-  setPerformanceBondsData: Dispatch<SetStateAction<PerformanceBondDataType[]>>;
+  performanceBondsData: BondDataType[];
+  setPerformanceBondsData: Dispatch<SetStateAction<BondDataType[]>>;
 }
 
 export const BondsModal = ({

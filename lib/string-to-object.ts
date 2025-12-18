@@ -1,5 +1,5 @@
 import { Id } from "@/convex/_generated/dataModel";
-import { PerformanceBondDataType } from "@/packages/bonds/types";
+import { BondDataType } from "@/packages/bonds/types";
 import { ContractDataType } from "@/packages/quotes/types";
 
 type AgentBond = {
@@ -68,7 +68,7 @@ export const string2Object = (
 
   const data: {
     contractData: ContractDataType;
-    performanceBondsData: PerformanceBondDataType[];
+    performanceBondsData: BondDataType[];
   } = {
     contractData: {
       contractor: "",
@@ -127,7 +127,7 @@ export const string2Object = (
           ? data.contractData.contractValue * (percentage / 100)
           : 0;
 
-      const perfBond: PerformanceBondDataType = {
+      const perfBond: BondDataType = {
         id: bond.id,
         name: isNonEmptyString(bond.name) ? bond.name : "",
         startDate: toValidDate(bond.startDate) ?? new Date(),

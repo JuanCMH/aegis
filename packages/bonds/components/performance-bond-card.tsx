@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { fullDate } from "@/lib/date-formats";
 import { formatCop } from "@/lib/format-cop";
 import { truncateTwoDecimals } from "@/lib/formatTwoDecimals";
-import { BondDataType, PerformanceBondDataType } from "../types";
+import { BondDataType } from "../types";
 import { differenceInCalendarDays } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import { getBondTotals } from "@/lib/get-bond-totals";
@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { RiArrowRightLine } from "@remixicon/react";
 
 interface PerformanceBondCardProps {
-  bondData: PerformanceBondDataType;
+  bondData: BondDataType;
   setOpen: Dispatch<SetStateAction<boolean>>;
   setQuoteType: Dispatch<SetStateAction<"bidBond" | "performanceBonds">>;
   setSelectedBondId: Dispatch<SetStateAction<Id<"bonds"> | undefined>>;

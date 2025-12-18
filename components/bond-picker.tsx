@@ -6,15 +6,15 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Dispatch, SetStateAction } from "react";
-import { Doc, Id } from "@/convex/_generated/dataModel";
-import { PerformanceBondDataType } from "@/packages/bonds/types";
+import { Id } from "@/convex/_generated/dataModel";
+import { BondDataType } from "@/packages/bonds/types";
 
 interface BondPickerProps {
   value?: Id<"bonds">;
   onChange?: Dispatch<SetStateAction<Id<"bonds"> | undefined>>;
   placeholder?: string;
   disabled?: boolean;
-  bonds: Array<PerformanceBondDataType>;
+  bonds: Array<BondDataType>;
 }
 
 export function BondPicker({

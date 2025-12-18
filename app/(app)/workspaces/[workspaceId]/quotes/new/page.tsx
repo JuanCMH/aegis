@@ -18,7 +18,7 @@ import { ContractDataType } from "@/packages/quotes/types";
 import BidBondInfo from "@/packages/bonds/components/bid-bond-info";
 import { RiAiGenerate2, RiShieldCheckFill } from "@remixicon/react";
 import ContractInfo from "@/packages/quotes/components/contract-info";
-import { BondDataType, PerformanceBondDataType } from "@/packages/bonds/types";
+import { BondDataType } from "@/packages/bonds/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
 import { QuoteAgentModal } from "@/packages/quotes/components/modals/quote-agent-modal";
@@ -53,7 +53,7 @@ const NewQuotePage = () => {
   });
 
   const [performanceBondsData, setPerformanceBondsData] = useState<
-    Array<PerformanceBondDataType>
+    Array<BondDataType>
   >([]);
 
   const handleQuoteTypeChange = (value: string) => {

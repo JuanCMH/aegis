@@ -6,6 +6,7 @@ import {
   RiEditFill,
   RiArrowLeftLine,
   RiShieldCheckFill,
+  RiDownloadLine,
 } from "@remixicon/react";
 import {
   Breadcrumb,
@@ -19,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { Separator } from "@/components/ui/separator";
+import { BondDataType } from "@/packages/bonds/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ContractDataType } from "@/packages/quotes/types";
@@ -26,8 +28,8 @@ import { useQuoteId } from "@/packages/quotes/hooks/use-quote-id";
 import BidBondInfo from "@/packages/bonds/components/bid-bond-info";
 import ContractInfo from "@/packages/quotes/components/contract-info";
 import { useGetQuoteById, useUpdateQuote } from "@/packages/quotes/api";
+import { generateQuotePDF } from "@/packages/quotes/lib/export-quote-pdf";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
-import { BondDataType, PerformanceBondDataType } from "@/packages/bonds/types";
 import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
 
 const QuoteIdPage = () => {
@@ -63,7 +65,7 @@ const QuoteIdPage = () => {
     rate: 0,
   });
   const [performanceBondsData, setPerformanceBondsData] = useState<
-    Array<PerformanceBondDataType>
+    Array<BondDataType>
   >([]);
 
   useEffect(() => {
@@ -250,6 +252,25 @@ const QuoteIdPage = () => {
                     {quote.quoteType === "performanceBonds" && "Cumplimiento"}
                   </h1>
                 </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    generateQuotePDF({
+                      expenses,
+                      contractData,
+                      calculateExpensesTaxes,
+                      bondsData:
+                        quote.quoteType === "bidBond"
+                          ? [bidBondData]
+                          : performanceBondsData,
+                      quoteType: quote.quoteType,
+                    });
+                  }}
+                >
+                  <RiDownloadLine />
+                  Exportar PDF
+                </Button>
               </header>
               <Separator />
               <TabsContent value="bidBond">

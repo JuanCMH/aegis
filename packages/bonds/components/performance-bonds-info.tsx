@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { BondsModal } from "@/packages/bonds/components/modal/bonds-modal";
 import { Id } from "@/convex/_generated/dataModel";
-import { PerformanceBondDataType } from "@/packages/bonds/types";
+import { BondDataType } from "@/packages/bonds/types";
 import Bond from "./bond";
 import { PerformanceBondsList } from "./performance-bonds-list";
 import ResultsCard from "@/packages/quotes/components/results-card";
@@ -31,10 +31,8 @@ interface PerformanceBondsInfoProps {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
   contractData: ContractDataType;
-  performanceBondsData: Array<PerformanceBondDataType>;
-  setPerformanceBondsData: Dispatch<
-    SetStateAction<Array<PerformanceBondDataType>>
-  >;
+  performanceBondsData: Array<BondDataType>;
+  setPerformanceBondsData: Dispatch<SetStateAction<Array<BondDataType>>>;
   setQuoteType: Dispatch<SetStateAction<"bidBond" | "performanceBonds">>;
 }
 

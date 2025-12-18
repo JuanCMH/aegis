@@ -60,6 +60,33 @@ export const columns: ColumnDef<Doc<"quotes">>[] = [
     },
   },
   {
+    accessorKey: "contractor",
+    header: ({ column }) => {
+      return (
+        <Button
+          size="sm"
+          variant="ghost"
+          className="has-[>svg]:px-2"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Contratista
+          {column.getIsSorted() === "asc" ? (
+            <RiArrowUpLine className="size-4 ml-2" />
+          ) : (
+            <RiArrowDownLine className="size-4 ml-2" />
+          )}
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      return (
+        <Hint label={row.getValue("contractor")}>
+          <p className="truncate ml-2 max-w-48">{row.getValue("contractor")}</p>
+        </Hint>
+      );
+    },
+  },
+  {
     accessorKey: "quoteType",
     meta: {
       className: "hidden md:table-cell",
@@ -84,7 +111,7 @@ export const columns: ColumnDef<Doc<"quotes">>[] = [
     cell: ({ row }) => {
       const quoteType = row.getValue("quoteType");
       const value = quoteType === "bidBond" ? "Seriedad" : "Cumplimiento";
-      return <Badge>{value}</Badge>;
+      return <Badge className="ml-2">{value}</Badge>;
     },
   },
   {
@@ -115,33 +142,6 @@ export const columns: ColumnDef<Doc<"quotes">>[] = [
           <p className="truncate ml-2 max-w-48">
             {row.getValue("contractType")}
           </p>
-        </Hint>
-      );
-    },
-  },
-  {
-    accessorKey: "contractor",
-    header: ({ column }) => {
-      return (
-        <Button
-          size="sm"
-          variant="ghost"
-          className="has-[>svg]:px-2"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Contratista
-          {column.getIsSorted() === "asc" ? (
-            <RiArrowUpLine className="size-4 ml-2" />
-          ) : (
-            <RiArrowDownLine className="size-4 ml-2" />
-          )}
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      return (
-        <Hint label={row.getValue("contractor")}>
-          <p className="truncate ml-2 max-w-48">{row.getValue("contractor")}</p>
         </Hint>
       );
     },
