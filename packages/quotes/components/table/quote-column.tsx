@@ -1,24 +1,22 @@
+import {
+  RiMore2Line,
+  RiArrowUpLine,
+  RiArrowDownLine,
+  RiInformation2Fill,
+} from "@remixicon/react";
+import { Hint } from "@/components/hint";
 import { formatCop } from "@/lib/format-cop";
+import { Badge } from "@/components/ui/badge";
 import { QuoteActions } from "./quote-actions";
+import { QuotePopover } from "./quote-popover";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import { fullDate, fullDateTime } from "@/lib/date-formats";
 import { Doc } from "@/convex/_generated/dataModel";
-import {
-  RiArrowDownLine,
-  RiArrowUpLine,
-  RiInformation2Fill,
-  RiMore2Line,
-} from "@remixicon/react";
-import { QuotePopover } from "./quote-popover";
-import { Badge } from "@/components/ui/badge";
+import { fullDate, fullDateTime } from "@/lib/date-formats";
 
 export const columns: ColumnDef<Doc<"quotes">>[] = [
   {
     accessorKey: "info",
-    // meta: {
-    //   className: "md:hidden",
-    // },
     header: () => {
       return <p className="line-clamp-1 ml-2">Más</p>;
     },
@@ -63,6 +61,9 @@ export const columns: ColumnDef<Doc<"quotes">>[] = [
   },
   {
     accessorKey: "quoteType",
+    meta: {
+      className: "hidden md:table-cell",
+    },
     header: ({ column }) => {
       return (
         <Button
@@ -89,7 +90,7 @@ export const columns: ColumnDef<Doc<"quotes">>[] = [
   {
     accessorKey: "contractType",
     meta: {
-      className: "hidden lg:table-cell",
+      className: "hidden 2xl:table-cell",
     },
     header: ({ column }) => {
       return (
@@ -110,7 +111,11 @@ export const columns: ColumnDef<Doc<"quotes">>[] = [
     },
     cell: ({ row }) => {
       return (
-        <p className="line-clamp-1 ml-2">{row.getValue("contractType")}</p>
+        <Hint label={row.getValue("contractType")}>
+          <p className="truncate ml-2 max-w-48">
+            {row.getValue("contractType")}
+          </p>
+        </Hint>
       );
     },
   },
@@ -134,13 +139,17 @@ export const columns: ColumnDef<Doc<"quotes">>[] = [
       );
     },
     cell: ({ row }) => {
-      return <p className="line-clamp-1 ml-2">{row.getValue("contractor")}</p>;
+      return (
+        <Hint label={row.getValue("contractor")}>
+          <p className="truncate ml-2 max-w-48">{row.getValue("contractor")}</p>
+        </Hint>
+      );
     },
   },
   {
     accessorKey: "contractStart",
     meta: {
-      className: "hidden lg:table-cell",
+      className: "hidden xl:table-cell",
     },
     header: ({ column }) => {
       return (
@@ -169,7 +178,7 @@ export const columns: ColumnDef<Doc<"quotes">>[] = [
   {
     accessorKey: "contractEnd",
     meta: {
-      className: "hidden lg:table-cell",
+      className: "hidden xl:table-cell",
     },
     header: ({ column }) => {
       return (
@@ -198,7 +207,7 @@ export const columns: ColumnDef<Doc<"quotes">>[] = [
   {
     accessorKey: "contractValue",
     meta: {
-      className: "hidden md:table-cell",
+      className: "hidden xl:table-cell",
     },
     header: ({ column }) => {
       return (
