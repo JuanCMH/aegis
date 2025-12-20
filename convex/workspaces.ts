@@ -69,6 +69,9 @@ export const newJoinCode = mutation({
 export const create = mutation({
   args: {
     name: v.string(),
+    primaryColor: v.string(),
+    secondaryColor: v.string(),
+    logo: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);

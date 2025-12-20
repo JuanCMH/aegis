@@ -1,8 +1,8 @@
 import { v } from "convex/values";
+import { customColors } from "./lib/colors";
 import { authTables } from "@convex-dev/auth/server";
 import { permissionsSchema } from "./lib/permissions";
 import { defineSchema, defineTable } from "convex/server";
-import { customColors } from "./lib/colors";
 
 const schema = defineSchema({
   ...authTables,

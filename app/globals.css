@@ -41,6 +41,55 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  --color-yellow: #ffb900; /* Amarillo */
+  --color-yellow-600: #cc9400;
+  --color-gold: #ff8c00; /* Dorado */
+  --color-gold-600: #cc7000;
+  --color-orange: #f7630c; /* Naranja */
+  --color-orange-600: #c54f0a;
+  --color-brown: #ca5010; /* Marrón */
+  --color-brown-600: #a2400d;
+  --color-red: #d13438; /* Rojo */
+  --color-red-600: #a72a2d;
+  --color-magenta: #e81123; /* Magenta */
+  --color-magenta-600: #ba0e1c;
+  --color-rose: #e74856; /* Rosa */
+  --color-rose-600: #b93a45;
+  --color-crimson: #c30052; /* Carmesí */
+  --color-crimson-600: #9c0042;
+  --color-orchid: #e3008c; /* Orquídea */
+  --color-orchid-600: #b60070;
+  --color-lilac: #b146c2; /* Lila */
+  --color-lilac-600: #8e389b;
+  --color-violet: #8764b8; /* Violeta */
+  --color-violet-600: #6c5093;
+  --color-purple: #9a0089; /* Púrpura */
+  --color-purple-600: #7b006d;
+  --color-iris: #6b69d6; /* Iris */
+  --color-iris-600: #5654ab;
+  --color-cobalt: #0078d7; /* Cobalto */
+  --color-cobalt-600: #0060ac;
+  --color-blue: #0099bc; /* Azul */
+  --color-blue-600: #007a96;
+  --color-turquoise: #00b7c3; /* Turquesa */
+  --color-turquoise-600: #00929c;
+  --color-mint: #018574; /* Menta */
+  --color-mint-600: #016a5d;
+  --color-kelly: #10893e; /* Kelly */
+  --color-kelly-600: #0d6e32;
+  --color-green: #107c10; /* Verde */
+  --color-green-600: #0d630d;
+  --color-moss: #498205; /* Musgo */
+  --color-moss-600: #3a6804;
+  --color-gray: #7a7574; /* Gris */
+  --color-gray-600: #625d5d;
+  --color-platinum: #69797e; /* Platino */
+  --color-platinum-600: #546165;
+  --color-lichen: #486860; /* Lichen */
+  --color-lichen-600: #3a534d;
+  --color-slate: #515c6b; /* Pizarra */
+  --color-slate-600: #414a56;
 }
 
 :root {
