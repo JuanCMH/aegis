@@ -27,13 +27,28 @@ import {
   useJoinWorkspace,
 } from "../../api";
 import { useCreateWorkspaceModal } from "../../store/use-create-workspace-modal";
+import { CustomColor } from "@/lib/custom-colors";
+import { Id } from "@/convex/_generated/dataModel";
+
+type WorkspaceData = {
+  name: string;
+  primaryColor: CustomColor;
+  secondaryColor: CustomColor;
+  logo?: Id<"_storage">;
+};
 
 export const CreateWorkspaceModal = () => {
   const router = useRouter();
 
-  const [name, setName] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [open, setOpen] = useCreateWorkspaceModal();
+
+  const [data, setData] = useState<any>({
+    name: "",
+    primaryColor: "blue",
+    secondaryColor: "purple",
+    logo: undefined,
+  });
 
   const { data: user, isLoading: isLoadingUser } = useCurrentUser();
 
@@ -52,7 +67,12 @@ export const CreateWorkspaceModal = () => {
     useGetOwnedWorkspaces();
 
   const handleClose = () => {
-    setName("");
+    setData({
+      name: "",
+      primaryColor: "blue",
+      secondaryColor: "purple",
+      logo: undefined,
+    });
     setJoinCode("");
     setOpen(false);
   };
@@ -73,7 +93,12 @@ export const CreateWorkspaceModal = () => {
       return toast.error("La organización ha alcanzado el límite de espacios");
     }
     createMutate(
-      { name },
+      {
+        name: data.name,
+        primaryColor: data.primaryColor,
+        secondaryColor: data.secondaryColor,
+        logo: data.logo,
+      },
       {
         onSuccess(workspaceId) {
           toast.success("Espacio creado correctamente");
@@ -126,11 +151,11 @@ export const CreateWorkspaceModal = () => {
             <form className="grid grid-cols-2 gap-2" onSubmit={handleCreate}>
               <Input
                 required
-                value={name}
+                value={data.name}
                 minLength={4}
                 maxLength={40}
                 disabled={isCreating}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setData({ ...data, name: e.target.value })}
                 placeholder="Nombre del espacio"
                 className="col-span-2"
               />

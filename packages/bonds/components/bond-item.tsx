@@ -6,6 +6,7 @@ import { Dispatch, SetStateAction } from "react";
 import { BondDataType } from "../types";
 import { ContractDataType } from "@/packages/quotes/types";
 import { differenceInCalendarDays } from "date-fns";
+import { Hint } from "@/components/hint";
 
 interface BondItemProps {
   bond: Doc<"bonds">;
@@ -62,7 +63,11 @@ export const BondItem = ({
               checked={performanceBondsData.some((b) => b.id === bond._id)}
               onCheckedChange={onCheckedChange}
             />
-            <span className="text-sm truncate font-semibold">{bond.name}</span>
+            <Hint label={bond.name} side="top" align="center">
+              <span className="text-sm font-semibold line-clamp-1">
+                {bond.name}
+              </span>
+            </Hint>
           </div>
           <Button
             size="icon-sm"

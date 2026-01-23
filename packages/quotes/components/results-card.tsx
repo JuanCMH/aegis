@@ -41,8 +41,8 @@ const ResultsCard = ({
     <div className="p-2 border border-muted rounded-lg mt-4 z-10 bg-sky-700 text-white pb-2">
       <div
         className={cn(
-          "grid gap-2",
-          !withExpenses ? "grid-cols-3" : "grid-cols-4",
+          "grid gap-2 grid-cols-1 md:grid-cols-2",
+          !withExpenses ? "lg:grid-cols-3" : "lg:grid-cols-4",
         )}
       >
         {withExpenses && (

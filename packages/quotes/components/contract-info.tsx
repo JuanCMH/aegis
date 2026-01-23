@@ -39,7 +39,7 @@ const ContractInfo = ({
   };
 
   return (
-    <main className="mt-2">
+    <section className="m-2 border p-2 rounded-md shadow-sm bg-card">
       <div className="flex gap-2 items-center">
         <RiContractFill className="size-4" />
         <h1 className="text-lg font-semibold">
@@ -47,7 +47,7 @@ const ContractInfo = ({
         </h1>
       </div>
       <Separator className="my-2" />
-      <div className="mt-2 grid grid-cols-4 gap-2">
+      <div className="mt-2 gap-2 grid grid-cols-2 lg:grid-cols-4">
         <Field
           label="AFIANZADO/CONTRATISTA*"
           htmlFor="contractor"
@@ -59,7 +59,7 @@ const ContractInfo = ({
               contractor: value,
             }))
           }
-          className="col-span-3"
+          className="lg:col-span-3"
           readOnly={readOnly}
         />
         <Field
@@ -86,7 +86,7 @@ const ContractInfo = ({
               contractee: value,
             }))
           }
-          className="col-span-3"
+          className="lg:col-span-3"
           readOnly={readOnly}
         />
         <Field
@@ -150,7 +150,7 @@ const ContractInfo = ({
             onSelect={(date) => date && handleEndDateChange(date)}
           />
         </div>
-        <div className="grid w-full items-center gap-1 col-span-4">
+        <div className="grid w-full items-center gap-1 col-span-full">
           <Label htmlFor="agreement" className="text-xs">
             OBJETO
           </Label>
@@ -170,7 +170,7 @@ const ContractInfo = ({
           />
         </div>
       </div>
-    </main>
+    </section>
   );
 };
 

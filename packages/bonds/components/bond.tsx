@@ -100,7 +100,7 @@ const Bond = ({
   };
 
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
       <div className="grid w-full items-center gap-1">
         <Label htmlFor="bond-start" className="text-xs">
           DESDE*

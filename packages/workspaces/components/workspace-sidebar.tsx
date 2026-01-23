@@ -1,7 +1,6 @@
 import {
   RiListView,
   RiHome2Fill,
-  RiAddBoxFill,
   RiGroup2Fill,
   RiFolderShield2Fill,
   RiMoneyDollarCircleFill,
@@ -58,7 +57,7 @@ export function WorkspaceSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   ];
 
   return (
-    <Sidebar variant="floating" collapsible="icon" {...props}>
+    <Sidebar variant="inset" collapsible="icon" {...props}>
       <SidebarHeader>
         <WorkspaceSwitcher />
       </SidebarHeader>

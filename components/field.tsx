@@ -20,7 +20,7 @@ export const Field = ({
 }: FieldProps) => {
   return (
     <div className={cn("grid w-full items-center gap-1", className)}>
-      <Label htmlFor={htmlFor || props.id} className="text-xs">
+      <Label htmlFor={htmlFor || props.id} className="text-xs line-clamp-1">
         {label}
       </Label>
       <Hint label={props.value as string} side="top">

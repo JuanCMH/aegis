@@ -172,7 +172,7 @@ export const QuoteAgentModal = ({
         </DialogHeader>
         <Separator />
         <form className="space-y-4 p-4" onSubmit={extractPdf}>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="grid w-full items-center gap-1">
               <Label htmlFor="quote-type" className="text-xs">
                 TIPO DE COTIZACIÓN
