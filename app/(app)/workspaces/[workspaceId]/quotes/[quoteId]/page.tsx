@@ -250,52 +250,46 @@ const QuoteIdPage = () => {
 
   return (
     <>
-      <div className="w-full h-full flex-1 flex flex-col p-2 pl-2 md:pl-0">
-        <div className="p-2 border border-muted rounded-lg z-11 bg-card">
-          <header className="p-1 border rounded-md z-10 sticky top-0 shrink-0 flex flex-col transition-[width,height] ease-linear">
-            <div className="flex items-center w-full">
-              <div className="flex gap-2 w-full items-center">
-                <SidebarTrigger className="cursor-pointer" />
-                <Breadcrumb className="flex">
-                  <BreadcrumbList>
-                    <BreadcrumbItem>Cotizaciones</BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbPage>Detalles de Cotización</BreadcrumbPage>
-                  </BreadcrumbList>
-                </Breadcrumb>
-                <div className="flex gap-2 ml-auto">
-                  <Hint label="Volver a Cotizaciones" align="end">
-                    <Button
-                      size="sm"
-                      type="button"
-                      variant="outline"
-                      onClick={onBack}
-                    >
-                      <RiArrowLeftLine />
-                      Volver
-                    </Button>
-                  </Hint>
-                  <Toggle
-                    size="sm"
-                    variant="outline"
-                    pressed={editMode}
-                    onPressedChange={setEditMode}
-                    className="cursor-pointer  data-[state=on]:*:[svg]:fill-sky-500 data-[state=on]:*:[svg]:stroke-sky-500"
-                  >
-                    <RiEditFill />
-                  </Toggle>
-                </div>
-              </div>
+      <main className="w-full h-full flex-1 flex flex-col">
+        <header className="flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
+          <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              orientation="vertical"
+              className="mx-2 data-[orientation=vertical]:h-4"
+            />
+            <h1 className="text-base font-medium">Detalles de la Cotización</h1>
+            <div className="ml-auto flex items-center gap-2">
+              <Hint label="Volver a Cotizaciones" align="end">
+                <Button
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                  onClick={onBack}
+                >
+                  <RiArrowLeftLine />
+                  Volver
+                </Button>
+              </Hint>
+              <Toggle
+                size="sm"
+                variant="outline"
+                pressed={editMode}
+                onPressedChange={setEditMode}
+                className="cursor-pointer  data-[state=on]:*:[svg]:fill-sky-500 data-[state=on]:*:[svg]:stroke-sky-500"
+              >
+                <RiEditFill />
+              </Toggle>
             </div>
-          </header>
-          <ContractInfo
-            readOnly={!editMode}
-            contractData={contractData}
-            setContractData={setContractData}
-          />
-        </div>
+          </div>
+        </header>
+        <ContractInfo
+          readOnly={!editMode}
+          contractData={contractData}
+          setContractData={setContractData}
+        />
         {quote && (
-          <div className="p-2 border border-muted rounded-lg mt-2 z-11 bg-card pb-2">
+          <div className="m-2 mt-0 border p-2 rounded-md shadow-sm bg-card">
             <Tabs value={quote.quoteType}>
               <header className="flex items-center justify-between gap-2">
                 <div className="flex gap-2 items-center">
@@ -364,7 +358,7 @@ const QuoteIdPage = () => {
             </Tabs>
           </div>
         )}
-      </div>
+      </main>
     </>
   );
 };

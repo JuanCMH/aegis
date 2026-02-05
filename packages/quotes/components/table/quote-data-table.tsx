@@ -59,7 +59,7 @@ export function QuoteDataTable<TData, TValue>({
   });
 
   return (
-    <div>
+    <div className="m-2 border p-2 rounded-md shadow-sm bg-card">
       <div className="flex items-center pb-2 gap-2 justify-between">
         <Input
           placeholder="Buscar por contratista"

@@ -1,14 +1,13 @@
-import { CurrencyInput } from "@/components/currency-input";
-import { DatePicker } from "@/components/date-picker";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { ContractDataType } from "../types";
-import { Dispatch, SetStateAction } from "react";
-import { isAfter, isBefore } from "date-fns";
-import { RiContractFill } from "@remixicon/react";
 import { Field } from "@/components/field";
+import { ContractDataType } from "../types";
+import { isAfter, isBefore } from "date-fns";
+import { Label } from "@/components/ui/label";
+import { Dispatch, SetStateAction } from "react";
+import { RiContractFill } from "@remixicon/react";
 import { Textarea } from "@/components/ui/textarea";
+import { DatePicker } from "@/components/date-picker";
+import { Separator } from "@/components/ui/separator";
+import { CurrencyInput } from "@/components/currency-input";
 
 interface ContractInfoProps {
   readOnly?: boolean;

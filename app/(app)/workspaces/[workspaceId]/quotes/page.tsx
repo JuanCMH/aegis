@@ -1,21 +1,15 @@
 "use client";
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { useDates } from "@/lib/useDates";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { RiAddCircleFill } from "@remixicon/react";
+import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useGetQuotesByWorkspace } from "@/packages/quotes/api";
 import { columns } from "@/packages/quotes/components/table/quote-column";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
 import { QuoteDataTable } from "@/packages/quotes/components/table/quote-data-table";
-import { RiAddCircleFill } from "@remixicon/react";
 
 const QuotePage = () => {
   const router = useRouter();
@@ -40,43 +34,37 @@ const QuotePage = () => {
 
   return (
     <>
-      <div className="w-full h-full flex-1 flex flex-col p-2 pl-2 md:pl-0">
-        <div className="p-2 border border-muted rounded-lg z-11 bg-card">
-          <header className="p-1 border rounded-md z-10 sticky top-0 shrink-0 flex flex-col transition-[width,height] ease-linear">
-            <div className="flex items-center w-full">
-              <div className="flex gap-2 w-full items-center">
-                <SidebarTrigger className="cursor-pointer" />
-                <Breadcrumb className="flex">
-                  <BreadcrumbList>
-                    <BreadcrumbItem>Cotizaciones</BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbPage>Lista de Cotizaciones</BreadcrumbPage>
-                  </BreadcrumbList>
-                </Breadcrumb>
-                <Button
-                  size="sm"
-                  type="button"
-                  variant="outline"
-                  onClick={onNewQuoteClick}
-                  className="cursor-pointer ml-auto"
-                >
-                  <RiAddCircleFill />
-                  Nueva Cotización
-                </Button>
-              </div>
-            </div>
-          </header>
-          <main className="mt-2">
-            <QuoteDataTable
-              columns={columns}
-              data={quotes || []}
-              onMonthChange={handleMonthChange}
-              currentMonthValue={currentMonthValue}
-              isLoadingQuotes={isLoadingQuotes}
+      <main className="w-full h-full flex-1 flex flex-col">
+        <header className="flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
+          <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              orientation="vertical"
+              className="mx-2 data-[orientation=vertical]:h-4"
             />
-          </main>
-        </div>
-      </div>
+            <h1 className="text-base font-medium">Lista de Cotizaciones</h1>
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={onNewQuoteClick}
+                className="cursor-pointer"
+              >
+                <RiAddCircleFill />
+                Nueva Cotización
+              </Button>
+            </div>
+          </div>
+        </header>
+        <QuoteDataTable
+          columns={columns}
+          data={quotes || []}
+          onMonthChange={handleMonthChange}
+          currentMonthValue={currentMonthValue}
+          isLoadingQuotes={isLoadingQuotes}
+        />
+      </main>
     </>
   );
 };

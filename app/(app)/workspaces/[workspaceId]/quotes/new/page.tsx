@@ -1,35 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
-import { useCreateQuote } from "@/packages/quotes/api";
-import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
-import { getErrorMessage } from "@/lib/get-error-message";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { RiAiGenerate2 } from "@remixicon/react";
 import { BondDataType } from "@/packages/bonds/types";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ContractDataType } from "@/packages/quotes/types";
-import BidBondInfo from "@/packages/bonds/components/bid-bond-info";
-import {
-  RiAiGenerate2,
-  RiDownloadLine,
-  RiShieldCheckFill,
-} from "@remixicon/react";
-import ContractInfo from "@/packages/quotes/components/contract-info";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
-import { QuoteAgentModal } from "@/packages/quotes/components/modals/quote-agent-modal";
-import { generateQuotePDF } from "@/packages/quotes/lib/export-quote-pdf";
-import { useGetWorkspace } from "@/packages/workspaces/api";
 import QuoteInfo from "@/packages/quotes/components/quote-info";
+import ContractInfo from "@/packages/quotes/components/contract-info";
+import { QuoteAgentModal } from "@/packages/quotes/components/modals/quote-agent-modal";
 
 const NewQuotePage = () => {
   const [agentModalOpen, setAgentModalOpen] = useState(false);

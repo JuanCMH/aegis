@@ -17,8 +17,7 @@ interface MonthPickerProps {
 }
 
 const months = Array.from({ length: 12 }, (_, i) => i);
-const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 5 }, (_, i) => currentYear + i);
+const years = Array.from({ length: 20 }, (_, i) => 2015 + i);
 
 export const MonthPicker = ({
   value,
@@ -41,7 +40,7 @@ export const MonthPicker = ({
       <SelectContent className="max-h-48">
         {years.map((year) => (
           <SelectGroup key={year}>
-            <SelectLabel className="pl-2 dark:brightness-150">
+            <SelectLabel className="pl-2 text-sky-500 font-bold">
               {year}
             </SelectLabel>
             {months.map((month) => {

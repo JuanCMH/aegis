@@ -2,15 +2,15 @@ import {
   RiListView,
   RiHome2Fill,
   RiGroup2Fill,
+  RiAddCircleFill,
   RiFolderShield2Fill,
   RiMoneyDollarCircleFill,
-  RiAddCircleFill,
 } from "@remixicon/react";
 import {
   Sidebar,
-  SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarContent,
 } from "@/components/ui/sidebar";
 import { ComponentProps } from "react";
 import { WorkspaceMenu } from "./workspace-menu";
@@ -31,7 +31,18 @@ export function WorkspaceSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     {
       title: "Clientes",
       icon: RiGroup2Fill,
-      items: [],
+      items: [
+        {
+          title: "Lista de Clientes",
+          url: `/workspaces/${workspaceId}/clients`,
+          icon: RiListView,
+        },
+        {
+          title: "Nuevo Cliente",
+          url: `/workspaces/${workspaceId}/clients/new`,
+          icon: RiAddCircleFill,
+        },
+      ],
     },
     {
       title: "Cotizaciones",
@@ -52,7 +63,18 @@ export function WorkspaceSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     {
       title: "Pólizas",
       icon: RiFolderShield2Fill,
-      items: [],
+      items: [
+        {
+          title: "Lista de Pólizas",
+          url: `/workspaces/${workspaceId}/policies`,
+          icon: RiListView,
+        },
+        {
+          title: "Nueva Póliza",
+          url: `/workspaces/${workspaceId}/policies/new`,
+          icon: RiAddCircleFill,
+        },
+      ],
     },
   ];
 
