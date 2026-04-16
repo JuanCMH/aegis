@@ -4,6 +4,65 @@ import { authTables } from "@convex-dev/auth/server";
 import { permissionsSchema } from "./lib/permissions";
 import { defineSchema, defineTable } from "convex/server";
 
+// --- Client Template Field Validators ---
+const fieldType = v.union(
+  v.literal("text"),
+  v.literal("textarea"),
+  v.literal("number"),
+  v.literal("currency"),
+  v.literal("date"),
+  v.literal("select"),
+  v.literal("phone"),
+  v.literal("email"),
+  v.literal("file"),
+  v.literal("image"),
+  v.literal("switch"),
+  v.literal("url"),
+);
+
+const fieldSize = v.union(
+  v.literal("small"),
+  v.literal("medium"),
+  v.literal("large"),
+  v.literal("full"),
+);
+
+const templateField = v.object({
+  id: v.string(),
+  type: fieldType,
+  label: v.string(),
+  placeholder: v.optional(v.string()),
+  required: v.boolean(),
+  size: fieldSize,
+  sizeOverride: v.optional(
+    v.object({
+      sm: v.optional(v.number()),
+      md: v.optional(v.number()),
+      lg: v.optional(v.number()),
+    }),
+  ),
+  showInTable: v.boolean(),
+  isFixed: v.boolean(),
+  config: v.object({
+    minLength: v.optional(v.number()),
+    maxLength: v.optional(v.number()),
+    minValue: v.optional(v.number()),
+    maxValue: v.optional(v.number()),
+    options: v.optional(
+      v.array(v.object({ label: v.string(), value: v.string() })),
+    ),
+    acceptedFormats: v.optional(v.array(v.string())),
+    maxFileSize: v.optional(v.number()),
+  }),
+});
+
+const templateSection = v.object({
+  id: v.string(),
+  label: v.string(),
+  order: v.number(),
+  fields: v.array(templateField),
+});
+
 const schema = defineSchema({
   ...authTables,
   users: defineTable({
@@ -61,31 +120,26 @@ const schema = defineSchema({
     workspaceId: v.id("workspaces"),
     ...permissionsSchema,
   }).index("workspaceId", ["workspaceId"]),
+  clientTemplates: defineTable({
+    workspaceId: v.id("workspaces"),
+    sections: v.array(templateSection),
+  }).index("workspaceId", ["workspaceId"]),
   clients: defineTable({
     name: v.string(),
-    lastName: v.string(),
-    identificationType: v.union(
-      v.literal("NIT"),
-      v.literal("CC"),
-      v.literal("CE"),
-      v.literal("TI"),
-    ),
     identificationNumber: v.string(),
-    maritalStatus: v.union(
-      v.literal("single"),
-      v.literal("married"),
-      v.literal("divorced"),
-      v.literal("widowed"),
-    ),
-    birthDate: v.number(),
-    gender: v.union(v.literal("male"), v.literal("female"), v.literal("other")),
-    city: v.string(),
-    address: v.string(),
-    phone: v.string(),
-    email: v.string(),
-    profession: v.string(),
+    templateId: v.id("clientTemplates"),
+    data: v.any(),
     workspaceId: v.id("workspaces"),
-  }).index("workspaceId", ["workspaceId"]),
+  })
+    .index("workspaceId", ["workspaceId"])
+    .searchIndex("search_name", {
+      searchField: "name",
+      filterFields: ["workspaceId"],
+    })
+    .searchIndex("search_identificationNumber", {
+      searchField: "identificationNumber",
+      filterFields: ["workspaceId"],
+    }),
   policies: defineTable({
     insuredName: v.string(),
     insuredIdNumber: v.string(),
@@ -143,6 +197,7 @@ const schema = defineSchema({
     agreement: v.string(),
     calculateExpensesTaxes: v.boolean(),
     quoteType: v.union(v.literal("bidBond"), v.literal("performanceBonds")),
+    documentId: v.optional(v.id("_storage")),
     workspaceId: v.id("workspaces"),
   }).index("workspaceId", ["workspaceId"]),
   quoteBonds: defineTable({
