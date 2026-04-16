@@ -25,6 +25,7 @@ import { getPdfContent } from "@/lib/extract-pdf";
 import { BondDataType } from "@/packages/bonds/types";
 import { Separator } from "@/components/ui/separator";
 import { string2Object } from "@/lib/string-to-object";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { normalizePdfText } from "@/lib/normalize-pdf-text";
 import { useGetBondsByWorkspace } from "@/packages/bonds/api";
 import { estimateTokens, MAX_TOKENS } from "@/lib/token-counter";
@@ -41,6 +42,7 @@ interface QuoteAgentModalProps {
   setContractData: Dispatch<SetStateAction<ContractDataType>>;
   setBidBondData: Dispatch<SetStateAction<BondDataType>>;
   setPerformanceBondsData: Dispatch<SetStateAction<Array<BondDataType>>>;
+  onFileProcessed?: (file: File) => void;
 }
 
 export const QuoteAgentModal = ({
@@ -50,6 +52,7 @@ export const QuoteAgentModal = ({
   setContractData,
   setBidBondData,
   setPerformanceBondsData,
+  onFileProcessed,
 }: QuoteAgentModalProps) => {
   const workspaceId = useWorkspaceId();
   const fileElementRef = useRef<HTMLInputElement>(null);
@@ -97,19 +100,31 @@ export const QuoteAgentModal = ({
         name: bond.name,
       })) || [];
 
-    const prompt =
+    const metadata =
       quoteType === "performanceBonds"
-        ? `Quote type: ${quoteType}, Performance Bonds: ${JSON.stringify(
-            performanceBonds,
-          )}, PDF: ${text}`
-        : `Quote type: ${quoteType}, PDF: ${text}`;
+        ? `[QUOTE_TYPE]: ${quoteType}\n[PERFORMANCE_BONDS]: ${JSON.stringify(performanceBonds)}`
+        : `[QUOTE_TYPE]: ${quoteType}`;
+
+    const prompt = `${metadata}\n\n---DOCUMENT START---\n${text}\n---DOCUMENT END---`;
 
     getQuote(
       { prompt },
       {
         onSuccess: (quoteResponse) => {
           const data = string2Object(quoteResponse, quoteType);
-          console.log(quoteResponse);
+
+          const hasContractData =
+            data.contractData.contractor.trim() !== "" ||
+            data.contractData.contractee.trim() !== "" ||
+            data.contractData.contractValue > 0;
+
+          if (!hasContractData) {
+            toast.error(
+              "No se pudo extraer información útil del documento. Verifica que el PDF contenga datos del contrato.",
+            );
+            return;
+          }
+
           setExternalQuoteType(quoteType);
           setContractData(data.contractData);
 
@@ -143,10 +158,11 @@ export const QuoteAgentModal = ({
             fileElementRef.current.value = "";
           }
 
+          onFileProcessed?.(file);
           toast.success("Información extraída exitosamente del PDF");
         },
-        onError: () => {
-          toast.error(errorMessage);
+        onError: (error) => {
+          toast.error(getErrorMessage(error));
         },
       },
     );

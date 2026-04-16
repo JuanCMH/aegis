@@ -14,7 +14,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Doc } from "@/convex/_generated/dataModel";
 import { fullDate, fullDateTime } from "@/lib/date-formats";
 
-export const columns: ColumnDef<Doc<"quotes">>[] = [
+type QuoteRow = Doc<"quotes"> & { documentUrl: string | null };
+
+export const columns: ColumnDef<QuoteRow>[] = [
   {
     accessorKey: "info",
     header: () => {

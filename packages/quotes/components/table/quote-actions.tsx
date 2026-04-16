@@ -4,16 +4,21 @@ import {
   DropdownMenuItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useRemoveQuote } from "../../api";
 import { useRouter } from "next/navigation";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { useConfirm } from "@/components/hooks/use-confirm";
-import { RiCloseCircleFill, RiEyeFill } from "@remixicon/react";
+import {
+  RiCloseCircleFill,
+  RiEyeFill,
+  RiFileTextLine,
+} from "@remixicon/react";
 
 interface QuoteActionsProps {
   id: Id<"quotes">;
-  quote: Doc<"quotes">;
+  quote: Doc<"quotes"> & { documentUrl: string | null };
   children?: React.ReactNode;
 }
 
@@ -58,6 +63,19 @@ export const QuoteActions = ({ id, quote, children }: QuoteActionsProps) => {
             Ver Cotización
             <RiEyeFill className="size-4 ml-auto" />
           </DropdownMenuItem>
+          {quote.documentUrl && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => window.open(quote.documentUrl!, "_blank")}
+                className="cursor-pointer"
+              >
+                Ver Documento
+                <RiFileTextLine className="size-4 ml-auto" />
+              </DropdownMenuItem>
+            </>
+          )}
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             variant="destructive"
             disabled={isRemovingQuote}

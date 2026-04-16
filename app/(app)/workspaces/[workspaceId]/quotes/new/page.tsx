@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { RiAiGenerate2 } from "@remixicon/react";
+import {
+  RiAiGenerate2,
+  RiAttachmentLine,
+  RiCloseLine,
+} from "@remixicon/react";
 import { BondDataType } from "@/packages/bonds/types";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -10,9 +14,12 @@ import { ContractDataType } from "@/packages/quotes/types";
 import QuoteInfo from "@/packages/quotes/components/quote-info";
 import ContractInfo from "@/packages/quotes/components/contract-info";
 import { QuoteAgentModal } from "@/packages/quotes/components/modals/quote-agent-modal";
+import { Hint } from "@/components/hint";
 
 const NewQuotePage = () => {
   const [agentModalOpen, setAgentModalOpen] = useState(false);
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
   const [quoteType, setQuoteType] = useState<"bidBond" | "performanceBonds">(
     "bidBond",
   );
@@ -54,6 +61,47 @@ const NewQuotePage = () => {
             />
             <h1 className="text-base font-medium">Nueva Cotización</h1>
             <div className="ml-auto flex items-center gap-2">
+              <input
+                type="file"
+                accept=".pdf"
+                className="hidden"
+                ref={documentInputRef}
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    setDocumentFile(e.target.files[0]);
+                  }
+                }}
+              />
+              {documentFile ? (
+                <div className="flex items-center gap-1 border rounded-md px-2 py-1 text-sm">
+                  <RiAttachmentLine className="size-4 text-muted-foreground shrink-0" />
+                  <span className="max-w-32 truncate">{documentFile.name}</span>
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    className="size-5"
+                    onClick={() => {
+                      setDocumentFile(null);
+                      if (documentInputRef.current)
+                        documentInputRef.current.value = "";
+                    }}
+                  >
+                    <RiCloseLine className="size-3" />
+                  </Button>
+                </div>
+              ) : (
+                <Hint label="Adjuntar documento de referencia" align="end">
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    variant="outline"
+                    className="cursor-pointer"
+                    onClick={() => documentInputRef.current?.click()}
+                  >
+                    <RiAttachmentLine />
+                  </Button>
+                </Hint>
+              )}
               <Button
                 type="button"
                 size="icon-sm"
@@ -78,6 +126,8 @@ const NewQuotePage = () => {
           setBidBondData={setBidBondData}
           performanceBondsData={performanceBondsData}
           setPerformanceBondsData={setPerformanceBondsData}
+          documentFile={documentFile}
+          setDocumentFile={setDocumentFile}
         />
       </main>
       <QuoteAgentModal
@@ -87,6 +137,7 @@ const NewQuotePage = () => {
         setContractData={setContractData}
         setBidBondData={setBidBondData}
         setPerformanceBondsData={setPerformanceBondsData}
+        onFileProcessed={(file) => setDocumentFile(file)}
       />
     </>
   );

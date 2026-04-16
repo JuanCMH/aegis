@@ -8,6 +8,7 @@ import {
   RiArrowLeftLine,
   RiShieldCheckFill,
   RiDownloadLine,
+  RiFileTextLine,
 } from "@remixicon/react";
 import {
   Breadcrumb,
@@ -30,10 +31,17 @@ import BidBondInfo from "@/packages/bonds/components/bid-bond-info";
 import ContractInfo from "@/packages/quotes/components/contract-info";
 import { useGetQuoteById, useUpdateQuote } from "@/packages/quotes/api";
 import { generateQuotePDF } from "@/packages/quotes/lib/export-quote-pdf";
+import { generateQuoteExcel } from "@/packages/quotes/lib/export-quote-excel";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
 import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
 import { useGetWorkspace } from "@/packages/workspaces/api";
 import { AegisLogo } from "@/components/logo";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const QuoteIdPage = () => {
   const router = useRouter();
@@ -129,21 +137,14 @@ const QuoteIdPage = () => {
 
   const handleUpdateBidQuote = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const requiredFields = [
-      contractData.contractee,
-      contractData.contractor,
-      contractData.contractValue,
-      contractData.contractStart,
-      contractData.contractEnd,
-      bidBondData.startDate,
-      bidBondData.endDate,
-      bidBondData.expiryDate,
-      bidBondData.percentage,
-      bidBondData.insuredValue,
-      bidBondData.rate,
-    ];
-
-    if (requiredFields.some((field) => !field)) {
+    if (
+      !contractData.contractee.trim() ||
+      !contractData.contractor.trim() ||
+      contractData.contractValue <= 0 ||
+      bidBondData.percentage <= 0 ||
+      bidBondData.insuredValue <= 0 ||
+      bidBondData.rate <= 0
+    ) {
       toast.error("Por favor completa todos los campos obligatorios.");
       return;
     }
@@ -191,22 +192,16 @@ const QuoteIdPage = () => {
     e: React.FormEvent<HTMLFormElement>,
   ) => {
     e.preventDefault();
-    const requiredFields = [
-      contractData.contractee,
-      contractData.contractor,
-      contractData.contractValue,
-      contractData.contractStart,
-      contractData.contractEnd,
-      ...performanceBondsData.flatMap((bond) => [
-        bond.startDate,
-        bond.endDate,
-        bond.percentage,
-        bond.insuredValue,
-        bond.rate,
-      ]),
-    ];
-
-    if (requiredFields.some((field) => !field)) {
+    if (
+      !contractData.contractee.trim() ||
+      !contractData.contractor.trim() ||
+      contractData.contractValue <= 0 ||
+      performanceBondsData.length === 0 ||
+      performanceBondsData.some(
+        (bond) =>
+          bond.percentage <= 0 || bond.insuredValue <= 0 || bond.rate <= 0,
+      )
+    ) {
       toast.error("Por favor completa todos los campos obligatorios.");
       return;
     }
@@ -293,35 +288,77 @@ const QuoteIdPage = () => {
             <Tabs value={quote.quoteType}>
               <header className="flex items-center justify-between gap-2">
                 <div className="flex gap-2 items-center">
-                  <RiShieldCheckFill
-                    className="size-4"
-                    onClick={() => console.log(bidBondData)}
-                  />
+                  <RiShieldCheckFill className="size-4" />
                   <h1 className="text-lg font-semibold">
                     {quote.quoteType === "bidBond" && "Seriedad de la Oferta"}
                     {quote.quoteType === "performanceBonds" && "Cumplimiento"}
                   </h1>
                 </div>
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    generateQuotePDF({
-                      expenses,
-                      contractData,
-                      calculateExpensesTaxes,
-                      bondsData:
-                        quote.quoteType === "bidBond"
-                          ? [bidBondData]
-                          : performanceBondsData,
-                      quoteType: quote.quoteType,
-                      workspaceName: workspace?.name,
-                    });
-                  }}
-                  disabled={isLoadingWorkspace}
-                >
-                  <RiDownloadLine />
-                  Exportar PDF
-                </Button>
+                <div className="flex items-center gap-2">
+                  {quote.documentUrl && (
+                    <Hint label="Ver documento de referencia" align="end">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          window.open(quote.documentUrl!, "_blank")
+                        }
+                      >
+                        <RiFileTextLine />
+                        Documento
+                      </Button>
+                    </Hint>
+                  )}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="sm"
+                        disabled={isLoadingWorkspace}
+                      >
+                        <RiDownloadLine />
+                        Exportar
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => {
+                          generateQuoteExcel({
+                            expenses,
+                            contractData,
+                            calculateExpensesTaxes,
+                            bondsData:
+                              quote.quoteType === "bidBond"
+                                ? [bidBondData]
+                                : performanceBondsData,
+                            quoteType: quote.quoteType,
+                            workspaceName: workspace?.name,
+                          });
+                        }}
+                        className="cursor-pointer"
+                      >
+                        Exportar a Excel
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          generateQuotePDF({
+                            expenses,
+                            contractData,
+                            calculateExpensesTaxes,
+                            bondsData:
+                              quote.quoteType === "bidBond"
+                                ? [bidBondData]
+                                : performanceBondsData,
+                            quoteType: quote.quoteType,
+                            workspaceName: workspace?.name,
+                          });
+                        }}
+                        className="cursor-pointer"
+                      >
+                        Exportar a PDF
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </header>
               <Separator />
               <TabsContent value="bidBond">

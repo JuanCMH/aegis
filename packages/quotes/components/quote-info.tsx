@@ -10,9 +10,11 @@ import { generateQuotePDF } from "../lib/export-quote-pdf";
 import { generateQuoteExcel } from "../lib/export-quote-excel";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useGetWorkspace } from "@/packages/workspaces/api";
+import { Id } from "@/convex/_generated/dataModel";
 import BidBondInfo from "@/packages/bonds/components/bid-bond-info";
 import { RiDownloadLine, RiShieldCheckFill } from "@remixicon/react";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
+import { useGenerateUploadUrl } from "@/components/hooks/use-generate-upload-url";
 import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
 import {
   DropdownMenu,
@@ -30,6 +32,8 @@ interface QuoteInfoProps {
   setBidBondData: Dispatch<SetStateAction<BondDataType>>;
   performanceBondsData: BondDataType[];
   setPerformanceBondsData: Dispatch<SetStateAction<BondDataType[]>>;
+  documentFile: File | null;
+  setDocumentFile: Dispatch<SetStateAction<File | null>>;
 }
 
 const QuoteInfo = ({
@@ -41,6 +45,8 @@ const QuoteInfo = ({
   setBidBondData,
   performanceBondsData,
   setPerformanceBondsData,
+  documentFile,
+  setDocumentFile,
 }: QuoteInfoProps) => {
   const workspaceId = useWorkspaceId();
 
@@ -52,6 +58,8 @@ const QuoteInfo = ({
     isPending: isCreatingQuote,
     errorMessage,
   } = useCreateQuote();
+
+  const { mutate: generateUploadUrl } = useGenerateUploadUrl();
 
   const { data: workspace, isLoading: isLoadingWorkspace } = useGetWorkspace({
     id: workspaceId,
@@ -85,28 +93,44 @@ const QuoteInfo = ({
       rate: 0,
     });
     setPerformanceBondsData([]);
+    setDocumentFile(null);
   };
 
-  const handleCreateBidQuote = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const requiredFields = [
-      contractData.contractee,
-      contractData.contractor,
-      contractData.contractValue,
-      contractData.contractStart,
-      contractData.contractEnd,
-      bidBondData.startDate,
-      bidBondData.endDate,
-      bidBondData.expiryDate,
-      bidBondData.percentage,
-      bidBondData.insuredValue,
-      bidBondData.rate,
-    ];
+  const uploadDocument = async (): Promise<Id<"_storage"> | undefined> => {
+    if (!documentFile) return undefined;
+    const url = await new Promise<string>((resolve, reject) => {
+      generateUploadUrl(
+        {},
+        {
+          onSuccess: (data) => resolve(data as string),
+          onError: reject,
+        },
+      );
+    });
+    const result = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": documentFile.type },
+      body: documentFile,
+    });
+    const { storageId } = await result.json();
+    return storageId as Id<"_storage">;
+  };
 
-    if (requiredFields.some((field) => !field)) {
+  const handleCreateBidQuote = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (
+      !contractData.contractee.trim() ||
+      !contractData.contractor.trim() ||
+      contractData.contractValue <= 0 ||
+      bidBondData.percentage <= 0 ||
+      bidBondData.insuredValue <= 0 ||
+      bidBondData.rate <= 0
+    ) {
       toast.error("Por favor completa todos los campos obligatorios.");
       return;
     }
+
+    const documentId = await uploadDocument();
 
     createQuote(
       {
@@ -134,6 +158,7 @@ const QuoteInfo = ({
         contractValue: contractData.contractValue,
         contractStart: contractData.contractStart.getTime(),
         contractEnd: contractData.contractEnd.getTime(),
+        documentId,
       },
       {
         onSuccess: () => {
@@ -149,29 +174,25 @@ const QuoteInfo = ({
     );
   };
 
-  const handleCreatePerformanceBondsQuote = (
+  const handleCreatePerformanceBondsQuote = async (
     e: React.FormEvent<HTMLFormElement>,
   ) => {
     e.preventDefault();
-    const requiredFields = [
-      contractData.contractee,
-      contractData.contractor,
-      contractData.contractValue,
-      contractData.contractStart,
-      contractData.contractEnd,
-      ...performanceBondsData.flatMap((bond) => [
-        bond.startDate,
-        bond.endDate,
-        bond.percentage,
-        bond.insuredValue,
-        bond.rate,
-      ]),
-    ];
-
-    if (requiredFields.some((field) => !field)) {
+    if (
+      !contractData.contractee.trim() ||
+      !contractData.contractor.trim() ||
+      contractData.contractValue <= 0 ||
+      performanceBondsData.length === 0 ||
+      performanceBondsData.some(
+        (bond) =>
+          bond.percentage <= 0 || bond.insuredValue <= 0 || bond.rate <= 0,
+      )
+    ) {
       toast.error("Por favor completa todos los campos obligatorios.");
       return;
     }
+
+    const documentId = await uploadDocument();
 
     createQuote(
       {
@@ -197,6 +218,7 @@ const QuoteInfo = ({
         contractValue: contractData.contractValue,
         contractStart: contractData.contractStart.getTime(),
         contractEnd: contractData.contractEnd.getTime(),
+        documentId,
       },
       {
         onSuccess: () => {
