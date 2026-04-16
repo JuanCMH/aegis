@@ -5,6 +5,8 @@ import {
   RiAddCircleFill,
   RiFolderShield2Fill,
   RiMoneyDollarCircleFill,
+  RiSettings4Fill,
+  RiLayoutGridFill,
 } from "@remixicon/react";
 import {
   Sidebar,
@@ -73,6 +75,17 @@ export function WorkspaceSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
           title: "Nueva Póliza",
           url: `/workspaces/${workspaceId}/policies/new`,
           icon: RiAddCircleFill,
+        },
+      ],
+    },
+    {
+      title: "Configuración",
+      icon: RiSettings4Fill,
+      items: [
+        {
+          title: "Plantilla Clientes",
+          url: `/workspaces/${workspaceId}/settings/client-template`,
+          icon: RiLayoutGridFill,
         },
       ],
     },
