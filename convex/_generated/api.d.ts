@@ -11,7 +11,11 @@
 import type * as agents from "../agents.js";
 import type * as auth from "../auth.js";
 import type * as bonds from "../bonds.js";
+import type * as clientActions from "../clientActions.js";
+import type * as clientTemplates from "../clientTemplates.js";
+import type * as clients from "../clients.js";
 import type * as errors_bonds from "../errors/bonds.js";
+import type * as errors_clients from "../errors/clients.js";
 import type * as errors_quotes from "../errors/quotes.js";
 import type * as errors_roles from "../errors/roles.js";
 import type * as errors_users from "../errors/users.js";
@@ -36,7 +40,11 @@ declare const fullApi: ApiFromModules<{
   agents: typeof agents;
   auth: typeof auth;
   bonds: typeof bonds;
+  clientActions: typeof clientActions;
+  clientTemplates: typeof clientTemplates;
+  clients: typeof clients;
   "errors/bonds": typeof errors_bonds;
+  "errors/clients": typeof errors_clients;
   "errors/quotes": typeof errors_quotes;
   "errors/roles": typeof errors_roles;
   "errors/users": typeof errors_users;
