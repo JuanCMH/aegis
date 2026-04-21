@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
 import {
   Select,
@@ -13,6 +14,8 @@ interface TaxPickerProps {
   placeholder?: string;
   disabled?: boolean;
   readOnly?: boolean;
+  inputClassName?: string;
+  triggerClassName?: string;
 }
 
 const toOptionValue = (num: number) => {
@@ -40,26 +43,24 @@ export function TaxPicker({
   placeholder,
   disabled,
   readOnly,
+  inputClassName,
+  triggerClassName,
 }: TaxPickerProps) {
   const normalizedValue = normalizeValue(value);
+  const selectValue = normalizedValue ?? "";
 
   return (
-    <Select
-      key={normalizedValue}
-      disabled={disabled}
-      onValueChange={onChange}
-      value={normalizedValue}
-    >
+    <Select disabled={disabled} onValueChange={onChange} value={selectValue}>
       {readOnly && (
         <Input
           readOnly
-          value={`${normalizedValue}%`}
-          className="cursor-default"
+          value={normalizedValue ? `${normalizedValue}%` : ""}
+          className={cn("cursor-default", inputClassName)}
         />
       )}
       {!readOnly && (
         <>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className={cn("w-full", triggerClassName)}>
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent className="flex max-h-48">

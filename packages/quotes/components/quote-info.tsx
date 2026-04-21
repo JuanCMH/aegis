@@ -22,6 +22,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { differenceInCalendarDays } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface QuoteInfoProps {
   quoteType: "bidBond" | "performanceBonds";
@@ -71,6 +73,12 @@ const QuoteInfo = ({
     }
   };
 
+  const hasValidContractDates =
+    differenceInCalendarDays(
+      contractData.contractEnd,
+      contractData.contractStart,
+    ) > 0;
+
   const resetForm = () => {
     setContractData({
       contractor: "",
@@ -118,6 +126,13 @@ const QuoteInfo = ({
 
   const handleCreateBidQuote = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!hasValidContractDates) {
+      toast.error(
+        "La fecha de inicio del contrato debe ser anterior a la fecha de finalizacion.",
+      );
+      return;
+    }
+
     if (
       !contractData.contractee.trim() ||
       !contractData.contractor.trim() ||
@@ -178,6 +193,13 @@ const QuoteInfo = ({
     e: React.FormEvent<HTMLFormElement>,
   ) => {
     e.preventDefault();
+    if (!hasValidContractDates) {
+      toast.error(
+        "La fecha de inicio del contrato debe ser anterior a la fecha de finalizacion.",
+      );
+      return;
+    }
+
     if (
       !contractData.contractee.trim() ||
       !contractData.contractor.trim() ||
@@ -235,19 +257,38 @@ const QuoteInfo = ({
   };
 
   return (
-    <section className="m-2 border p-2 rounded-md shadow-sm bg-card">
+    <section className="m-2 overflow-hidden rounded-xl border border-border/40 bg-card/90 backdrop-blur-sm">
       <Tabs value={quoteType} onValueChange={handleQuoteTypeChange}>
-        <header className="flex items-center justify-between gap-2">
-          <div className="flex gap-2 items-center">
-            <RiShieldCheckFill className="size-4" />
-            <TabsList className="h-8">
-              <TabsTrigger value="bidBond">Seriedad</TabsTrigger>
-              <TabsTrigger value="performanceBonds">Cumplimiento</TabsTrigger>
+        <header className="flex items-center justify-between gap-3 p-4">
+          <div className="flex items-center gap-2">
+            <div className="flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
+              <RiShieldCheckFill className="size-4" />
+            </div>
+            <TabsList className="h-10 rounded-xl bg-muted/60 p-1">
+              <TabsTrigger
+                value="bidBond"
+                className="px-3 text-sm data-[state=active]:shadow-none"
+              >
+                Seriedad
+              </TabsTrigger>
+              <TabsTrigger
+                value="performanceBonds"
+                className="px-3 text-sm data-[state=active]:shadow-none"
+              >
+                Cumplimiento
+              </TabsTrigger>
             </TabsList>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="icon-sm" disabled={isLoadingWorkspace}>
+              <Button
+                size="icon-sm"
+                variant="outline"
+                disabled={isLoadingWorkspace}
+                className={cn(
+                  "border-border/40 bg-background/80 hover:bg-accent/60 dark:bg-background/30",
+                )}
+              >
                 <RiDownloadLine />
               </Button>
             </DropdownMenuTrigger>
@@ -291,36 +332,38 @@ const QuoteInfo = ({
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <Separator />
-        <TabsContent value="bidBond">
-          <BidBondInfo
-            type="create"
-            expenses={expenses}
-            contractData={contractData}
-            bidBondData={bidBondData}
-            calculateExpensesTaxes={calculateExpensesTaxes}
-            setExpenses={setExpenses}
-            setBidBondData={setBidBondData}
-            onSubmit={handleCreateBidQuote}
-            isLoading={isCreatingQuote}
-            setCalculateExpensesTaxes={setCalculateExpensesTaxes}
-          />
-        </TabsContent>
-        <TabsContent value="performanceBonds">
-          <PerformanceBondsInfo
-            type="create"
-            expenses={expenses}
-            setExpenses={setExpenses}
-            contractData={contractData}
-            isLoading={isCreatingQuote}
-            setQuoteType={setQuoteType}
-            performanceBondsData={performanceBondsData}
-            calculateExpensesTaxes={calculateExpensesTaxes}
-            setPerformanceBondsData={setPerformanceBondsData}
-            onSubmit={handleCreatePerformanceBondsQuote}
-            setCalculateExpensesTaxes={setCalculateExpensesTaxes}
-          />
-        </TabsContent>
+        <Separator className="opacity-40" />
+        <div className="p-4">
+          <TabsContent value="bidBond" className="mt-0">
+            <BidBondInfo
+              type="create"
+              expenses={expenses}
+              contractData={contractData}
+              bidBondData={bidBondData}
+              calculateExpensesTaxes={calculateExpensesTaxes}
+              setExpenses={setExpenses}
+              setBidBondData={setBidBondData}
+              onSubmit={handleCreateBidQuote}
+              isLoading={isCreatingQuote}
+              setCalculateExpensesTaxes={setCalculateExpensesTaxes}
+            />
+          </TabsContent>
+          <TabsContent value="performanceBonds" className="mt-0">
+            <PerformanceBondsInfo
+              type="create"
+              expenses={expenses}
+              setExpenses={setExpenses}
+              contractData={contractData}
+              isLoading={isCreatingQuote}
+              setQuoteType={setQuoteType}
+              performanceBondsData={performanceBondsData}
+              calculateExpensesTaxes={calculateExpensesTaxes}
+              setPerformanceBondsData={setPerformanceBondsData}
+              onSubmit={handleCreatePerformanceBondsQuote}
+              setCalculateExpensesTaxes={setCalculateExpensesTaxes}
+            />
+          </TabsContent>
+        </div>
       </Tabs>
     </section>
   );

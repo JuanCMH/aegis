@@ -21,12 +21,12 @@ const ContractInfo = ({
   setContractData,
 }: ContractInfoProps) => {
   const handleStartDateChange = (date: Date) => {
-    if (isAfter(date, contractData.contractEnd)) return;
+    if (!isBefore(date, contractData.contractEnd)) return;
     setContractData((prev) => ({ ...prev, contractStart: date }));
   };
 
   const handleEndDateChange = (date: Date) => {
-    if (isBefore(date, contractData.contractStart)) return;
+    if (!isAfter(date, contractData.contractStart)) return;
     setContractData((prev) => ({ ...prev, contractEnd: date }));
   };
 
@@ -38,15 +38,19 @@ const ContractInfo = ({
   };
 
   return (
-    <section className="m-2 border p-2 rounded-md shadow-sm bg-card">
-      <div className="flex gap-2 items-center">
-        <RiContractFill className="size-4" />
-        <h1 className="text-lg font-semibold">
-          Información básica del contrato
-        </h1>
-      </div>
-      <Separator className="my-2" />
-      <div className="mt-2 gap-2 grid grid-cols-2 lg:grid-cols-4">
+    <section className="m-2 overflow-hidden rounded-xl border border-border/40 bg-card/90 backdrop-blur-sm">
+      <header className="flex items-center gap-3 p-4">
+        <div className="flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
+          <RiContractFill className="size-4" />
+        </div>
+        <div>
+          <h1 className="text-lg font-semibold tracking-tight">
+            Información básica del contrato
+          </h1>
+        </div>
+      </header>
+      <Separator className="opacity-40" />
+      <div className="grid grid-cols-2 gap-2 p-4 lg:grid-cols-4">
         <Field
           label="AFIANZADO/CONTRATISTA*"
           htmlFor="contractor"

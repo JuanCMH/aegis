@@ -32,6 +32,8 @@ interface BondProps {
 }
 
 const AVG_DAYS_PER_MONTH = 30;
+const disabledFieldClassName =
+  "disabled:opacity-100 disabled:bg-muted/40 disabled:text-muted-foreground disabled:border-border/60";
 
 const Bond = ({
   contractData,
@@ -182,6 +184,7 @@ const Bond = ({
         htmlFor="bond-percentage"
         inputMode="numeric"
         disabled={contractData.contractValue === 0}
+        inputClassName={disabledFieldClassName}
         value={percentage === 0 ? "" : percentage}
         onChange={(value) => handlePercentageChange(value)}
         onKeyDown={(e) => {
@@ -201,6 +204,7 @@ const Bond = ({
           readOnly={readOnly}
           placeholder="$20.000.000"
           disabled={contractData.contractValue === 0}
+          inputClassName={disabledFieldClassName}
           value={insuredValue === 0 ? "" : String(insuredValue)}
           onChange={handleInsuredValueChange}
         />
@@ -215,6 +219,8 @@ const Bond = ({
           onChange={handleRateChange}
           value={rate === 0 ? "" : String(rate)}
           disabled={contractData.contractValue === 0}
+          inputClassName={disabledFieldClassName}
+          triggerClassName={disabledFieldClassName}
         />
       </div>
     </div>

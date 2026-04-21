@@ -6,6 +6,7 @@ import { differenceInCalendarDays } from "date-fns";
 import { ContractDataType } from "../../quotes/types";
 import { getBondTotals } from "@/lib/get-bond-totals";
 import ResultsCard from "@/packages/quotes/components/results-card";
+import { Separator } from "@/components/ui/separator";
 
 interface BidBondDataProps {
   editMode?: boolean;
@@ -40,7 +41,14 @@ const BidBondInfo = ({
     365,
   );
 
+  const hasValidContractDates =
+    differenceInCalendarDays(
+      contractData.contractEnd,
+      contractData.contractStart,
+    ) > 0;
+
   const isValidQuote =
+    hasValidContractDates &&
     bidBondData.percentage > 0 &&
     bidBondData.insuredValue > 0 &&
     bidBondData.rate > 0 &&
@@ -71,6 +79,7 @@ const BidBondInfo = ({
           setBidBondData((p) => ({ ...p, expiryDate }))
         }
       />
+      <Separator className="my-4 opacity-40" />
       <ResultsCard
         readOnly={editMode !== undefined && !editMode}
         expenses={expenses}

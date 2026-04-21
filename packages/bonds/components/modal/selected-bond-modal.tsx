@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { RiPencilLine } from "@remixicon/react";
 
 interface SelectedBondModalProps {
   selectedBond: Doc<"bonds"> | undefined;
@@ -102,16 +103,23 @@ export const SelectedBondModal = ({
     <>
       <ConfirmDialog />
       <Dialog open={!!selectedBond} onOpenChange={handleCloseSelectedBond}>
-        <DialogContent className="p-0 gap-0">
+        <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-md">
           <DialogHeader className="p-4">
-            <DialogTitle className="capitalize">
-              {selectedBond?.name}
-            </DialogTitle>
-            <DialogDescription>
-              Edita la información del amparo seleccionado.
-            </DialogDescription>
+            <div className="flex items-start gap-3 pr-8">
+              <div className="flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
+                <RiPencilLine className="size-4" />
+              </div>
+              <div className="space-y-1">
+                <DialogTitle className="capitalize">
+                  {selectedBond?.name}
+                </DialogTitle>
+                <DialogDescription className="text-muted-foreground/80">
+                  Edita la información del amparo seleccionado.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <Separator />
+          <Separator className="opacity-40" />
           <div className="flex flex-col p-4 gap-2">
             <form className="space-y-4" onSubmit={handleUpdateBond}>
               <div className="grid w-full items-center gap-1">
@@ -149,7 +157,7 @@ export const SelectedBondModal = ({
                   }
                 />
               </div>
-              <DialogFooter>
+              <DialogFooter className="border-t border-border/40 pt-4">
                 <DialogClose asChild>
                   <Button variant="outline">Cancelar</Button>
                 </DialogClose>

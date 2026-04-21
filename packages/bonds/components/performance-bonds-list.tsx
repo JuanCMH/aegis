@@ -13,6 +13,7 @@ import ResultsCard from "@/packages/quotes/components/results-card";
 import { getQuoteTotals } from "@/lib/get-quote-totals";
 import { differenceInCalendarDays } from "date-fns";
 import { Id } from "@/convex/_generated/dataModel";
+import { RiListCheck3 } from "@remixicon/react";
 
 interface PerformanceBondsListProps {
   open: boolean;
@@ -49,16 +50,22 @@ export const PerformanceBondsList = ({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="flex flex-col sm:max-w-lg">
+      <SheetContent className="flex flex-col gap-0 p-0 sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle className="truncate">Lista de Garantías</SheetTitle>
-          <SheetDescription>
-            En esta sección se muestran las garantías de cumplimiento agregadas
-            a la cotización.
-          </SheetDescription>
+          <div className="flex items-start gap-3 pr-8">
+            <div className="flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
+              <RiListCheck3 className="size-4" />
+            </div>
+            <div className="space-y-1">
+              <SheetTitle className="truncate">Lista de garantías</SheetTitle>
+              <SheetDescription>
+                Revisa las garantías de cumplimiento agregadas a la cotización.
+              </SheetDescription>
+            </div>
+          </div>
         </SheetHeader>
-        <Separator />
-        <main className="overflow-y-auto space-y-2 px-2 h-full">
+        <Separator className="opacity-40" />
+        <main className="h-full space-y-2 overflow-y-auto p-4">
           {performanceBondsData.map((bond, index) => (
             <PerformanceBondCard
               key={index}
@@ -69,7 +76,7 @@ export const PerformanceBondsList = ({
             />
           ))}
         </main>
-        <footer className="p-2">
+        <footer className="border-t border-border/40 p-4">
           <ResultsCard
             vat={results.vat}
             total={results.total}

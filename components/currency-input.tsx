@@ -10,7 +10,20 @@ interface CurrencyInputProps {
   placeholder?: string;
   readOnly?: boolean;
   disabled?: boolean;
+  inputClassName?: string;
 }
+
+const getDisplayValue = (value?: string) => {
+  if (value === undefined || value === "") {
+    return "";
+  }
+
+  return new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    minimumFractionDigits: 0,
+  }).format(Number(value));
+};
 
 export function CurrencyInput({
   value,
@@ -18,16 +31,9 @@ export function CurrencyInput({
   placeholder,
   readOnly,
   disabled,
+  inputClassName,
 }: CurrencyInputProps) {
-  const [display, setDisplay] = useState(
-    value !== undefined
-      ? new Intl.NumberFormat("es-CO", {
-          style: "currency",
-          currency: "COP",
-          minimumFractionDigits: 0,
-        }).format(Number(value))
-      : "",
-  );
+  const [display, setDisplay] = useState(getDisplayValue(value));
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
@@ -61,7 +67,7 @@ export function CurrencyInput({
         value={display}
         onChange={handleChange}
         placeholder={placeholder}
-        className={cn("w-full", readOnly && "cursor-default")}
+        className={cn("w-full", readOnly && "cursor-default", inputClassName)}
         readOnly={readOnly}
         disabled={disabled}
       />

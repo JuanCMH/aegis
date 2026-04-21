@@ -70,22 +70,36 @@ export const useConfirm = ({
     <Dialog open={promise !== null} onOpenChange={handleDialogOpenChange}>
       <DialogContent className="p-0 overflow-hidden gap-0 z-100">
         <DialogHeader className="p-4">
-          <div className="flex items-center gap-1">
-            {type === "info" && (
-              <RiInformationLine className="size-5 shrink-0" />
-            )}
-            {type === "warning" && (
-              <RiAlertLine className="size-5 text-yellow-500 shrink-0" />
-            )}
-            {type === "critical" && (
-              <RiErrorWarningLine className="size-5 text-red-500 shrink-0" />
-            )}
-            <DialogTitle>{title}</DialogTitle>
+          <div className="flex items-start gap-3 pr-8">
+            <div
+              className={
+                type === "critical"
+                  ? "flex size-9 items-center justify-center rounded-lg border border-red-500/10 bg-red-500/10 text-red-500"
+                  : type === "warning"
+                    ? "flex size-9 items-center justify-center rounded-lg border border-yellow-500/10 bg-yellow-500/10 text-yellow-500"
+                    : "flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo"
+              }
+            >
+              {type === "info" && (
+                <RiInformationLine className="size-4 shrink-0" />
+              )}
+              {type === "warning" && (
+                <RiAlertLine className="size-4 shrink-0" />
+              )}
+              {type === "critical" && (
+                <RiErrorWarningLine className="size-4 shrink-0" />
+              )}
+            </div>
+            <div className="space-y-1">
+              <DialogTitle>{title}</DialogTitle>
+              <DialogDescription className="text-muted-foreground/80">
+                {message}
+              </DialogDescription>
+            </div>
           </div>
-          <DialogDescription>{message}</DialogDescription>
         </DialogHeader>
-        <Separator />
-        <DialogFooter className="p-4">
+        <Separator className="opacity-40" />
+        <DialogFooter className="border-t border-border/40 p-4">
           <Button variant="outline" onClick={handleCancel}>
             {cancelText}
           </Button>

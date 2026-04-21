@@ -29,6 +29,7 @@ import {
 import { useCreateWorkspaceModal } from "../../store/use-create-workspace-modal";
 import { CustomColor } from "@/lib/custom-colors";
 import { Id } from "@/convex/_generated/dataModel";
+import { RiFolderShield2Fill } from "@remixicon/react";
 
 type WorkspaceData = {
   name: string;
@@ -133,21 +134,29 @@ export const CreateWorkspaceModal = () => {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="p-0 overflow-hidden gap-0">
         <DialogHeader className="p-4">
-          <DialogTitle>Crea o únete a un Espacio</DialogTitle>
-          <DialogDescription>
-            Un Espacio es un lugar donde puedes colaborar con otros usuarios.
-          </DialogDescription>
+          <div className="flex items-start gap-3 pr-8">
+            <div className="flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
+              <RiFolderShield2Fill className="size-4" />
+            </div>
+            <div className="space-y-1">
+              <DialogTitle>Crea o únete a un espacio</DialogTitle>
+              <DialogDescription className="text-muted-foreground/80">
+                Un espacio es un lugar donde puedes colaborar con otros
+                usuarios.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
-        <Separator />
+        <Separator className="opacity-40" />
         <Tabs defaultValue="join" className="p-4">
-          <TabsList className="grid w-full grid-cols-2 mb-2">
+          <TabsList className="mb-3 grid h-10 w-full grid-cols-2 rounded-xl bg-muted/60 p-1">
             <TabsTrigger value="join">Unirse</TabsTrigger>
             <TabsTrigger disabled={cantCreate} value="create">
               Crear
               {cantCreate && <RiLock2Line className="size-4 ml-2" />}
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="create">
+          <TabsContent value="create" className="mt-0">
             <form className="grid grid-cols-2 gap-2" onSubmit={handleCreate}>
               <Input
                 required
@@ -166,7 +175,7 @@ export const CreateWorkspaceModal = () => {
               </div>
             </form>
           </TabsContent>
-          <TabsContent value="join">
+          <TabsContent value="join" className="mt-0">
             <form
               className="flex flex-col items-center space-y-2"
               onSubmit={handleJoin}

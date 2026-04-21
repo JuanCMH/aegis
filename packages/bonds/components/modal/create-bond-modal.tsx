@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { RiAddFill } from "@remixicon/react";
 
 interface CreateBondModalProps {
   createOpen: boolean;
@@ -72,15 +73,22 @@ export const CreateBondModal = ({
   return (
     <>
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="p-0 gap-0">
+        <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-md">
           <DialogHeader className="p-4">
-            <DialogTitle className="capitalize">Crear Amparo</DialogTitle>
-            <DialogDescription>
-              Crea un nuevo amparo para que pueda ser utilizado en las
-              cotizaciones.
-            </DialogDescription>
+            <div className="flex items-start gap-3 pr-8">
+              <div className="flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
+                <RiAddFill className="size-4" />
+              </div>
+              <div className="space-y-1">
+                <DialogTitle className="capitalize">Crear amparo</DialogTitle>
+                <DialogDescription className="text-muted-foreground/80">
+                  Crea un nuevo amparo para que pueda ser utilizado en las
+                  cotizaciones.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <Separator />
+          <Separator className="opacity-40" />
           <form className="space-y-4 p-4" onSubmit={handleCreateBond}>
             <div className="grid w-full items-center gap-1">
               <Label htmlFor="bond-name" className="text-xs">
@@ -117,7 +125,7 @@ export const CreateBondModal = ({
                 }
               />
             </div>
-            <DialogFooter>
+            <DialogFooter className="border-t border-border/40 pt-4">
               <DialogClose asChild>
                 <Button variant="outline">Cancelar</Button>
               </DialogClose>

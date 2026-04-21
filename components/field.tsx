@@ -8,12 +8,14 @@ interface FieldProps extends Omit<ComponentProps<"input">, "onChange"> {
   label?: string;
   htmlFor?: string;
   onChange?: (value: string) => void;
+  inputClassName?: string;
 }
 
 export const Field = ({
   label,
   htmlFor,
   onChange,
+  inputClassName,
   className,
   type = "text",
   ...props
@@ -29,7 +31,7 @@ export const Field = ({
           id={htmlFor || props.id}
           type={type}
           onChange={(e) => onChange?.(e.target.value)}
-          className={cn(props.readOnly && "cursor-default")}
+          className={cn(props.readOnly && "cursor-default", inputClassName)}
         />
       </Hint>
     </div>

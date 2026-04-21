@@ -20,6 +20,7 @@ import ResultsCard from "@/packages/quotes/components/results-card";
 import { getBondTotals } from "@/lib/get-bond-totals";
 import { differenceInCalendarDays } from "date-fns";
 import { getQuoteTotals } from "@/lib/get-quote-totals";
+import { Separator } from "@/components/ui/separator";
 
 interface PerformanceBondsInfoProps {
   editMode?: boolean;
@@ -79,7 +80,14 @@ const PerformanceBondsInfo = ({
     }),
   );
 
+  const hasValidContractDates =
+    differenceInCalendarDays(
+      contractData.contractEnd,
+      contractData.contractStart,
+    ) > 0;
+
   const isValidQuote =
+    hasValidContractDates &&
     performanceBondsData.length > 0 &&
     performanceBondsData.every((bond) => {
       const hasValidValues =
@@ -176,6 +184,7 @@ const PerformanceBondsInfo = ({
                 );
               }}
             />
+            <Separator className="opacity-40" />
             <ResultsCard
               readOnly={editMode !== undefined && !editMode}
               vat={performanceBondTotals.vat}
@@ -185,16 +194,19 @@ const PerformanceBondsInfo = ({
           </>
         )}
         {!selectedBond && (
-          <ResultsCard
-            readOnly={editMode !== undefined && !editMode}
-            vat={results.vat}
-            total={results.total}
-            premium={results.premium}
-            expenses={expenses}
-            setExpenses={setExpenses}
-            calculateExpensesTaxes={calculateExpensesTaxes}
-            setCalculateExpensesTaxes={setCalculateExpensesTaxes}
-          />
+          <>
+            <Separator className="opacity-40" />
+            <ResultsCard
+              readOnly={editMode !== undefined && !editMode}
+              vat={results.vat}
+              total={results.total}
+              premium={results.premium}
+              expenses={expenses}
+              setExpenses={setExpenses}
+              calculateExpensesTaxes={calculateExpensesTaxes}
+              setCalculateExpensesTaxes={setCalculateExpensesTaxes}
+            />
+          </>
         )}
         <PerformanceBondsList
           open={listOpen}

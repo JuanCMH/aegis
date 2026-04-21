@@ -19,6 +19,7 @@ import { BondItem } from "../bond-item";
 import { SelectedBondModal } from "./selected-bond-modal";
 import { BondDataType } from "../../types";
 import { ContractDataType } from "@/packages/quotes/types";
+import { RiShieldCheckFill } from "@remixicon/react";
 
 interface BondsModalProps {
   open: boolean;
@@ -56,14 +57,22 @@ export const BondsModal = ({
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="p-0 gap-0">
+        <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
           <DialogHeader className="p-4">
-            <DialogTitle>Gestionar amparos</DialogTitle>
-            <DialogDescription>
-              Crea y administra los amparos disponibles para las cotizaciones.
-            </DialogDescription>
+            <div className="flex items-start gap-3 pr-8">
+              <div className="flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
+                <RiShieldCheckFill className="size-4" />
+              </div>
+              <div className="space-y-1">
+                <DialogTitle>Gestionar amparos</DialogTitle>
+                <DialogDescription className="text-muted-foreground/80">
+                  Crea y administra los amparos disponibles para las
+                  cotizaciones.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <Separator />
+          <Separator className="opacity-40" />
           <div className="flex-1 flex flex-col gap-y-2 p-4">
             <header className="flex justify-between items-center w-full">
               <h1 className="text-sm font-semibold">Amparos</h1>

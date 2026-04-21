@@ -31,7 +31,13 @@ import { useGetBondsByWorkspace } from "@/packages/bonds/api";
 import { estimateTokens, MAX_TOKENS } from "@/lib/token-counter";
 import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
-import { RiAttachmentLine, RiCloseLine, RiLoader3Line } from "@remixicon/react";
+import {
+  RiAttachmentLine,
+  RiCloseLine,
+  RiFilePdf2Line,
+  RiLoader3Line,
+  RiSparklingFill,
+} from "@remixicon/react";
 
 interface QuoteAgentModalProps {
   open: boolean;
@@ -176,17 +182,27 @@ export const QuoteAgentModal = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="p-0 gap-0">
+      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-xl">
         <DialogHeader className="p-4">
-          <DialogTitle>Asistente de cotización</DialogTitle>
-          <DialogDescription>
-            Aquí puedes subir un PDF para que el asistente de cotización te
-            ayude a extraer la información relevante para tu cotización.
-            recuerda que siempre debes revisar la información extraída por el
-            asistente antes de finalizar tu cotización.
-          </DialogDescription>
+          <div className="flex items-start gap-3 pr-8">
+            <div className="flex size-10 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
+              <RiSparklingFill className="size-5" />
+            </div>
+            <div className="space-y-1">
+              <DialogTitle>Asistente de cotización</DialogTitle>
+              <DialogDescription className="max-w-prose text-sm leading-relaxed text-muted-foreground/80">
+                Sube un PDF y el asistente extraera la informacion mas relevante
+                para acelerar tu cotizacion. Revisa siempre los datos antes de
+                finalizarla.
+              </DialogDescription>
+            </div>
+          </div>
+          <div className="mt-3 rounded-lg border border-border/40 bg-muted/20 px-3 py-2 text-xs text-muted-foreground/80">
+            PDF maximo de 10 MB. Funciona mejor con documentos claros y con
+            datos legibles del contrato.
+          </div>
         </DialogHeader>
-        <Separator />
+        <Separator className="opacity-40" />
         <form className="space-y-4 p-4" onSubmit={extractPdf}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="grid w-full items-center gap-1">
@@ -198,7 +214,7 @@ export const QuoteAgentModal = ({
                 value={quoteType}
                 onValueChange={handleQuoteTypeChange}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full border-border/40 bg-background/80 dark:bg-background/30">
                   <SelectValue
                     placeholder={"Selecciona un tipo de cotización"}
                   />
@@ -228,24 +244,31 @@ export const QuoteAgentModal = ({
                 type="button"
                 variant="outline"
                 disabled={isLoading}
-                className="justify-start"
+                className="justify-start border-dashed border-border/60 bg-muted/20 hover:bg-muted/40"
                 onClick={() => fileElementRef.current?.click()}
               >
-                <RiAttachmentLine className="size-4 text-muted-foreground" />
-                <span className="ml-2">Adjuntar archivo</span>
+                <RiFilePdf2Line className="size-4 text-h-indigo" />
+                <span className="ml-2">Adjuntar archivo PDF</span>
               </Button>
             </div>
           </div>
           {!!file && (
-            <div className={cn(isLoading && "opacity-50 pointer-events-none")}>
-              <div className="border rounded-md flex items-center justify-between group/file p-2">
-                <div className="flex items-center">
+            <div className={cn(isLoading && "pointer-events-none opacity-50")}>
+              <div className="flex items-center justify-between rounded-lg border border-border/40 bg-muted/20 p-3">
+                <div className="flex min-w-0 items-center">
                   {isLoading ? (
-                    <RiLoader3Line className="size-5 text-muted-foreground shrink-0 animate-spin" />
+                    <RiLoader3Line className="size-5 shrink-0 animate-spin text-h-indigo" />
                   ) : (
-                    <RiAttachmentLine className="size-5 text-muted-foreground shrink-0" />
+                    <RiFilePdf2Line className="size-5 shrink-0 text-h-indigo" />
                   )}
-                  <span className="ml-2 line-clamp-1">{file.name}</span>
+                  <div className="ml-3 min-w-0">
+                    <p className="truncate text-sm font-medium">{file.name}</p>
+                    <p className="text-xs text-muted-foreground/80">
+                      {isLoading
+                        ? "Extrayendo informacion del documento..."
+                        : "Archivo listo para procesar"}
+                    </p>
+                  </div>
                 </div>
                 <Button
                   size="icon-sm"
@@ -253,7 +276,8 @@ export const QuoteAgentModal = ({
                     setFile(null);
                     fileElementRef.current!.value = "";
                   }}
-                  variant="destructive"
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-foreground"
                   disabled={isLoading}
                 >
                   <RiCloseLine />
@@ -262,13 +286,12 @@ export const QuoteAgentModal = ({
             </div>
           )}
           {isLoading && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground/80">
               Dependiendo de la complejidad del documento, el proceso de
-              extracción puede tardar unos segundos. Por favor, ten paciencia
-              mientras el asistente procesa el archivo.
+              extracción puede tardar unos segundos.
             </p>
           )}
-          <DialogFooter>
+          <DialogFooter className="border-t border-border/40 pt-4">
             <DialogClose asChild>
               <Button disabled={isLoading} variant="outline">
                 Cancelar
