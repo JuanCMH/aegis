@@ -88,11 +88,11 @@ export const save = mutation({
     const member = await populateMember(ctx, userId, args.workspaceId);
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
 
-    // Validate that fixed fields (name, identificationNumber) exist
+    // Validate that canonical fixed fields exist in the template.
     const allFields = args.sections.flatMap((s) => s.fields);
-    const hasName = allFields.some((f) => f.isFixed && f.id === "name");
+    const hasName = allFields.some((f) => f.isFixed && f.id === "field_name");
     const hasIdentification = allFields.some(
-      (f) => f.isFixed && f.id === "identificationNumber",
+      (f) => f.isFixed && f.id === "field_identificationNumber",
     );
     if (!hasName || !hasIdentification) {
       throw new ConvexError(clientErrors.fixedFieldsMissing);

@@ -7,14 +7,22 @@ import { RiAddCircleFill } from "@remixicon/react";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
-import { usePaginatedClients } from "@/packages/clients/api";
-import { baseColumns, type ClientRow } from "@/packages/clients/components/table/client-columns";
+import {
+  useGetClientTemplate,
+  usePaginatedClients,
+} from "@/packages/clients/api";
+import {
+  createClientColumns,
+  type ClientRow,
+} from "@/packages/clients/components/table/client-columns";
 import { ClientDataTable } from "@/packages/clients/components/table/client-data-table";
 import { useDebounce } from "@/packages/clients/hooks/use-debounce";
+import type { TemplateField, TemplateSection } from "@/packages/clients/types";
 
 export default function ClientsPage() {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
+  const template = useGetClientTemplate({ workspaceId });
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
@@ -34,6 +42,22 @@ export default function ClientsPage() {
       })),
     [results],
   );
+
+  const columns = useMemo(() => {
+    const sections = template.data?.sections as TemplateSection[] | undefined;
+    const visibleFields: TemplateField[] = (sections ?? [])
+      .slice()
+      .sort((a, b) => a.order - b.order)
+      .flatMap((section) => section.fields)
+      .filter(
+        (field) =>
+          field.showInTable &&
+          field.id !== "field_name" &&
+          field.id !== "field_identificationNumber",
+      );
+
+    return createClientColumns(visibleFields);
+  }, [template.data]);
 
   const isLoading = status === "LoadingFirstPage";
   const isDone = status !== "CanLoadMore";
@@ -66,7 +90,7 @@ export default function ClientsPage() {
       </header>
       <ClientDataTable
         data={rows}
-        columns={baseColumns}
+        columns={columns}
         isLoading={isLoading}
         search={search}
         onSearchChange={setSearch}

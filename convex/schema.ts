@@ -127,8 +127,8 @@ const schema = defineSchema({
   clients: defineTable({
     name: v.string(),
     identificationNumber: v.string(),
-    templateId: v.id("clientTemplates"),
-    data: v.any(),
+    templateId: v.optional(v.id("clientTemplates")),
+    data: v.optional(v.any()),
     workspaceId: v.id("workspaces"),
   })
     .index("workspaceId", ["workspaceId"])

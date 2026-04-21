@@ -6,6 +6,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { RiMore2Line, RiArrowUpLine, RiArrowDownLine } from "@remixicon/react";
 import { ClientActions } from "./client-actions";
 import { fullDateTime } from "@/lib/date-formats";
+import type { TemplateField } from "@/packages/clients/types";
 
 export type ClientRow = {
   _id: string;
@@ -15,6 +16,64 @@ export type ClientRow = {
   data: Record<string, unknown>;
   [key: string]: unknown;
 };
+
+function stringifyValue(field: TemplateField, value: unknown) {
+  if (value == null || value === "") return "";
+
+  if (field.type === "switch") {
+    return value ? "Si" : "No";
+  }
+
+  if (field.type === "select") {
+    const selected = field.config.options?.find(
+      (option) => option.value === value,
+    );
+    return selected?.label ?? String(value);
+  }
+
+  if (field.type === "date" && typeof value === "string") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? value : fullDateTime(parsed);
+  }
+
+  if (field.type === "file" || field.type === "image") {
+    return typeof value === "string" && value ? "Cargado" : "Sin archivo";
+  }
+
+  return String(value);
+}
+
+export function createClientColumns(
+  fields: TemplateField[],
+): ColumnDef<ClientRow>[] {
+  const dynamicColumns: ColumnDef<ClientRow>[] = fields.map((field) => ({
+    id: field.id,
+    accessorFn: (row) => stringifyValue(field, row.data[field.id]),
+    header: field.label,
+    meta: {
+      className:
+        field.type === "file" || field.type === "image"
+          ? "hidden lg:table-cell"
+          : "hidden md:table-cell",
+    },
+    cell: ({ row }) => {
+      const displayValue = stringifyValue(field, row.original.data[field.id]);
+      return (
+        <Hint label={displayValue || "Sin dato"}>
+          <p className="truncate ml-2 max-w-48">{displayValue || "-"}</p>
+        </Hint>
+      );
+    },
+  }));
+
+  return [
+    baseColumns[0],
+    baseColumns[1],
+    ...dynamicColumns,
+    baseColumns[2],
+    baseColumns[3],
+  ];
+}
 
 export const baseColumns: ColumnDef<ClientRow>[] = [
   {

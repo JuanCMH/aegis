@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { RiSave3Fill, RiSettings4Fill } from "@remixicon/react";
+import { RiSave3Fill } from "@remixicon/react";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
 import {
   useGetClientTemplate,
@@ -20,6 +20,8 @@ import { getPdfContent } from "@/lib/extract-pdf";
 import { normalizePdfText } from "@/lib/normalize-pdf-text";
 import type { TemplateSection } from "@/packages/clients/types";
 import { validateClientData } from "@/packages/clients/lib/validate-client-data";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const NewClientPage = () => {
   const router = useRouter();
@@ -33,8 +35,11 @@ const NewClientPage = () => {
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [aiFields, setAiFields] = useState<Set<string>>(new Set());
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [basicName, setBasicName] = useState("");
+  const [basicId, setBasicId] = useState("");
 
   const sections = template.data?.sections as TemplateSection[] | undefined;
+  const hasTemplate = Boolean(sections && sections.length > 0);
 
   const handleChange = (fieldId: string, value: unknown) => {
     setValues((prev) => ({ ...prev, [fieldId]: value }));
@@ -121,28 +126,42 @@ const NewClientPage = () => {
   };
 
   const handleSave = async () => {
-    if (!sections) return;
+    // With template: validate all fields
+    if (sections && sections.length > 0) {
+      const { valid, errors } = validateClientData(sections, values);
+      if (!valid) {
+        setFieldErrors(errors);
+        const count = Object.keys(errors).length;
+        toast.error(`Hay ${count} campo${count > 1 ? "s" : ""} con errores`);
+        return;
+      }
+      setFieldErrors({});
+    }
 
-    const { valid, errors } = validateClientData(sections, values);
-    if (!valid) {
-      setFieldErrors(errors);
-      const count = Object.keys(errors).length;
-      toast.error(`Hay ${count} campo${count > 1 ? "s" : ""} con errores`);
+    const name = hasTemplate
+      ? ((values.field_name as string)?.trim() ?? "")
+      : basicName.trim();
+    const identificationNumber = hasTemplate
+      ? ((values.field_identificationNumber as string)?.trim() ?? "")
+      : basicId.trim();
+
+    if (!name) {
+      toast.error("El nombre es obligatorio");
       return;
     }
-    setFieldErrors({});
-
-    const name = (values.field_name as string)?.trim() ?? "";
-    const identificationNumber =
-      (values.field_identificationNumber as string)?.trim() ?? "";
+    if (!identificationNumber) {
+      toast.error("La identificación es obligatoria");
+      return;
+    }
 
     await createClient(
       {
         workspaceId,
         name,
         identificationNumber,
-        templateId: template.data!._id,
-        data: values,
+        ...(hasTemplate && template.data
+          ? { templateId: template.data._id, data: values }
+          : {}),
       },
       {
         onSuccess: (clientId) => {
@@ -173,27 +192,44 @@ const NewClientPage = () => {
               className="mx-2 data-[orientation=vertical]:h-4"
             />
             <h1 className="text-base font-medium">Nuevo Cliente</h1>
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                size="sm"
+                onClick={handleSave}
+                disabled={isCreating}
+                className="gap-1.5"
+              >
+                <RiSave3Fill className="size-3.5" />
+                Guardar
+              </Button>
+            </div>
           </div>
         </header>
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <div className="flex items-center justify-center size-10 rounded-xl bg-muted/50 mb-3">
-            <RiSettings4Fill className="size-5 text-muted-foreground/50" />
+        <div className="flex-1 overflow-auto p-4">
+          <div className="grid grid-cols-4 gap-3 max-w-2xl">
+            <div className="col-span-2 space-y-1.5">
+              <Label htmlFor="basic-name" className="text-xs font-medium">
+                Nombre <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="basic-name"
+                placeholder="Nombre del cliente"
+                value={basicName}
+                onChange={(e) => setBasicName(e.target.value)}
+              />
+            </div>
+            <div className="col-span-2 space-y-1.5">
+              <Label htmlFor="basic-id" className="text-xs font-medium">
+                Identificación <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="basic-id"
+                placeholder="Número de identificación"
+                value={basicId}
+                onChange={(e) => setBasicId(e.target.value)}
+              />
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Configure la plantilla de clientes primero
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-3 border-border/40"
-            onClick={() =>
-              router.push(
-                `/workspaces/${workspaceId}/settings/client-template`,
-              )
-            }
-          >
-            Ir a Configuración
-          </Button>
         </div>
       </main>
     );

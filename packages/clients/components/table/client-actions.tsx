@@ -5,11 +5,7 @@ import { useRouter } from "next/navigation";
 import { useConfirm } from "@/components/hooks/use-confirm";
 import { useRemoveClient } from "@/packages/clients/api";
 import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
-import {
-  RiEyeLine,
-  RiEditLine,
-  RiDeleteBinLine,
-} from "@remixicon/react";
+import { RiEyeLine, RiEditLine, RiDeleteBinLine } from "@remixicon/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,19 +54,38 @@ export function ClientActions({ id, children }: ClientActionsProps) {
     <>
       <ConfirmDialog />
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-40">
-          <DropdownMenuItem onClick={handleView}>
+        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+          {children}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-40"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleView();
+            }}
+          >
             <RiEyeLine className="size-3.5 mr-2" />
             Ver
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleEdit}>
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEdit();
+            }}
+          >
             <RiEditLine className="size-3.5 mr-2" />
             Editar
           </DropdownMenuItem>
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
-            onClick={handleDelete}
+            onClick={(e) => {
+              e.stopPropagation();
+              void handleDelete();
+            }}
           >
             <RiDeleteBinLine className="size-3.5 mr-2" />
             Eliminar

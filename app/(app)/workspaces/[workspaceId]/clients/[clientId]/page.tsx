@@ -6,36 +6,32 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import {
-  RiSave3Fill,
-  RiEditLine,
-  RiCloseLine,
-} from "@remixicon/react";
-import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
+import { RiSave3Fill, RiEditLine, RiCloseLine } from "@remixicon/react";
 import { useClientId } from "@/packages/clients/hooks/use-client-id";
-import {
-  useGetClientById,
-  useGetClientTemplate,
-  useUpdateClient,
-} from "@/packages/clients/api";
+import { useGetClientById, useUpdateClient } from "@/packages/clients/api";
 import { useGenerateUploadUrl } from "@/components/hooks/use-generate-upload-url";
 import { ClientStepper } from "@/packages/clients/components/client-stepper";
 import type { TemplateSection } from "@/packages/clients/types";
 import { validateClientData } from "@/packages/clients/lib/validate-client-data";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function ClientDetailPage() {
-  const workspaceId = useWorkspaceId();
   const clientId = useClientId();
   const client = useGetClientById({ id: clientId });
-  const template = useGetClientTemplate({ workspaceId });
   const { mutate: updateClient, isPending: isUpdating } = useUpdateClient();
   const { mutate: generateUploadUrl } = useGenerateUploadUrl();
 
   const [isEditing, setIsEditing] = useState(false);
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [basicName, setBasicName] = useState("");
+  const [basicId, setBasicId] = useState("");
 
-  const sections = template.data?.sections as TemplateSection[] | undefined;
+  const sections = client.data?.templateSections as
+    | TemplateSection[]
+    | undefined;
+  const hasTemplate = Boolean(sections && sections.length > 0);
   const resolvedFiles = (client.data?.resolvedFiles ?? {}) as Record<
     string,
     string
@@ -45,6 +41,8 @@ export default function ClientDetailPage() {
   useEffect(() => {
     if (client.data && !isEditing) {
       setValues((client.data.data as Record<string, unknown>) ?? {});
+      setBasicName(client.data.name ?? "");
+      setBasicId(client.data.identificationNumber ?? "");
     }
   }, [client.data, isEditing]);
 
@@ -72,20 +70,32 @@ export default function ClientDetailPage() {
   };
 
   const handleSave = async () => {
-    if (!sections) return;
+    if (hasTemplate) {
+      const { valid, errors } = validateClientData(sections, values);
+      if (!valid) {
+        setFieldErrors(errors);
+        const count = Object.keys(errors).length;
+        toast.error(`Hay ${count} campo${count > 1 ? "s" : ""} con errores`);
+        return;
+      }
+      setFieldErrors({});
+    }
 
-    const { valid, errors } = validateClientData(sections, values);
-    if (!valid) {
-      setFieldErrors(errors);
-      const count = Object.keys(errors).length;
-      toast.error(`Hay ${count} campo${count > 1 ? "s" : ""} con errores`);
+    const name = hasTemplate
+      ? ((values.field_name as string)?.trim() ?? "")
+      : basicName.trim();
+    const identificationNumber = hasTemplate
+      ? ((values.field_identificationNumber as string)?.trim() ?? "")
+      : basicId.trim();
+
+    if (!name) {
+      toast.error("El nombre es obligatorio");
       return;
     }
-    setFieldErrors({});
-
-    const name = (values.field_name as string)?.trim() ?? "";
-    const identificationNumber =
-      (values.field_identificationNumber as string)?.trim() ?? "";
+    if (!identificationNumber) {
+      toast.error("La identificación es obligatoria");
+      return;
+    }
 
     await updateClient(
       {
@@ -109,10 +119,12 @@ export default function ClientDetailPage() {
     setFieldErrors({});
     if (client.data) {
       setValues((client.data.data as Record<string, unknown>) ?? {});
+      setBasicName(client.data.name ?? "");
+      setBasicId(client.data.identificationNumber ?? "");
     }
   };
 
-  if (client.isLoading || template.isLoading) {
+  if (client.isLoading) {
     return (
       <main className="w-full h-full flex-1 flex items-center justify-center">
         <Spinner />
@@ -176,7 +188,7 @@ export default function ClientDetailPage() {
         </div>
       </header>
       <div className="flex-1 overflow-auto p-4">
-        {sections && sections.length > 0 ? (
+        {hasTemplate ? (
           <ClientStepper
             sections={sections}
             values={values}
@@ -187,9 +199,32 @@ export default function ClientDetailPage() {
             errors={fieldErrors}
           />
         ) : (
-          <p className="text-sm text-muted-foreground">
-            No hay plantilla configurada
-          </p>
+          <div className="grid grid-cols-4 gap-3 max-w-2xl">
+            <div className="col-span-2 space-y-1.5">
+              <Label htmlFor="basic-name" className="text-xs font-medium">
+                Nombre <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="basic-name"
+                placeholder="Nombre del cliente"
+                value={basicName}
+                onChange={(e) => setBasicName(e.target.value)}
+                readOnly={!isEditing}
+              />
+            </div>
+            <div className="col-span-2 space-y-1.5">
+              <Label htmlFor="basic-id" className="text-xs font-medium">
+                Identificación <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="basic-id"
+                placeholder="Número de identificación"
+                value={basicId}
+                onChange={(e) => setBasicId(e.target.value)}
+                readOnly={!isEditing}
+              />
+            </div>
+          </div>
         )}
       </div>
     </main>

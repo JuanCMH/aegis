@@ -5,12 +5,213 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { populateMember } from "./roles";
 import { clientErrors } from "./errors/clients";
 
+const FIXED_NAME_FIELD_ID = "field_name";
+const FIXED_IDENTIFICATION_FIELD_ID = "field_identificationNumber";
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^\+?[\d\s()-]{7,20}$/;
+const URL_RE = /^https?:\/\/.+/;
+
+type ClientTemplateField = {
+  id: string;
+  type:
+    | "text"
+    | "textarea"
+    | "number"
+    | "currency"
+    | "date"
+    | "select"
+    | "phone"
+    | "email"
+    | "file"
+    | "image"
+    | "switch"
+    | "url";
+  label: string;
+  required: boolean;
+  config: {
+    minLength?: number;
+    maxLength?: number;
+    minValue?: number;
+    maxValue?: number;
+    options?: Array<{ label: string; value: string }>;
+  };
+};
+
+type ClientTemplate = {
+  _id: unknown;
+  workspaceId: unknown;
+  sections: Array<{ fields: ClientTemplateField[] }>;
+};
+
+function getDataRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function isEmptyValue(value: unknown) {
+  return value == null || (typeof value === "string" && value.trim() === "");
+}
+
+function validateFieldValue(field: ClientTemplateField, value: unknown) {
+  if (isEmptyValue(value)) {
+    return;
+  }
+
+  const stringValue = typeof value === "string" ? value.trim() : "";
+
+  if (field.type === "text" || field.type === "textarea") {
+    if (typeof value !== "string") {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    if (field.config.minLength && stringValue.length < field.config.minLength) {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    if (field.config.maxLength && stringValue.length > field.config.maxLength) {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    return;
+  }
+
+  if (field.type === "number" || field.type === "currency") {
+    const numericValue =
+      typeof value === "number"
+        ? value
+        : typeof value === "string"
+          ? Number(value)
+          : Number.NaN;
+
+    if (Number.isNaN(numericValue)) {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    if (field.config.minValue != null && numericValue < field.config.minValue) {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    if (field.config.maxValue != null && numericValue > field.config.maxValue) {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    return;
+  }
+
+  if (field.type === "email") {
+    if (typeof value !== "string" || !EMAIL_RE.test(stringValue)) {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    return;
+  }
+
+  if (field.type === "phone") {
+    if (typeof value !== "string" || !PHONE_RE.test(stringValue)) {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    return;
+  }
+
+  if (field.type === "url") {
+    if (typeof value !== "string" || !URL_RE.test(stringValue)) {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    return;
+  }
+
+  if (field.type === "date") {
+    if (typeof value !== "string" || Number.isNaN(Date.parse(value))) {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    return;
+  }
+
+  if (field.type === "select") {
+    if (typeof value !== "string") {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    const options = field.config.options ?? [];
+    if (
+      options.length > 0 &&
+      !options.some((option) => option.value === value)
+    ) {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    return;
+  }
+
+  if (field.type === "switch") {
+    if (typeof value !== "boolean") {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    return;
+  }
+
+  if (field.type === "file" || field.type === "image") {
+    if (typeof value !== "string") {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+  }
+}
+
+function validateTemplateData(
+  template: ClientTemplate | null,
+  data: unknown,
+  name: string,
+  identificationNumber: string,
+) {
+  if (!template) {
+    if (data == null) {
+      return undefined;
+    }
+
+    const record = getDataRecord(data);
+    if (!record || Object.keys(record).length > 0) {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+
+    return undefined;
+  }
+
+  const record = getDataRecord(data);
+  if (!record) {
+    throw new ConvexError(clientErrors.invalidFieldData);
+  }
+
+  const allFields = template.sections.flatMap((section) => section.fields);
+  const allowedFieldIds = new Set(allFields.map((field) => field.id));
+
+  for (const key of Object.keys(record)) {
+    if (!allowedFieldIds.has(key)) {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+  }
+
+  for (const field of allFields) {
+    const rawValue = record[field.id];
+    if (field.required && isEmptyValue(rawValue)) {
+      throw new ConvexError(clientErrors.invalidFieldData);
+    }
+    validateFieldValue(field, rawValue);
+  }
+
+  const templateName = record[FIXED_NAME_FIELD_ID];
+  const templateIdentification = record[FIXED_IDENTIFICATION_FIELD_ID];
+  if (
+    typeof templateName !== "string" ||
+    templateName.trim() !== name.trim() ||
+    typeof templateIdentification !== "string" ||
+    templateIdentification.trim() !== identificationNumber.trim()
+  ) {
+    throw new ConvexError(clientErrors.invalidFieldData);
+  }
+
+  return record;
+}
+
 export const create = mutation({
   args: {
     name: v.string(),
     identificationNumber: v.string(),
-    templateId: v.id("clientTemplates"),
-    data: v.any(),
+    templateId: v.optional(v.id("clientTemplates")),
+    data: v.optional(v.any()),
     workspaceId: v.id("workspaces"),
   },
   handler: async (ctx, args) => {
@@ -24,11 +225,26 @@ export const create = mutation({
     if (!args.identificationNumber.trim())
       throw new ConvexError(clientErrors.identificationRequired);
 
+    const template = args.templateId ? await ctx.db.get(args.templateId) : null;
+    if (
+      args.templateId &&
+      (!template || template.workspaceId !== args.workspaceId)
+    ) {
+      throw new ConvexError(clientErrors.templateNotFound);
+    }
+
+    const validatedData = validateTemplateData(
+      template,
+      args.data,
+      args.name,
+      args.identificationNumber,
+    );
+
     return await ctx.db.insert("clients", {
       name: args.name,
       identificationNumber: args.identificationNumber,
       templateId: args.templateId,
-      data: args.data,
+      data: validatedData,
       workspaceId: args.workspaceId,
     });
   },
@@ -55,10 +271,27 @@ export const update = mutation({
     if (!args.identificationNumber.trim())
       throw new ConvexError(clientErrors.identificationRequired);
 
+    const template = client.templateId
+      ? await ctx.db.get(client.templateId)
+      : null;
+    if (
+      client.templateId &&
+      (!template || template.workspaceId !== client.workspaceId)
+    ) {
+      throw new ConvexError(clientErrors.templateNotFound);
+    }
+
+    const validatedData = validateTemplateData(
+      template,
+      args.data,
+      args.name,
+      args.identificationNumber,
+    );
+
     await ctx.db.patch(args.id, {
       name: args.name,
       identificationNumber: args.identificationNumber,
-      data: args.data,
+      data: validatedData,
     });
 
     return args.id;
@@ -78,7 +311,9 @@ export const remove = mutation({
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
 
     // Clean up file/image fields stored in Convex storage
-    const template = await ctx.db.get(client.templateId);
+    const template = client.templateId
+      ? await ctx.db.get(client.templateId)
+      : null;
     if (template && client.data && typeof client.data === "object") {
       const fileFieldIds = template.sections
         .flatMap((s) => s.fields)
@@ -109,8 +344,7 @@ export const getByWorkspace = query({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null)
-      return { page: [], isDone: true, continueCursor: "" };
+    if (userId === null) return { page: [], isDone: true, continueCursor: "" };
 
     const member = await populateMember(ctx, userId, args.workspaceId);
     if (!member) return { page: [], isDone: true, continueCursor: "" };
@@ -168,8 +402,12 @@ export const getById = query({
     if (!member) return null;
 
     // Resolve file/image URLs from storage
-    const template = await ctx.db.get(client.templateId);
-    if (!template) return { ...client, resolvedFiles: {} };
+    const template = client.templateId
+      ? await ctx.db.get(client.templateId)
+      : null;
+    if (!template) {
+      return { ...client, resolvedFiles: {}, templateSections: undefined };
+    }
 
     const fileFields = template.sections
       .flatMap((s) => s.fields)
@@ -183,6 +421,6 @@ export const getById = query({
       }
     }
 
-    return { ...client, resolvedFiles };
+    return { ...client, resolvedFiles, templateSections: template.sections };
   },
 });
