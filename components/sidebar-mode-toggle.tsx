@@ -26,7 +26,7 @@ export const SidebarModeToggle = ({ align = "center" }: ModeToggleProps) => {
             hidden: false,
             children: "Tema",
           }}
-          className="font-semibold w-full overflow-hidden cursor-pointer border"
+          className="w-full overflow-hidden cursor-pointer text-sidebar-foreground/70 hover:text-sidebar-foreground"
         >
           <span
             className={cn(
@@ -43,7 +43,7 @@ export const SidebarModeToggle = ({ align = "center" }: ModeToggleProps) => {
           </span>
         </SidebarMenuButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} className="poppins">
+      <DropdownMenuContent align={align}>
         <DropdownMenuItem
           className="cursor-pointer"
           onClick={() => setTheme("light")}

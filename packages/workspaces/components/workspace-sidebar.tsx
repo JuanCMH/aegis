@@ -1,6 +1,5 @@
 import {
   RiListView,
-  RiHome2Fill,
   RiGroup2Fill,
   RiAddCircleFill,
   RiFolderShield2Fill,
@@ -25,11 +24,6 @@ export function WorkspaceSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const workspaceId = useWorkspaceId();
 
   const data = [
-    {
-      title: "Principal",
-      icon: RiHome2Fill,
-      items: [],
-    },
     {
       title: "Clientes",
       icon: RiGroup2Fill,
@@ -92,7 +86,7 @@ export function WorkspaceSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   ];
 
   return (
-    <Sidebar variant="inset" collapsible="icon" {...props}>
+    <Sidebar variant="inset" collapsible="icon" desktopOverlay {...props}>
       <SidebarHeader>
         <WorkspaceSwitcher />
       </SidebarHeader>

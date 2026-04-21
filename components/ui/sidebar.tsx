@@ -155,6 +155,7 @@ function Sidebar({
   side = "left",
   variant = "sidebar",
   collapsible = "offcanvas",
+  desktopOverlay = false,
   className,
   children,
   ...props
@@ -162,8 +163,63 @@ function Sidebar({
   side?: "left" | "right";
   variant?: "sidebar" | "floating" | "inset";
   collapsible?: "offcanvas" | "icon" | "none";
+  desktopOverlay?: boolean;
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+  const { isMobile, state, open, setOpen, openMobile, setOpenMobile } =
+    useSidebar();
+  const desktopContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!desktopOverlay || isMobile || !open) {
+      return;
+    }
+
+    const focusTrigger = () => {
+      const trigger = document.querySelector<HTMLElement>(
+        '[data-sidebar="trigger"]',
+      );
+      trigger?.focus();
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) {
+        return;
+      }
+
+      if (target.closest('[data-slot="dropdown-menu-content"]')) {
+        return;
+      }
+
+      if (target.closest('[data-sidebar="trigger"]')) {
+        return;
+      }
+
+      if (desktopContainerRef.current?.contains(target)) {
+        return;
+      }
+
+      setOpen(false);
+      requestAnimationFrame(focusTrigger);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      setOpen(false);
+      requestAnimationFrame(focusTrigger);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [desktopOverlay, isMobile, open, setOpen]);
 
   if (collapsible === "none") {
     return (
@@ -217,6 +273,16 @@ function Sidebar({
       {/* This is what handles the sidebar gap on desktop */}
       <div
         data-slot="sidebar-gap"
+        style={
+          desktopOverlay && collapsible === "icon"
+            ? {
+                width:
+                  variant === "floating" || variant === "inset"
+                    ? "calc(var(--sidebar-width-icon) + 1rem)"
+                    : "var(--sidebar-width-icon)",
+              }
+            : undefined
+        }
         className={cn(
           "relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
           "group-data-[collapsible=offcanvas]:w-0",
@@ -227,9 +293,10 @@ function Sidebar({
         )}
       />
       <div
+        ref={desktopContainerRef}
         data-slot="sidebar-container"
         className={cn(
-          "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+          "fixed inset-y-0 z-40 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
             : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
@@ -309,7 +376,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
     <main
       data-slot="sidebar-inset"
       className={cn(
-        "bg-background relative flex w-full flex-1 flex-col",
+        "bg-background relative z-0 flex w-full flex-1 flex-col",
         "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
         className,
       )}
