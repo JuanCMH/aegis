@@ -60,32 +60,32 @@ const sectionValidator = v.object({
   fields: v.array(fieldValidator),
 });
 
-export const getByWorkspace = query({
-  args: { workspaceId: v.id("workspaces") },
+export const getByCompany = query({
+  args: { companyId: v.id("companies") },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) return null;
 
-    const member = await populateMember(ctx, userId, args.workspaceId);
+    const member = await populateMember(ctx, userId, args.companyId);
     if (!member) return null;
 
     return await ctx.db
       .query("clientTemplates")
-      .withIndex("workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
       .unique();
   },
 });
 
 export const save = mutation({
   args: {
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
     sections: v.array(sectionValidator),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new ConvexError(clientErrors.unauthorized);
 
-    const member = await populateMember(ctx, userId, args.workspaceId);
+    const member = await populateMember(ctx, userId, args.companyId);
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
 
     // Validate that canonical fixed fields exist in the template.
@@ -100,7 +100,7 @@ export const save = mutation({
 
     const existing = await ctx.db
       .query("clientTemplates")
-      .withIndex("workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
       .unique();
 
     if (existing) {
@@ -109,7 +109,7 @@ export const save = mutation({
     }
 
     return await ctx.db.insert("clientTemplates", {
-      workspaceId: args.workspaceId,
+      companyId: args.companyId,
       sections: args.sections,
     });
   },

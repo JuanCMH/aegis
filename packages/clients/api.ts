@@ -9,8 +9,8 @@ import { Id } from "@/convex/_generated/dataModel";
 const templateRoute = api.clientTemplates;
 
 export const useGetClientTemplate = (
-  data: typeof templateRoute.getByWorkspace._args,
-) => useFetch(templateRoute.getByWorkspace, data);
+  data: typeof templateRoute.getByCompany._args,
+) => useFetch(templateRoute.getByCompany, data);
 
 export const useSaveClientTemplate = () => useMutate(templateRoute.save);
 
@@ -24,12 +24,12 @@ export const useUpdateClient = () => useMutate(clientRoute.update);
 export const useRemoveClient = () => useMutate(clientRoute.remove);
 
 export const usePaginatedClients = (
-  workspaceId: Id<"workspaces">,
+  companyId: Id<"companies">,
   search?: string,
 ) => {
   const result = usePaginatedQuery(
-    clientRoute.getByWorkspace,
-    { workspaceId, search },
+    clientRoute.getByCompany,
+    { companyId, search },
     { initialNumItems: 25 },
   );
   return result;

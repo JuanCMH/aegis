@@ -11,10 +11,10 @@ import { useRouter } from "next/navigation";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { useConfirm } from "@/components/hooks/use-confirm";
 import {
-  RiCloseCircleFill,
-  RiEyeFill,
-  RiFileTextLine,
-} from "@remixicon/react";
+  X,
+  Eye,
+  FileText,
+} from "lucide-react";
 
 interface QuoteActionsProps {
   id: Id<"quotes">;
@@ -50,7 +50,7 @@ export const QuoteActions = ({ id, quote, children }: QuoteActionsProps) => {
   };
 
   const onOpenQuote = () => {
-    router.push(`/workspaces/${quote.workspaceId}/quotes/${id}`);
+    router.push(`/companies/${quote.companyId}/quotes/${id}`);
   };
 
   return (
@@ -61,7 +61,7 @@ export const QuoteActions = ({ id, quote, children }: QuoteActionsProps) => {
         <DropdownMenuContent className="w-48 space-y-1" align="end">
           <DropdownMenuItem onClick={onOpenQuote} className="cursor-pointer">
             Ver Cotización
-            <RiEyeFill className="size-4 ml-auto" />
+            <Eye className="size-4 ml-auto" />
           </DropdownMenuItem>
           {quote.documentUrl && (
             <>
@@ -71,7 +71,7 @@ export const QuoteActions = ({ id, quote, children }: QuoteActionsProps) => {
                 className="cursor-pointer"
               >
                 Ver Documento
-                <RiFileTextLine className="size-4 ml-auto" />
+                <FileText className="size-4 ml-auto" />
               </DropdownMenuItem>
             </>
           )}
@@ -83,7 +83,7 @@ export const QuoteActions = ({ id, quote, children }: QuoteActionsProps) => {
             className="cursor-pointer"
           >
             Eliminar Cotización
-            <RiCloseCircleFill className="size-4 ml-auto" />
+            <X className="size-4 ml-auto" />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

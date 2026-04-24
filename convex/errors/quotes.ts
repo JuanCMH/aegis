@@ -1,7 +1,7 @@
 export const quoteErrors = {
   unauthorized: "No estás autorizado para realizar esta acción",
   notFound: "La cotización no existe",
-  workspaceNotFound: "El espacio de trabajo no existe o no eres miembro",
+  companyNotFound: "El espacio de trabajo no existe o no eres miembro",
   permissionDenied:
     "No tienes permisos para gestionar cotizaciones en este espacio",
   invalidContractValue: "El valor del contrato debe ser mayor a 0",

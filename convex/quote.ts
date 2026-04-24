@@ -62,7 +62,7 @@ export const update = mutation({
     const quote = await ctx.db.get(args.id);
     if (!quote) throw new ConvexError(quoteErrors.notFound);
 
-    const member = await populateMember(ctx, userId, quote.workspaceId);
+    const member = await populateMember(ctx, userId, quote.companyId);
     if (!member) throw new ConvexError(quoteErrors.permissionDenied);
 
     // Only update documentId if explicitly provided; clean up old file if replacing
@@ -106,7 +106,7 @@ export const update = mutation({
         percentage: qb.percentage,
         insuredValue: qb.insuredValue,
         rate: qb.rate,
-        workspaceId: quote.workspaceId,
+        companyId: quote.companyId,
         quoteId: args.id,
         bondId: qb.bondId,
       });
@@ -127,7 +127,7 @@ export const remove = mutation({
     const quote = await ctx.db.get(args.id);
     if (!quote) throw new ConvexError(quoteErrors.notFound);
 
-    const member = await populateMember(ctx, userId, quote.workspaceId);
+    const member = await populateMember(ctx, userId, quote.companyId);
     if (!member) throw new ConvexError(quoteErrors.permissionDenied);
 
     const quoteBonds = await ctx.db
@@ -176,16 +176,16 @@ export const create = mutation({
         bondId: v.optional(v.id("bonds")),
       }),
     ),
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new ConvexError(quoteErrors.unauthorized);
 
-    const workspace = await ctx.db.get(args.workspaceId);
-    if (!workspace) throw new ConvexError(quoteErrors.workspaceNotFound);
+    const company = await ctx.db.get(args.companyId);
+    if (!company) throw new ConvexError(quoteErrors.companyNotFound);
 
-    const member = await populateMember(ctx, userId, args.workspaceId);
+    const member = await populateMember(ctx, userId, args.companyId);
     if (!member) throw new ConvexError(quoteErrors.permissionDenied);
 
     if (args.contractValue <= 0)
@@ -209,7 +209,7 @@ export const create = mutation({
       quoteType: args.quoteType,
       agreement: args.agreement,
       documentId: args.documentId,
-      workspaceId: args.workspaceId,
+      companyId: args.companyId,
     });
 
     for (const qb of args.quoteBonds) {
@@ -221,7 +221,7 @@ export const create = mutation({
         percentage: qb.percentage,
         insuredValue: qb.insuredValue,
         rate: qb.rate,
-        workspaceId: args.workspaceId,
+        companyId: args.companyId,
         quoteId: quoteId,
         bondId: qb.bondId,
       });
@@ -231,16 +231,16 @@ export const create = mutation({
   },
 });
 
-export const getByWorkspace = query({
+export const getByCompany = query({
   args: {
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
     month: v.string(), // "yyyy-MM"
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) return [];
 
-    const member = await populateMember(ctx, userId, args.workspaceId);
+    const member = await populateMember(ctx, userId, args.companyId);
     if (!member) return [];
 
     const [year, month] = args.month.split("-").map(Number);
@@ -250,7 +250,7 @@ export const getByWorkspace = query({
 
     const quotes = await ctx.db
       .query("quotes")
-      .withIndex("workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
       .filter((q) =>
         q.and(
           q.gte(q.field("_creationTime"), monthStart),
@@ -283,7 +283,7 @@ export const getById = query({
     const quote = await ctx.db.get(args.id);
     if (!quote) return null;
 
-    const member = await populateMember(ctx, userId, quote.workspaceId);
+    const member = await populateMember(ctx, userId, quote.companyId);
     if (!member) return null;
 
     const quoteBonds = await ctx.db

@@ -1,4 +1,4 @@
-import { Hint } from "@/components/hint";
+import { Hint } from "@/components/aegis/hint";
 import {
   Popover,
   PopoverContent,

@@ -15,10 +15,10 @@
 //       v.literal("info"),
 //     ),
 //     organizationId: v.optional(v.id("organizations")),
-//     workspaceId: v.optional(v.id("workspaces")),
+//     companyId: v.optional(v.id("companies")),
 //     customerId: v.optional(v.id("customers")),
 //     affectedEntityType: v.optional(
-//       v.union(v.literal("workspace"), v.literal("member"), v.literal("role")),
+//       v.union(v.literal("company"), v.literal("member"), v.literal("role")),
 //     ),
 //     affectedEntityId: v.optional(v.string()),
 //   },
@@ -32,7 +32,7 @@
 //       userName: args.userName,
 //       userId: authUserId,
 //       type: args.type,
-//       workspaceId: args.workspaceId,
+//       companyId: args.companyId,
 //       affectedEntityType: args.affectedEntityType,
 //       affectedEntityId: args.affectedEntityId,
 //     });
@@ -40,9 +40,9 @@
 //   },
 // });
 
-// export const getByWorkspace = query({
+// export const getByCompany = query({
 //   args: {
-//     workspaceId: v.id("workspaces"),
+//     companyId: v.id("companies"),
 //     date: v.optional(v.string()),
 //     filterType: v.optional(v.union(v.literal("day"), v.literal("month"))),
 //   },
@@ -50,12 +50,12 @@
 //     const userId = await getAuthUserId(ctx);
 //     if (userId === null) throw new ConvexError(logsErrors.userNotAuthenticated);
 
-//     const workspace = await ctx.db.get(args.workspaceId);
-//     if (!workspace) throw new ConvexError(logsErrors.workspaceNotFound);
+//     const company = await ctx.db.get(args.companyId);
+//     if (!company) throw new ConvexError(logsErrors.companyNotFound);
 
 //     const logs = await ctx.db
 //       .query("logs")
-//       .withIndex("workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+//       .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
 //       .collect();
 
 //     if (args.date) {

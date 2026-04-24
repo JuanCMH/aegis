@@ -39,7 +39,7 @@ type ClientTemplateField = {
 
 type ClientTemplate = {
   _id: unknown;
-  workspaceId: unknown;
+  companyId: unknown;
   sections: Array<{ fields: ClientTemplateField[] }>;
 };
 
@@ -212,13 +212,13 @@ export const create = mutation({
     identificationNumber: v.string(),
     templateId: v.optional(v.id("clientTemplates")),
     data: v.optional(v.any()),
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new ConvexError(clientErrors.unauthorized);
 
-    const member = await populateMember(ctx, userId, args.workspaceId);
+    const member = await populateMember(ctx, userId, args.companyId);
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
 
     if (!args.name.trim()) throw new ConvexError(clientErrors.nameRequired);
@@ -228,7 +228,7 @@ export const create = mutation({
     const template = args.templateId ? await ctx.db.get(args.templateId) : null;
     if (
       args.templateId &&
-      (!template || template.workspaceId !== args.workspaceId)
+      (!template || template.companyId !== args.companyId)
     ) {
       throw new ConvexError(clientErrors.templateNotFound);
     }
@@ -245,7 +245,7 @@ export const create = mutation({
       identificationNumber: args.identificationNumber,
       templateId: args.templateId,
       data: validatedData,
-      workspaceId: args.workspaceId,
+      companyId: args.companyId,
     });
   },
 });
@@ -264,7 +264,7 @@ export const update = mutation({
     const client = await ctx.db.get(args.id);
     if (!client) throw new ConvexError(clientErrors.notFound);
 
-    const member = await populateMember(ctx, userId, client.workspaceId);
+    const member = await populateMember(ctx, userId, client.companyId);
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
 
     if (!args.name.trim()) throw new ConvexError(clientErrors.nameRequired);
@@ -276,7 +276,7 @@ export const update = mutation({
       : null;
     if (
       client.templateId &&
-      (!template || template.workspaceId !== client.workspaceId)
+      (!template || template.companyId !== client.companyId)
     ) {
       throw new ConvexError(clientErrors.templateNotFound);
     }
@@ -307,7 +307,7 @@ export const remove = mutation({
     const client = await ctx.db.get(args.id);
     if (!client) throw new ConvexError(clientErrors.notFound);
 
-    const member = await populateMember(ctx, userId, client.workspaceId);
+    const member = await populateMember(ctx, userId, client.companyId);
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
 
     // Clean up file/image fields stored in Convex storage
@@ -336,9 +336,9 @@ export const remove = mutation({
   },
 });
 
-export const getByWorkspace = query({
+export const getByCompany = query({
   args: {
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
     search: v.optional(v.string()),
     paginationOpts: paginationOptsValidator,
   },
@@ -346,7 +346,7 @@ export const getByWorkspace = query({
     const userId = await getAuthUserId(ctx);
     if (userId === null) return { page: [], isDone: true, continueCursor: "" };
 
-    const member = await populateMember(ctx, userId, args.workspaceId);
+    const member = await populateMember(ctx, userId, args.companyId);
     if (!member) return { page: [], isDone: true, continueCursor: "" };
 
     // If search term provided, use search indexes
@@ -354,7 +354,7 @@ export const getByWorkspace = query({
       const byName = await ctx.db
         .query("clients")
         .withSearchIndex("search_name", (q) =>
-          q.search("name", args.search!).eq("workspaceId", args.workspaceId),
+          q.search("name", args.search!).eq("companyId", args.companyId),
         )
         .take(25);
 
@@ -363,7 +363,7 @@ export const getByWorkspace = query({
         .withSearchIndex("search_identificationNumber", (q) =>
           q
             .search("identificationNumber", args.search!)
-            .eq("workspaceId", args.workspaceId),
+            .eq("companyId", args.companyId),
         )
         .take(25);
 
@@ -383,7 +383,7 @@ export const getByWorkspace = query({
     // No search: paginated list
     return await ctx.db
       .query("clients")
-      .withIndex("workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
       .order("desc")
       .paginate(args.paginationOpts);
   },
@@ -398,7 +398,7 @@ export const getById = query({
     const client = await ctx.db.get(args.id);
     if (!client) return null;
 
-    const member = await populateMember(ctx, userId, client.workspaceId);
+    const member = await populateMember(ctx, userId, client.companyId);
     if (!member) return null;
 
     // Resolve file/image URLs from storage

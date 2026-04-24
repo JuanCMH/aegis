@@ -3,7 +3,7 @@ export const clientErrors = {
   notFound: "El cliente no existe",
   templateNotFound:
     "La plantilla de clientes no existe para este espacio de trabajo",
-  workspaceNotFound:
+  companyNotFound:
     "El espacio de trabajo no existe o no eres miembro",
   permissionDenied:
     "No tienes permisos para gestionar clientes en este espacio",

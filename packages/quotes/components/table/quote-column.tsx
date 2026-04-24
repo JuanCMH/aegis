@@ -1,10 +1,10 @@
 import {
-  RiMore2Line,
-  RiArrowUpLine,
-  RiArrowDownLine,
-  RiInformation2Fill,
-} from "@remixicon/react";
-import { Hint } from "@/components/hint";
+  MoreHorizontal,
+  ArrowUp,
+  ArrowDown,
+  Info,
+} from "lucide-react";
+import { Hint } from "@/components/aegis/hint";
 import { formatCop } from "@/lib/format-cop";
 import { Badge } from "@/components/ui/badge";
 import { QuoteActions } from "./quote-actions";
@@ -28,7 +28,7 @@ export const columns: ColumnDef<QuoteRow>[] = [
       return (
         <QuotePopover quote={quote}>
           <Button variant="ghost" size="icon-sm">
-            <RiInformation2Fill className="size-4" />
+            <Info className="size-4" />
           </Button>
         </QuotePopover>
       );
@@ -49,9 +49,9 @@ export const columns: ColumnDef<QuoteRow>[] = [
         >
           Fecha
           {column.getIsSorted() === "asc" ? (
-            <RiArrowUpLine className="size-4 ml-2" />
+            <ArrowUp className="size-4 ml-2" />
           ) : (
-            <RiArrowDownLine className="size-4 ml-2" />
+            <ArrowDown className="size-4 ml-2" />
           )}
         </Button>
       );
@@ -73,9 +73,9 @@ export const columns: ColumnDef<QuoteRow>[] = [
         >
           Contratista
           {column.getIsSorted() === "asc" ? (
-            <RiArrowUpLine className="size-4 ml-2" />
+            <ArrowUp className="size-4 ml-2" />
           ) : (
-            <RiArrowDownLine className="size-4 ml-2" />
+            <ArrowDown className="size-4 ml-2" />
           )}
         </Button>
       );
@@ -103,9 +103,9 @@ export const columns: ColumnDef<QuoteRow>[] = [
         >
           Tipo de Cotización
           {column.getIsSorted() === "asc" ? (
-            <RiArrowUpLine className="size-4 ml-2" />
+            <ArrowUp className="size-4 ml-2" />
           ) : (
-            <RiArrowDownLine className="size-4 ml-2" />
+            <ArrowDown className="size-4 ml-2" />
           )}
         </Button>
       );
@@ -131,9 +131,9 @@ export const columns: ColumnDef<QuoteRow>[] = [
         >
           Tipo de Contrato
           {column.getIsSorted() === "asc" ? (
-            <RiArrowUpLine className="size-4 ml-2" />
+            <ArrowUp className="size-4 ml-2" />
           ) : (
-            <RiArrowDownLine className="size-4 ml-2" />
+            <ArrowDown className="size-4 ml-2" />
           )}
         </Button>
       );
@@ -163,9 +163,9 @@ export const columns: ColumnDef<QuoteRow>[] = [
         >
           Inicio del Contrato
           {column.getIsSorted() === "asc" ? (
-            <RiArrowUpLine className="size-4 ml-2" />
+            <ArrowUp className="size-4 ml-2" />
           ) : (
-            <RiArrowDownLine className="size-4 ml-2" />
+            <ArrowDown className="size-4 ml-2" />
           )}
         </Button>
       );
@@ -192,9 +192,9 @@ export const columns: ColumnDef<QuoteRow>[] = [
         >
           Fin del Contrato
           {column.getIsSorted() === "asc" ? (
-            <RiArrowUpLine className="size-4 ml-2" />
+            <ArrowUp className="size-4 ml-2" />
           ) : (
-            <RiArrowDownLine className="size-4 ml-2" />
+            <ArrowDown className="size-4 ml-2" />
           )}
         </Button>
       );
@@ -221,9 +221,9 @@ export const columns: ColumnDef<QuoteRow>[] = [
         >
           Valor del Contrato
           {column.getIsSorted() === "asc" ? (
-            <RiArrowUpLine className="size-4 ml-2" />
+            <ArrowUp className="size-4 ml-2" />
           ) : (
-            <RiArrowDownLine className="size-4 ml-2" />
+            <ArrowDown className="size-4 ml-2" />
           )}
         </Button>
       );
@@ -245,7 +245,7 @@ export const columns: ColumnDef<QuoteRow>[] = [
       return (
         <QuoteActions id={id} quote={quote}>
           <Button variant="ghost" size="icon-sm">
-            <RiMore2Line className="size-4" />
+            <MoreHorizontal className="size-4" />
           </Button>
         </QuoteActions>
       );

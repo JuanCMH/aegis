@@ -20,7 +20,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { RiDeleteBinLine, RiAddLine, RiCloseLine } from "@remixicon/react";
+import { Trash2, Plus, X } from "lucide-react";
 import { FIELD_TYPE_CONFIG } from "./field-palette";
 import type { TemplateField, FieldSize } from "@/packages/clients/types";
 
@@ -270,7 +270,7 @@ export function FieldConfigPanel({
                       onClick={addOption}
                       className="gap-1.5 border-border/40 h-7"
                     >
-                      <RiAddLine className="size-3" />
+                      <Plus className="size-3" />
                       <span className="text-xs">Agregar</span>
                     </Button>
                   </div>
@@ -290,7 +290,7 @@ export function FieldConfigPanel({
                           className="size-8 p-0 shrink-0 text-muted-foreground hover:text-destructive"
                           onClick={() => removeOption(i)}
                         >
-                          <RiCloseLine className="size-3.5" />
+                          <X className="size-3.5" />
                         </Button>
                       </div>
                     ))}
@@ -345,7 +345,7 @@ export function FieldConfigPanel({
               className="mr-auto text-destructive hover:text-destructive hover:bg-destructive/10"
               onClick={() => onDelete(field.id)}
             >
-              <RiDeleteBinLine className="size-4" />
+              <Trash2 className="size-4" />
               Eliminar
             </Button>
           )}

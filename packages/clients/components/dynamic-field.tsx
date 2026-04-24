@@ -7,8 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { DatePicker } from "@/components/date-picker";
-import { CurrencyInput } from "@/components/currency-input";
+import { DatePicker } from "@/components/aegis/date-picker";
+import { CurrencyInput } from "@/components/aegis/currency-input";
 import {
   Select,
   SelectContent,
@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RiUploadCloud2Line, RiFileLine, RiImageLine } from "@remixicon/react";
+import { Upload, FileText, Image } from "lucide-react";
 import type { TemplateField, FieldSize } from "@/packages/clients/types";
 
 const SIZE_COL_MAP: Record<FieldSize, string> = {
@@ -133,7 +133,9 @@ export function DynamicField({
             disabled={readOnly}
           >
             <SelectTrigger className={cn(readOnly && "cursor-default")}>
-              <SelectValue placeholder={field.placeholder ?? "Seleccionar..."} />
+              <SelectValue
+                placeholder={field.placeholder ?? "Seleccionar..."}
+              />
             </SelectTrigger>
             <SelectContent>
               {(field.config.options ?? []).map((opt) => (
@@ -159,7 +161,7 @@ export function DynamicField({
       case "file":
       case "image": {
         const isImage = field.type === "image";
-        const Icon = isImage ? RiImageLine : RiFileLine;
+        const Icon = isImage ? Image : FileText;
         const accept = isImage
           ? "image/*"
           : field.config.acceptedFormats?.join(",");
@@ -209,7 +211,7 @@ export function DynamicField({
               className="gap-1.5 border-border/40"
               onClick={() => fileInputRef.current?.click()}
             >
-              <RiUploadCloud2Line className="size-3.5" />
+              <Upload className="size-3.5" />
               {value ? "Cambiar" : "Subir"}
             </Button>
             {!!value && (
@@ -240,7 +242,7 @@ export function DynamicField({
           {field.label}
           {field.required && <span className="text-destructive ml-0.5">*</span>}
           {isAiFilled && (
-            <span className="text-[10px] font-semibold text-h-indigo bg-h-indigo/10 px-1 py-0.5 rounded">
+            <span className="text-[10px] font-semibold text-aegis-sapphire bg-aegis-sapphire/10 px-1 py-0.5 rounded">
               IA
             </span>
           )}
@@ -249,16 +251,14 @@ export function DynamicField({
         <Label className="text-xs text-muted-foreground/70 font-medium flex items-center gap-1">
           {field.label}
           {isAiFilled && (
-            <span className="text-[10px] font-semibold text-h-indigo bg-h-indigo/10 px-1 py-0.5 rounded">
+            <span className="text-[10px] font-semibold text-aegis-sapphire bg-aegis-sapphire/10 px-1 py-0.5 rounded">
               IA
             </span>
           )}
         </Label>
       )}
       {renderInput()}
-      {error && (
-        <p className="text-[11px] text-destructive">{error}</p>
-      )}
+      {error && <p className="text-[11px] text-destructive">{error}</p>}
     </div>
   );
 }

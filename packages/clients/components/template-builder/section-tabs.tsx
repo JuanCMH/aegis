@@ -4,19 +4,19 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  RiAddLine,
-  RiDeleteBinLine,
-  RiEditLine,
-  RiCheckLine,
-  RiCloseLine,
-} from "@remixicon/react";
+  Plus,
+  Trash2,
+  Pencil,
+  Check,
+  X,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { RiMoreFill } from "@remixicon/react";
+import { MoreHorizontal } from "lucide-react";
 import { useDroppable } from "@dnd-kit/core";
 import { useState } from "react";
 import type { TemplateSection } from "@/packages/clients/types";
@@ -86,7 +86,7 @@ function DroppableTab({
           className="size-6 p-0"
           onClick={handleSubmitRename}
         >
-          <RiCheckLine className="size-3" />
+          <Check className="size-3" />
         </Button>
         <Button
           type="button"
@@ -95,7 +95,7 @@ function DroppableTab({
           className="size-6 p-0"
           onClick={handleCancelRename}
         >
-          <RiCloseLine className="size-3" />
+          <X className="size-3" />
         </Button>
       </div>
     );
@@ -130,7 +130,7 @@ function DroppableTab({
             size="sm"
             className="size-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
           >
-            <RiMoreFill className="size-3" />
+            <MoreHorizontal className="size-3" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-36">
@@ -140,7 +140,7 @@ function DroppableTab({
               setIsEditing(true);
             }}
           >
-            <RiEditLine className="size-3.5 mr-2" />
+            <Pencil className="size-3.5 mr-2" />
             Renombrar
           </DropdownMenuItem>
           {canDelete && (
@@ -148,7 +148,7 @@ function DroppableTab({
               className="text-destructive focus:text-destructive"
               onClick={onDelete}
             >
-              <RiDeleteBinLine className="size-3.5 mr-2" />
+              <Trash2 className="size-3.5 mr-2" />
               Eliminar
             </DropdownMenuItem>
           )}
@@ -188,7 +188,7 @@ export function SectionTabs({
         className="size-6 p-0 text-muted-foreground hover:text-foreground"
         onClick={onAddSection}
       >
-        <RiAddLine className="size-3.5" />
+        <Plus className="size-3.5" />
       </Button>
     </div>
   );

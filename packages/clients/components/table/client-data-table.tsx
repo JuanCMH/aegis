@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
+import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import type { ClientRow } from "./client-columns";
 
 interface ClientDataTableProps {
@@ -44,7 +44,7 @@ export function ClientDataTable({
   onLoadMore,
 }: ClientDataTableProps) {
   const router = useRouter();
-  const workspaceId = useWorkspaceId();
+  const companyId = useCompanyId();
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
@@ -98,7 +98,7 @@ export function ClientDataTable({
                   className="cursor-pointer"
                   onClick={() =>
                     router.push(
-                      `/workspaces/${workspaceId}/clients/${row.original._id}`,
+                      `/companies/${companyId}/clients/${row.original._id}`,
                     )
                   }
                 >

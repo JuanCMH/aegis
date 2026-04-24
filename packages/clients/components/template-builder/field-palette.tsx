@@ -4,19 +4,19 @@ import { useDraggable } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
 import type { FieldType } from "@/packages/clients/types";
 import {
-  RiInputField,
-  RiFileTextFill,
-  RiHashtag,
-  RiMoneyDollarCircleFill,
-  RiCalendarFill,
-  RiArrowDownSLine,
-  RiPhoneFill,
-  RiMailFill,
-  RiAttachment2,
-  RiImageFill,
-  RiToggleFill,
-  RiLinksFill,
-} from "@remixicon/react";
+  TextCursorInput,
+  FileText,
+  Hash,
+  CircleDollarSign,
+  Calendar,
+  ChevronDown,
+  Phone,
+  Mail,
+  Paperclip,
+  Image,
+  ToggleRight,
+  Link,
+} from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 type FieldTypeConfig = {
@@ -26,18 +26,18 @@ type FieldTypeConfig = {
 };
 
 export const FIELD_TYPE_CONFIG: FieldTypeConfig[] = [
-  { type: "text", label: "Texto", icon: RiInputField },
-  { type: "textarea", label: "Descripción", icon: RiFileTextFill },
-  { type: "number", label: "Numérico", icon: RiHashtag },
-  { type: "currency", label: "Valor (COP)", icon: RiMoneyDollarCircleFill },
-  { type: "date", label: "Fecha", icon: RiCalendarFill },
-  { type: "select", label: "Selección", icon: RiArrowDownSLine },
-  { type: "phone", label: "Teléfono", icon: RiPhoneFill },
-  { type: "email", label: "Correo", icon: RiMailFill },
-  { type: "file", label: "Archivo", icon: RiAttachment2 },
-  { type: "image", label: "Imagen", icon: RiImageFill },
-  { type: "switch", label: "Sí/No", icon: RiToggleFill },
-  { type: "url", label: "Enlace", icon: RiLinksFill },
+  { type: "text", label: "Texto", icon: TextCursorInput },
+  { type: "textarea", label: "Descripción", icon: FileText },
+  { type: "number", label: "Numérico", icon: Hash },
+  { type: "currency", label: "Valor (COP)", icon: CircleDollarSign },
+  { type: "date", label: "Fecha", icon: Calendar },
+  { type: "select", label: "Selección", icon: ChevronDown },
+  { type: "phone", label: "Teléfono", icon: Phone },
+  { type: "email", label: "Correo", icon: Mail },
+  { type: "file", label: "Archivo", icon: Paperclip },
+  { type: "image", label: "Imagen", icon: Image },
+  { type: "switch", label: "Sí/No", icon: ToggleRight },
+  { type: "url", label: "Enlace", icon: Link },
 ];
 
 function DraggableFieldItem({ config }: { config: FieldTypeConfig }) {

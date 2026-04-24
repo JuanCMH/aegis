@@ -8,7 +8,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
-import { RiLockFill, RiDraggable } from "@remixicon/react";
+import { Lock, GripVertical } from "lucide-react";
 import { FIELD_TYPE_CONFIG } from "./field-palette";
 import type { TemplateField, FieldSize } from "@/packages/clients/types";
 
@@ -65,7 +65,7 @@ function SortableField({
         {...listeners}
         className="absolute -left-0.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
       >
-        <RiDraggable className="size-3.5 text-muted-foreground/50" />
+        <GripVertical className="size-3.5 text-muted-foreground/50" />
       </div>
 
       {Icon && (
@@ -88,7 +88,7 @@ function SortableField({
           <span className="text-[10px] text-destructive/80">*</span>
         )}
         {field.isFixed && (
-          <RiLockFill className="size-3 text-muted-foreground/40" />
+          <Lock className="size-3 text-muted-foreground/40" />
         )}
       </div>
     </div>

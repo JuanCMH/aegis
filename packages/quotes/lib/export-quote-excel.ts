@@ -8,7 +8,7 @@ import { getQuoteTotals } from "@/lib/get-quote-totals";
 
 interface GenerateQuoteExcelParams {
   expenses?: number;
-  workspaceName?: string;
+  companyName?: string;
   contractData: ContractDataType;
   bondsData: Array<BondDataType>;
   calculateExpensesTaxes?: boolean;
@@ -20,7 +20,7 @@ export const generateQuoteExcel = async ({
   quoteType,
   contractData,
   expenses = 0,
-  workspaceName,
+  companyName,
   calculateExpensesTaxes = false,
 }: GenerateQuoteExcelParams) => {
   const totals = getQuoteTotals(
@@ -66,8 +66,8 @@ export const generateQuoteExcel = async ({
     quoteType === "bidBond" ? "de Seriedad de la oferta" : "de Cumplimiento"
   }`;
   
-  titleCell.value = workspaceName 
-    ? `${titleText} - ${workspaceName}`
+  titleCell.value = companyName 
+    ? `${titleText} - ${companyName}`
     : titleText;
     
   titleCell.style = headerStyle;

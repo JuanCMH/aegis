@@ -14,8 +14,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
-import { RiSave3Fill, RiLayoutGridFill, RiSparklingFill } from "@remixicon/react";
-import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
+import { Save, LayoutGrid, Sparkles } from "lucide-react";
+import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import {
   useGetClientTemplate,
   useSaveClientTemplate,
@@ -24,10 +24,7 @@ import { FieldPalette, FIELD_TYPE_CONFIG } from "./field-palette";
 import { FieldConfigPanel } from "./field-config-panel";
 import { TemplateCanvas } from "./template-canvas";
 import { SectionTabs } from "./section-tabs";
-import {
-  TemplateAiModal,
-  type ReviewSuggestion,
-} from "./template-ai-modal";
+import { TemplateAiModal, type ReviewSuggestion } from "./template-ai-modal";
 import type {
   TemplateSection,
   TemplateField,
@@ -90,10 +87,9 @@ function createNewField(fieldType: FieldType): TemplateField {
 }
 
 export function TemplateBuilder() {
-  const workspaceId = useWorkspaceId();
-  const template = useGetClientTemplate({ workspaceId });
-  const { mutate: saveTemplate, isPending: isSaving } =
-    useSaveClientTemplate();
+  const companyId = useCompanyId();
+  const template = useGetClientTemplate({ companyId });
+  const { mutate: saveTemplate, isPending: isSaving } = useSaveClientTemplate();
 
   const [sections, setSections] = useState<TemplateSection[]>([]);
   const [activeSectionId, setActiveSectionId] = useState<string>("");
@@ -142,9 +138,7 @@ export function TemplateBuilder() {
   }, [sections.length]);
 
   const handleRenameSection = useCallback((id: string, label: string) => {
-    setSections((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, label } : s)),
-    );
+    setSections((prev) => prev.map((s) => (s.id === id ? { ...s, label } : s)));
   }, []);
 
   const handleDeleteSection = useCallback(
@@ -180,19 +174,16 @@ export function TemplateBuilder() {
     );
   }, []);
 
-  const handleFieldDelete = useCallback(
-    (fieldId: string) => {
-      setSections((prev) =>
-        prev.map((s) => ({
-          ...s,
-          fields: s.fields.filter((f) => f.id !== fieldId),
-        })),
-      );
-      setConfigOpen(false);
-      setSelectedField(null);
-    },
-    [],
-  );
+  const handleFieldDelete = useCallback((fieldId: string) => {
+    setSections((prev) =>
+      prev.map((s) => ({
+        ...s,
+        fields: s.fields.filter((f) => f.id !== fieldId),
+      })),
+    );
+    setConfigOpen(false);
+    setSelectedField(null);
+  }, []);
 
   // DnD handlers
   const handleDragStart = (event: DragStartEvent) => {
@@ -268,7 +259,10 @@ export function TemplateBuilder() {
     }
 
     // Reorder within canvas
-    if (activeData?.type === "canvas-field" && overData?.type === "canvas-field") {
+    if (
+      activeData?.type === "canvas-field" &&
+      overData?.type === "canvas-field"
+    ) {
       const activeField = activeData.field as TemplateField;
       const overField = overData.field as TemplateField;
 
@@ -286,7 +280,7 @@ export function TemplateBuilder() {
   // Save
   const handleSave = async () => {
     await saveTemplate(
-      { workspaceId, sections },
+      { companyId, sections },
       {
         onSuccess: () => toast.success("Plantilla guardada"),
         onError: (err) => toast.error(err.message),
@@ -295,70 +289,63 @@ export function TemplateBuilder() {
   };
 
   // AI: apply generated template
-  const handleApplyGenerated = useCallback(
-    (generated: TemplateSection[]) => {
-      setSections(generated);
-      if (generated.length > 0) setActiveSectionId(generated[0].id);
-    },
-    [],
-  );
+  const handleApplyGenerated = useCallback((generated: TemplateSection[]) => {
+    setSections(generated);
+    if (generated.length > 0) setActiveSectionId(generated[0].id);
+  }, []);
 
   // AI: apply review suggestions
-  const handleApplySuggestions = useCallback(
-    (accepted: ReviewSuggestion[]) => {
-      setSections((prev) => {
-        let updated = [...prev.map((s) => ({ ...s, fields: [...s.fields] }))];
+  const handleApplySuggestions = useCallback((accepted: ReviewSuggestion[]) => {
+    setSections((prev) => {
+      let updated = [...prev.map((s) => ({ ...s, fields: [...s.fields] }))];
 
-        for (const suggestion of accepted) {
-          if (suggestion.type === "add") {
-            // Find or create target section
-            let section = updated.find(
-              (s) => s.id === suggestion.sectionId,
-            );
-            if (!section) {
-              section = {
-                id: suggestion.sectionId || generateId(),
-                label: suggestion.sectionLabel || "Nueva Sección",
-                order: updated.length,
-                fields: [],
-              };
-              updated.push(section);
-            }
-            section.fields.push({
-              ...suggestion.field,
-              id: suggestion.field.id || generateId(),
-              isFixed: false,
-            });
-          } else if (suggestion.type === "modify") {
-            updated = updated.map((s) => ({
-              ...s,
-              fields: s.fields.map((f) =>
-                f.id === suggestion.field.id
-                  ? { ...f, ...suggestion.field, isFixed: f.isFixed }
-                  : f,
-              ),
-            }));
-          } else if (suggestion.type === "remove") {
-            updated = updated.map((s) => ({
-              ...s,
-              fields: s.fields.filter(
-                (f) =>
-                  f.id !== suggestion.field.id || f.isFixed,
-              ),
-            }));
+      for (const suggestion of accepted) {
+        if (suggestion.type === "add") {
+          // Find or create target section
+          let section = updated.find((s) => s.id === suggestion.sectionId);
+          if (!section) {
+            section = {
+              id: suggestion.sectionId || generateId(),
+              label: suggestion.sectionLabel || "Nueva Sección",
+              order: updated.length,
+              fields: [],
+            };
+            updated.push(section);
           }
+          section.fields.push({
+            ...suggestion.field,
+            id: suggestion.field.id || generateId(),
+            isFixed: false,
+          });
+        } else if (suggestion.type === "modify") {
+          updated = updated.map((s) => ({
+            ...s,
+            fields: s.fields.map((f) =>
+              f.id === suggestion.field.id
+                ? { ...f, ...suggestion.field, isFixed: f.isFixed }
+                : f,
+            ),
+          }));
+        } else if (suggestion.type === "remove") {
+          updated = updated.map((s) => ({
+            ...s,
+            fields: s.fields.filter(
+              (f) => f.id !== suggestion.field.id || f.isFixed,
+            ),
+          }));
         }
+      }
 
-        return updated;
-      });
-    },
-    [],
-  );
+      return updated;
+    });
+  }, []);
 
   // Drag overlay render
   const renderDragOverlay = () => {
     if (activePaletteType) {
-      const config = FIELD_TYPE_CONFIG.find((c) => c.type === activePaletteType);
+      const config = FIELD_TYPE_CONFIG.find(
+        (c) => c.type === activePaletteType,
+      );
       if (!config) return null;
       const Icon = config.icon;
       return (
@@ -396,8 +383,8 @@ export function TemplateBuilder() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center size-9 rounded-xl bg-h-indigo/10 border border-h-indigo/10 text-h-indigo">
-            <RiLayoutGridFill className="size-4" />
+          <div className="flex items-center justify-center size-9 rounded-xl bg-aegis-sapphire/10 border border-aegis-sapphire/10 text-aegis-sapphire">
+            <LayoutGrid className="size-4" />
           </div>
           <div>
             <h1 className="text-sm font-semibold tracking-tight">
@@ -415,7 +402,7 @@ export function TemplateBuilder() {
             onClick={() => setAiModalOpen(true)}
             className="gap-1.5 border-border/40"
           >
-            <RiSparklingFill className="size-3.5" />
+            <Sparkles className="size-3.5" />
             Asistente IA
           </Button>
           <Button
@@ -424,7 +411,7 @@ export function TemplateBuilder() {
             disabled={isSaving}
             className="gap-1.5"
           >
-            <RiSave3Fill className="size-3.5" />
+            <Save className="size-3.5" />
             Guardar
           </Button>
         </div>

@@ -22,7 +22,7 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MonthPicker } from "@/components/month-picker";
+import { MonthPicker } from "@/components/aegis/month-picker";
 import { Spinner } from "@/components/ui/spinner";
 
 interface QuoteDataTableProps<TData, TValue> {

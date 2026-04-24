@@ -1,9 +1,9 @@
 "use client";
 
-import { Hint } from "@/components/hint";
+import { Hint } from "@/components/aegis/hint";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import { RiMore2Line, RiArrowUpLine, RiArrowDownLine } from "@remixicon/react";
+import { MoreHorizontal, ArrowUp, ArrowDown } from "lucide-react";
 import { ClientActions } from "./client-actions";
 import { fullDateTime } from "@/lib/date-formats";
 import type { TemplateField } from "@/packages/clients/types";
@@ -87,9 +87,9 @@ export const baseColumns: ColumnDef<ClientRow>[] = [
       >
         Nombre
         {column.getIsSorted() === "asc" ? (
-          <RiArrowUpLine className="size-4 ml-2" />
+          <ArrowUp className="size-4 ml-2" />
         ) : (
-          <RiArrowDownLine className="size-4 ml-2" />
+          <ArrowDown className="size-4 ml-2" />
         )}
       </Button>
     ),
@@ -112,9 +112,9 @@ export const baseColumns: ColumnDef<ClientRow>[] = [
       >
         Identificación
         {column.getIsSorted() === "asc" ? (
-          <RiArrowUpLine className="size-4 ml-2" />
+          <ArrowUp className="size-4 ml-2" />
         ) : (
-          <RiArrowDownLine className="size-4 ml-2" />
+          <ArrowDown className="size-4 ml-2" />
         )}
       </Button>
     ),
@@ -134,9 +134,9 @@ export const baseColumns: ColumnDef<ClientRow>[] = [
       >
         Creado
         {column.getIsSorted() === "asc" ? (
-          <RiArrowUpLine className="size-4 ml-2" />
+          <ArrowUp className="size-4 ml-2" />
         ) : (
-          <RiArrowDownLine className="size-4 ml-2" />
+          <ArrowDown className="size-4 ml-2" />
         )}
       </Button>
     ),
@@ -151,7 +151,7 @@ export const baseColumns: ColumnDef<ClientRow>[] = [
     cell: ({ row }) => (
       <ClientActions id={row.original._id}>
         <Button variant="ghost" size="icon-sm">
-          <RiMore2Line className="size-4" />
+          <MoreHorizontal className="size-4" />
         </Button>
       </ClientActions>
     ),

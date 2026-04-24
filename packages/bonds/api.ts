@@ -10,6 +10,6 @@ export const useUpdateBond = () => useMutate(route.update);
 
 export const useRemoveBond = () => useMutate(route.remove);
 
-export const useGetBondsByWorkspace = (
-  data: typeof route.getByWorkspace._args,
-) => useFetch(route.getByWorkspace, data);
+export const useGetBondsByCompany = (
+  data: typeof route.getByCompany._args,
+) => useFetch(route.getByCompany, data);

@@ -4,8 +4,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useConfirm } from "@/components/hooks/use-confirm";
 import { useRemoveClient } from "@/packages/clients/api";
-import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
-import { RiEyeLine, RiEditLine, RiDeleteBinLine } from "@remixicon/react";
+import { useCompanyId } from "@/packages/companies/store/use-company-id";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +20,7 @@ interface ClientActionsProps {
 
 export function ClientActions({ id, children }: ClientActionsProps) {
   const router = useRouter();
-  const workspaceId = useWorkspaceId();
+  const companyId = useCompanyId();
   const { mutate: removeClient } = useRemoveClient();
 
   const [ConfirmDialog, confirm] = useConfirm({
@@ -30,11 +30,11 @@ export function ClientActions({ id, children }: ClientActionsProps) {
   });
 
   const handleView = () => {
-    router.push(`/workspaces/${workspaceId}/clients/${id}`);
+    router.push(`/companies/${companyId}/clients/${id}`);
   };
 
   const handleEdit = () => {
-    router.push(`/workspaces/${workspaceId}/clients/${id}`);
+    router.push(`/companies/${companyId}/clients/${id}`);
   };
 
   const handleDelete = async () => {
@@ -68,7 +68,7 @@ export function ClientActions({ id, children }: ClientActionsProps) {
               handleView();
             }}
           >
-            <RiEyeLine className="size-3.5 mr-2" />
+            <Eye className="size-3.5 mr-2" />
             Ver
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -77,7 +77,7 @@ export function ClientActions({ id, children }: ClientActionsProps) {
               handleEdit();
             }}
           >
-            <RiEditLine className="size-3.5 mr-2" />
+            <Pencil className="size-3.5 mr-2" />
             Editar
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -87,7 +87,7 @@ export function ClientActions({ id, children }: ClientActionsProps) {
               void handleDelete();
             }}
           >
-            <RiDeleteBinLine className="size-3.5 mr-2" />
+            <Trash2 className="size-3.5 mr-2" />
             Eliminar
           </DropdownMenuItem>
         </DropdownMenuContent>

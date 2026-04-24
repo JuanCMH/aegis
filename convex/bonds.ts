@@ -17,8 +17,8 @@ export const update = mutation({
     const bond = await ctx.db.get(args.id);
     if (!bond) throw new ConvexError(bondErrors.notFound);
 
-    const member = await populateMember(ctx, userId, bond.workspaceId);
-    if (!member) throw new ConvexError(bondErrors.workspaceNotFound);
+    const member = await populateMember(ctx, userId, bond.companyId);
+    if (!member) throw new ConvexError(bondErrors.companyNotFound);
 
     await ctx.db.patch(args.id, {
       name: args.name,
@@ -40,8 +40,8 @@ export const remove = mutation({
     const bond = await ctx.db.get(args.id);
     if (!bond) throw new ConvexError(bondErrors.notFound);
 
-    const member = await populateMember(ctx, userId, bond.workspaceId);
-    if (!member) throw new ConvexError(bondErrors.workspaceNotFound);
+    const member = await populateMember(ctx, userId, bond.companyId);
+    if (!member) throw new ConvexError(bondErrors.companyNotFound);
 
     await ctx.db.delete(args.id);
 
@@ -53,39 +53,39 @@ export const create = mutation({
   args: {
     name: v.string(),
     description: v.string(),
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new ConvexError(bondErrors.unauthorized);
 
-    const member = await populateMember(ctx, userId, args.workspaceId);
-    if (!member) throw new ConvexError(bondErrors.workspaceNotFound);
+    const member = await populateMember(ctx, userId, args.companyId);
+    if (!member) throw new ConvexError(bondErrors.companyNotFound);
 
     const bondId = await ctx.db.insert("bonds", {
       name: args.name,
       description: args.description,
-      workspaceId: args.workspaceId,
+      companyId: args.companyId,
     });
 
     return bondId;
   },
 });
 
-export const getByWorkspace = query({
+export const getByCompany = query({
   args: {
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) return [];
 
-    const member = await populateMember(ctx, userId, args.workspaceId);
+    const member = await populateMember(ctx, userId, args.companyId);
     if (!member) return [];
 
     const bonds = await ctx.db
       .query("bonds")
-      .withIndex("workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
       .collect();
 
     return bonds;

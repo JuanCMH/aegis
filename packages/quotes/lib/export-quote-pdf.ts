@@ -12,7 +12,7 @@ pdfMake.vfs = pdfFonts.vfs || pdfFonts;
 
 interface GenerateQuotePDFParams {
   expenses?: number;
-  workspaceName?: string;
+  companyName?: string;
   contractData: ContractDataType;
   bondsData: Array<BondDataType>;
   calculateExpensesTaxes?: boolean;
@@ -24,7 +24,7 @@ export const generateQuotePDF = async ({
   quoteType,
   contractData,
   expenses = 0,
-  workspaceName,
+  companyName,
   calculateExpensesTaxes = false,
 }: GenerateQuotePDFParams) => {
   const totals = getQuoteTotals(
@@ -44,7 +44,7 @@ export const generateQuotePDF = async ({
   const documentDefinition: TDocumentDefinitions = {
     pageOrientation: "landscape",
     content: [
-      workspaceName
+      companyName
         ? {
             columns: [
               {
@@ -54,7 +54,7 @@ export const generateQuotePDF = async ({
                 fontSize: 14,
               },
               {
-                text: workspaceName,
+                text: companyName,
                 style: "header",
                 alignment: "right",
                 fontSize: 14,

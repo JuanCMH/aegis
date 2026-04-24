@@ -1,35 +1,28 @@
 "use client";
 
+import { Loader2, Paperclip, Sparkles, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Dialog,
+  AegisModal,
+  AegisModalContent,
+  AegisModalFooter,
+  AegisModalHeader,
   DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  RiAttachmentLine,
-  RiCloseLine,
-  RiLoader3Line,
-  RiSparklingFill,
-} from "@remixicon/react";
+} from "@/components/aegis/aegis-modal";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { getPdfContent } from "@/lib/extract-pdf";
 import { normalizePdfText } from "@/lib/normalize-pdf-text";
+import { cn } from "@/lib/utils";
 import {
   useGenerateTemplateFromDoc,
   useReviewTemplate,
 } from "@/packages/clients/api";
-import type { TemplateSection, TemplateField } from "@/packages/clients/types";
+import type { TemplateField, TemplateSection } from "@/packages/clients/types";
 
 type ReviewSuggestion = {
   type: "add" | "modify" | "remove";
@@ -47,8 +40,6 @@ interface TemplateAiModalProps {
   onApplySuggestions: (suggestions: ReviewSuggestion[]) => void;
 }
 
-type Tab = "generate" | "review";
-
 export function TemplateAiModal({
   open,
   onOpenChange,
@@ -58,15 +49,12 @@ export function TemplateAiModal({
 }: TemplateAiModalProps) {
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [tab, setTab] = useState<Tab>("generate");
+  const [tab, setTab] = useState<"generate" | "review">("generate");
   const [file, setFile] = useState<File | null>(null);
   const [instruction, setInstruction] = useState("");
 
-  // Generate mode
   const { execute: generateFromDoc, isPending: isGenerating } =
     useGenerateTemplateFromDoc();
-
-  // Review mode
   const { execute: reviewTemplate, isPending: isReviewing } =
     useReviewTemplate();
   const [suggestions, setSuggestions] = useState<
@@ -74,6 +62,14 @@ export function TemplateAiModal({
   >([]);
 
   const isLoading = isGenerating || isReviewing;
+
+  const handleClose = () => {
+    onOpenChange(false);
+    setFile(null);
+    setInstruction("");
+    setSuggestions([]);
+    if (fileRef.current) fileRef.current.value = "";
+  };
 
   const handleGenerate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -97,9 +93,7 @@ export function TemplateAiModal({
       if (!response) return;
 
       const cleaned = response.replace(/```json\n?|```/g, "").trim();
-      const parsed = JSON.parse(cleaned) as {
-        sections: TemplateSection[];
-      };
+      const parsed = JSON.parse(cleaned) as { sections: TemplateSection[] };
 
       if (!parsed.sections || parsed.sections.length === 0) {
         toast.error("No se pudo generar una plantilla a partir del documento");
@@ -159,147 +153,113 @@ export function TemplateAiModal({
     );
   };
 
-  const handleClose = () => {
-    onOpenChange(false);
-    setFile(null);
-    setInstruction("");
-    setSuggestions([]);
-    if (fileRef.current) fileRef.current.value = "";
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="p-0 gap-0 max-w-lg">
-        <DialogHeader className="p-4">
-          <DialogTitle className="flex items-center gap-2">
-            <RiSparklingFill className="size-4 text-h-indigo" />
-            Asistente de plantilla
-          </DialogTitle>
-          <DialogDescription>
-            Genera una plantilla desde un documento o revisa la plantilla actual
-            para obtener sugerencias de mejora.
-          </DialogDescription>
-        </DialogHeader>
-        <Separator className="opacity-40" />
+    <AegisModal open={open} onOpenChange={handleClose} maxWidth="sm:max-w-lg">
+      <AegisModalHeader
+        icon={Sparkles}
+        title="Asistente de plantilla"
+        description="Genera una plantilla desde un documento o revisa la actual para obtener sugerencias de mejora."
+      />
 
-        {/* Tabs */}
-        <div className="flex items-center gap-1 px-4 pt-3">
-          <button
-            type="button"
-            onClick={() => {
-              setTab("generate");
-              setSuggestions([]);
-            }}
-            className={cn(
-              "px-3 py-1.5 text-xs font-medium rounded-md transition-colors",
-              tab === "generate"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
-            )}
-          >
-            Generar desde documento
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setTab("review");
-              setFile(null);
-            }}
-            className={cn(
-              "px-3 py-1.5 text-xs font-medium rounded-md transition-colors",
-              tab === "review"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
-            )}
-          >
-            Revisar plantilla
-          </button>
-        </div>
+      <AegisModalContent className="space-y-4">
+        <Tabs
+          value={tab}
+          onValueChange={(v) => {
+            setTab(v as "generate" | "review");
+            setSuggestions([]);
+            setFile(null);
+          }}
+        >
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="generate">Desde documento</TabsTrigger>
+            <TabsTrigger value="review">Revisar actual</TabsTrigger>
+          </TabsList>
 
-        {tab === "generate" ? (
-          <form className="space-y-3 p-4" onSubmit={handleGenerate}>
-            <div className="grid w-full items-center gap-1.5">
-              <Label className="text-xs text-muted-foreground/70 font-medium">
-                Documento PDF
-              </Label>
-              <input
-                type="file"
-                accept=".pdf"
-                className="hidden"
-                ref={fileRef}
-                onChange={(e) => {
-                  if (e.target.files) setFile(e.target.files[0]);
-                }}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isLoading}
-                className="justify-start border-border/40"
-                onClick={() => fileRef.current?.click()}
-              >
-                <RiAttachmentLine className="size-4 text-muted-foreground" />
-                <span className="ml-2">Adjuntar archivo</span>
-              </Button>
-            </div>
-            {!!file && (
-              <div
-                className={cn(isLoading && "opacity-50 pointer-events-none")}
-              >
-                <div className="border border-border/40 rounded-md flex items-center justify-between p-2">
-                  <div className="flex items-center">
-                    {isLoading ? (
-                      <RiLoader3Line className="size-5 text-muted-foreground shrink-0 animate-spin" />
-                    ) : (
-                      <RiAttachmentLine className="size-5 text-muted-foreground shrink-0" />
-                    )}
-                    <span className="ml-2 text-sm line-clamp-1">
-                      {file.name}
-                    </span>
-                  </div>
-                  <Button
-                    size="icon-sm"
-                    onClick={() => {
-                      setFile(null);
-                      if (fileRef.current) fileRef.current.value = "";
-                    }}
-                    variant="destructive"
-                    disabled={isLoading}
-                  >
-                    <RiCloseLine />
-                  </Button>
-                </div>
-              </div>
-            )}
-            {isLoading && (
-              <p className="text-xs text-muted-foreground">
-                Analizando el documento y generando la plantilla...
-              </p>
-            )}
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button disabled={isLoading} variant="outline">
-                  Cancelar
+          <TabsContent value="generate" className="mt-4">
+            <form
+              id="template-ai-form"
+              className="space-y-3"
+              onSubmit={handleGenerate}
+            >
+              <div className="grid w-full items-center gap-1.5">
+                <Label className="text-xs font-medium text-aegis-steel">
+                  Documento PDF
+                </Label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  className="hidden"
+                  ref={fileRef}
+                  onChange={(e) => {
+                    if (e.target.files) setFile(e.target.files[0]);
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isLoading}
+                  className="justify-start"
+                  onClick={() => fileRef.current?.click()}
+                >
+                  <Paperclip className="size-4 text-muted-foreground" />
+                  <span className="ml-2">Adjuntar archivo</span>
                 </Button>
-              </DialogClose>
-              <Button disabled={!file || isLoading} type="submit">
-                Generar plantilla
-              </Button>
-            </DialogFooter>
-          </form>
-        ) : (
-          <form className="space-y-3 p-4" onSubmit={handleReview}>
+              </div>
+
+              {!!file && (
+                <div
+                  className={cn(isLoading && "opacity-50 pointer-events-none")}
+                >
+                  <div className="flex items-center justify-between rounded-md border border-border/60 p-2">
+                    <div className="flex items-center">
+                      {isLoading ? (
+                        <Loader2 className="size-5 shrink-0 animate-spin text-muted-foreground" />
+                      ) : (
+                        <Paperclip className="size-5 shrink-0 text-muted-foreground" />
+                      )}
+                      <span className="ml-2 line-clamp-1 text-sm">
+                        {file.name}
+                      </span>
+                    </div>
+                    <Button
+                      size="icon-sm"
+                      onClick={() => {
+                        setFile(null);
+                        if (fileRef.current) fileRef.current.value = "";
+                      }}
+                      variant="destructive"
+                      disabled={isLoading}
+                    >
+                      <X />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {isLoading && (
+                <p className="text-xs text-muted-foreground">
+                  Analizando el documento y generando la plantilla...
+                </p>
+              )}
+            </form>
+          </TabsContent>
+
+          <TabsContent value="review" className="mt-4">
             {suggestions.length === 0 ? (
-              <>
+              <form
+                id="template-ai-form"
+                className="space-y-3"
+                onSubmit={handleReview}
+              >
                 <div className="grid w-full items-center gap-1.5">
-                  <Label className="text-xs text-muted-foreground/70 font-medium">
+                  <Label className="text-xs font-medium text-aegis-steel">
                     Instrucciones adicionales (opcional)
                   </Label>
                   <Textarea
                     value={instruction}
                     onChange={(e) => setInstruction(e.target.value)}
                     placeholder="Ej: Agrega campos para información bancaria, cambia los campos de contacto..."
-                    className="min-h-20 resize-none border-border/40"
+                    className="min-h-20 resize-none"
                     disabled={isLoading}
                   />
                 </div>
@@ -314,85 +274,100 @@ export function TemplateAiModal({
                     Revisando la plantilla...
                   </p>
                 )}
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button disabled={isLoading} variant="outline">
-                      Cancelar
-                    </Button>
-                  </DialogClose>
-                  <Button
-                    disabled={isLoading || sections.length === 0}
-                    type="submit"
-                  >
-                    Revisar
-                  </Button>
-                </DialogFooter>
-              </>
+              </form>
             ) : (
-              <>
-                <div className="max-h-60 overflow-y-auto space-y-2">
-                  {suggestions.map((s, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-2 p-2 rounded-md border border-border/40"
-                    >
-                      <Checkbox
-                        checked={s.accepted}
-                        onCheckedChange={() => toggleSuggestion(i)}
-                        className="mt-0.5"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className={cn(
-                              "text-[10px] font-semibold px-1 py-0.5 rounded uppercase",
-                              s.type === "add" &&
-                                "text-green-500 bg-green-500/10",
-                              s.type === "modify" &&
-                                "text-yellow-500 bg-yellow-500/10",
-                              s.type === "remove" &&
-                                "text-red-500 bg-red-500/10",
-                            )}
-                          >
-                            {s.type === "add"
-                              ? "Agregar"
-                              : s.type === "modify"
-                                ? "Modificar"
-                                : "Eliminar"}
-                          </span>
-                          <span className="text-xs font-medium truncate">
-                            {s.field.label}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground/70">
-                            en {s.sectionLabel}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground/70 mt-0.5">
-                          {s.reason}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setSuggestions([])}
+              <div className="max-h-72 space-y-2 overflow-y-auto">
+                {suggestions.map((s, i) => (
+                  <div
+                    key={`${s.sectionId}-${i}`}
+                    className="flex items-start gap-2 rounded-md border border-border/60 p-2"
                   >
-                    Volver
-                  </Button>
-                  <Button type="button" onClick={handleApplySuggestions}>
-                    Aplicar seleccionadas (
-                    {suggestions.filter((s) => s.accepted).length})
-                  </Button>
-                </DialogFooter>
-              </>
+                    <Checkbox
+                      checked={s.accepted}
+                      onCheckedChange={() => toggleSuggestion(i)}
+                      className="mt-0.5"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={cn(
+                            "rounded px-1 py-0.5 text-[10px] font-semibold uppercase",
+                            s.type === "add" &&
+                              "bg-aegis-emerald/10 text-aegis-emerald",
+                            s.type === "modify" &&
+                              "bg-aegis-amber/10 text-aegis-amber",
+                            s.type === "remove" &&
+                              "bg-destructive/10 text-destructive",
+                          )}
+                        >
+                          {s.type === "add"
+                            ? "Agregar"
+                            : s.type === "modify"
+                              ? "Modificar"
+                              : "Eliminar"}
+                        </span>
+                        <span className="truncate text-xs font-medium">
+                          {s.field.label}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground/70">
+                          en {s.sectionLabel}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-muted-foreground/70">
+                        {s.reason}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
-          </form>
+          </TabsContent>
+        </Tabs>
+      </AegisModalContent>
+
+      <AegisModalFooter>
+        {tab === "review" && suggestions.length > 0 ? (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setSuggestions([])}
+            >
+              Volver
+            </Button>
+            <Button type="button" onClick={handleApplySuggestions}>
+              Aplicar seleccionadas (
+              {suggestions.filter((s) => s.accepted).length})
+            </Button>
+          </>
+        ) : (
+          <>
+            <DialogClose asChild>
+              <Button disabled={isLoading} variant="outline" type="button">
+                Cancelar
+              </Button>
+            </DialogClose>
+            {tab === "generate" ? (
+              <Button
+                form="template-ai-form"
+                disabled={!file || isLoading}
+                type="submit"
+              >
+                Generar plantilla
+              </Button>
+            ) : (
+              <Button
+                form="template-ai-form"
+                disabled={isLoading || sections.length === 0}
+                type="submit"
+              >
+                Revisar
+              </Button>
+            )}
+          </>
         )}
-      </DialogContent>
-    </Dialog>
+      </AegisModalFooter>
+    </AegisModal>
   );
 }
 

@@ -1,23 +1,20 @@
-import { useConfirm } from "@/components/hooks/use-confirm";
-import { Doc } from "@/convex/_generated/dataModel";
+import { Pencil } from "lucide-react";
 import { useState } from "react";
-import { useRemoveBond, useUpdateBond } from "../../api";
 import { toast } from "sonner";
 import {
-  Dialog,
+  AegisModal,
+  AegisModalContent,
+  AegisModalFooter,
+  AegisModalHeader,
   DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/components/aegis/aegis-modal";
+import { useConfirm } from "@/components/hooks/use-confirm";
 import { Button } from "@/components/ui/button";
-import { RiPencilLine } from "@remixicon/react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import type { Doc } from "@/convex/_generated/dataModel";
+import { useRemoveBond, useUpdateBond } from "../../api";
 
 interface SelectedBondModalProps {
   selectedBond: Doc<"bonds"> | undefined;
@@ -39,10 +36,7 @@ export const SelectedBondModal = ({
   });
 
   const handleClose = () => {
-    setUpdateData({
-      name: "",
-      description: "",
-    });
+    setUpdateData({ name: "", description: "" });
     handleCloseSelectedBond();
   };
 
@@ -99,76 +93,92 @@ export const SelectedBondModal = ({
     );
   };
 
+  const isBusy = isUpdatingBond || isRemovingBond;
+
   return (
     <>
       <ConfirmDialog />
-      <Dialog open={!!selectedBond} onOpenChange={handleCloseSelectedBond}>
-        <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-md">
-          <DialogHeader className="p-4">
-            <div className="flex items-start gap-3 pr-8">
-              <div className="flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
-                <RiPencilLine className="size-4" />
-              </div>
-              <div className="space-y-1">
-                <DialogTitle className="capitalize">
-                  {selectedBond?.name}
-                </DialogTitle>
-                <DialogDescription className="text-muted-foreground/80">
-                  Edita la información del amparo seleccionado.
-                </DialogDescription>
-              </div>
+      <AegisModal
+        open={!!selectedBond}
+        onOpenChange={handleCloseSelectedBond}
+        maxWidth="sm:max-w-md"
+      >
+        <AegisModalHeader
+          icon={Pencil}
+          title={selectedBond?.name ?? "Amparo"}
+          description="Edita la información del amparo seleccionado."
+        />
+        <AegisModalContent>
+          <form
+            id="update-bond-form"
+            className="space-y-4"
+            onSubmit={handleUpdateBond}
+          >
+            <div className="grid w-full items-center gap-1.5">
+              <Label
+                htmlFor="bond-name"
+                className="text-xs font-medium text-aegis-steel"
+              >
+                Nombre
+              </Label>
+              <Input
+                required
+                id="bond-name"
+                minLength={4}
+                maxLength={70}
+                value={updateData.name}
+                disabled={isBusy}
+                placeholder="Amparo de cumplimiento"
+                onChange={(e) =>
+                  setUpdateData((prev) => ({ ...prev, name: e.target.value }))
+                }
+              />
             </div>
-          </DialogHeader>
-          <Separator className="opacity-40" />
-          <div className="flex flex-col p-4 gap-2">
-            <form className="space-y-4" onSubmit={handleUpdateBond}>
-              <div className="grid w-full items-center gap-1">
-                <Label htmlFor="bond-name" className="text-xs">
-                  NOMBRE
-                </Label>
-                <Input
-                  required
-                  id="bond-name"
-                  minLength={4}
-                  maxLength={70}
-                  value={updateData.name}
-                  disabled={isUpdatingBond}
-                  placeholder="Amparo de cumplimiento"
-                  onChange={(e) =>
-                    setUpdateData((prev) => ({ ...prev, name: e.target.value }))
-                  }
-                />
-              </div>
-              <div className="grid w-full items-center gap-1">
-                <Label htmlFor="bond-description" className="text-xs">
-                  DESCRIPCIÓN
-                </Label>
-                <Textarea
-                  maxLength={300}
-                  value={updateData.description}
-                  disabled={isUpdatingBond}
-                  className="resize-none h-24"
-                  placeholder="Descripción opcional del amparo"
-                  onChange={(e) =>
-                    setUpdateData((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <DialogFooter className="border-t border-border/40 pt-4">
-                <DialogClose asChild>
-                  <Button variant="outline">Cancelar</Button>
-                </DialogClose>
-                <Button disabled={isUpdatingBond} type="submit">
-                  Guardar
-                </Button>
-              </DialogFooter>
-            </form>
+            <div className="grid w-full items-center gap-1.5">
+              <Label
+                htmlFor="bond-description"
+                className="text-xs font-medium text-aegis-steel"
+              >
+                Descripción
+              </Label>
+              <Textarea
+                id="bond-description"
+                maxLength={300}
+                value={updateData.description}
+                disabled={isBusy}
+                className="h-24 resize-none"
+                placeholder="Descripción opcional del amparo"
+                onChange={(e) =>
+                  setUpdateData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+              />
+            </div>
+          </form>
+        </AegisModalContent>
+        <AegisModalFooter>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={isBusy}
+            onClick={handleRemoveBond}
+          >
+            Eliminar
+          </Button>
+          <div className="ml-auto flex items-center gap-2">
+            <DialogClose asChild>
+              <Button variant="outline" type="button" disabled={isBusy}>
+                Cancelar
+              </Button>
+            </DialogClose>
+            <Button form="update-bond-form" disabled={isBusy} type="submit">
+              Guardar
+            </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </AegisModalFooter>
+      </AegisModal>
     </>
   );
 };
