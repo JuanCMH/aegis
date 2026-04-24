@@ -65,7 +65,7 @@ No modifiques código de la app. Solo observa y reporta.
 | Roles                  | `roles.md`                | ✅ documentado   |
 | Insurers               | `insurers.md`             | ✅ documentado   |
 | Lines of Business      | `lines-of-business.md`    | ✅ documentado   |
-| Bonds (Amparos)        | `bonds.md`                | ⏳ pendiente     |
+| Bonds (Amparos)        | `bonds.md`                | ✅ documentado   |
 | Clients                | `clients.md`              | ⏳ pendiente     |
 | Quotes                 | `quotes.md`               | ⏳ pendiente     |
 | Policies               | `policies.md`             | ⏳ pendiente     |
