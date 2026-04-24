@@ -8,7 +8,7 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
-const WorkspaceIdPage = () => {
+const CompanyIdPage = () => {
   return (
     <div className="w-full h-full flex-1 flex flex-col px-2">
       <div className="border border-muted rounded-lg mx-2 mt-4 z-11 bg-card pb-2">
@@ -34,4 +34,4 @@ const WorkspaceIdPage = () => {
   );
 };
 
-export default WorkspaceIdPage;
+export default CompanyIdPage;

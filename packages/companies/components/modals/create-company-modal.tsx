@@ -1,11 +1,16 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { Building2, Lock } from "lucide-react";
+import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AegisModal,
+  AegisModalContent,
+  AegisModalHeader,
+} from "@/components/aegis/aegis-modal";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   InputOTP,
@@ -13,97 +18,69 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useCurrentUser } from "@/packages/auth/api";
-import { RiLock2Line } from "@remixicon/react";
-import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import {
-  useCreateWorkspace,
-  useGetOwnedWorkspaces,
-  useJoinWorkspace,
+  useCreateCompany,
+  useGetOwnedCompanies,
+  useJoinCompany,
 } from "../../api";
-import { useCreateWorkspaceModal } from "../../store/use-create-workspace-modal";
-import { CustomColor } from "@/lib/custom-colors";
-import { Id } from "@/convex/_generated/dataModel";
-import { RiFolderShield2Fill } from "@remixicon/react";
+import { useCreateCompanyModal } from "../../store/use-create-company-modal";
 
-type WorkspaceData = {
-  name: string;
-  primaryColor: CustomColor;
-  secondaryColor: CustomColor;
-  logo?: Id<"_storage">;
-};
+const MAX_COMPANIES = 2;
 
-export const CreateWorkspaceModal = () => {
+export const CreateCompanyModal = () => {
   const router = useRouter();
+  const [open, setOpen] = useCreateCompanyModal();
 
+  const [name, setName] = useState("");
   const [joinCode, setJoinCode] = useState("");
-  const [open, setOpen] = useCreateWorkspaceModal();
-
-  const [data, setData] = useState<any>({
-    name: "",
-    primaryColor: "blue",
-    secondaryColor: "purple",
-    logo: undefined,
-  });
-
-  const { data: user, isLoading: isLoadingUser } = useCurrentUser();
 
   const {
     mutate: joinMutate,
     isPending: isJoinPending,
     errorMessage: joinErrorMessage,
-  } = useJoinWorkspace();
+  } = useJoinCompany();
   const {
     mutate: createMutate,
     isPending: isCreating,
     errorMessage: createErrorMessage,
-  } = useCreateWorkspace();
+  } = useCreateCompany();
 
-  const { data: ownedWorkspaces, isLoading: isLoadingWorkspaces } =
-    useGetOwnedWorkspaces();
+  const { data: ownedCompanies } = useGetOwnedCompanies();
+
+  const cantCreate =
+    typeof ownedCompanies === "number" && ownedCompanies >= MAX_COMPANIES;
 
   const handleClose = () => {
-    setData({
-      name: "",
-      primaryColor: "blue",
-      secondaryColor: "purple",
-      logo: undefined,
-    });
+    setName("");
     setJoinCode("");
     setOpen(false);
   };
 
-  const maxWorkspaces = 2;
-
-  const cantCreate = !!ownedWorkspaces && ownedWorkspaces >= maxWorkspaces;
-
-  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    if (ownedWorkspaces === undefined) {
+    if (ownedCompanies === undefined) {
       return toast.error(
-        "No se ha podido determinar el número de espacios que posee la organización",
+        "No se pudo determinar el número de agencias que posees.",
       );
     }
-    if (ownedWorkspaces >= maxWorkspaces) {
-      return toast.error("La organización ha alcanzado el límite de espacios");
+    if (ownedCompanies >= MAX_COMPANIES) {
+      return toast.error(
+        "Has alcanzado el límite de agencias que puedes crear.",
+      );
     }
     createMutate(
       {
-        name: data.name,
-        primaryColor: data.primaryColor,
-        secondaryColor: data.secondaryColor,
-        logo: data.logo,
+        name,
+        primaryColor: "blue",
+        secondaryColor: "purple",
+        logo: undefined,
       },
       {
-        onSuccess(workspaceId) {
-          toast.success("Espacio creado correctamente");
-          router.push(`workspaces/${workspaceId}`);
+        onSuccess(companyId) {
+          toast.success("Agencia creada correctamente");
+          router.push(`/companies/${companyId}`);
           handleClose();
         },
         onError: () => {
@@ -113,14 +90,14 @@ export const CreateWorkspaceModal = () => {
     );
   };
 
-  const handleJoin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleJoin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     joinMutate(
       { joinCode },
       {
-        onSuccess(workspaceId) {
-          toast.success("Te has unido correctamente al espacio");
-          router.push(`workspaces/${workspaceId}`);
+        onSuccess(companyId) {
+          toast.success("Te uniste correctamente a la agencia");
+          router.push(`/companies/${companyId}`);
           handleClose();
         },
         onError: () => {
@@ -131,53 +108,25 @@ export const CreateWorkspaceModal = () => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="p-0 overflow-hidden gap-0">
-        <DialogHeader className="p-4">
-          <div className="flex items-start gap-3 pr-8">
-            <div className="flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
-              <RiFolderShield2Fill className="size-4" />
-            </div>
-            <div className="space-y-1">
-              <DialogTitle>Crea o únete a un espacio</DialogTitle>
-              <DialogDescription className="text-muted-foreground/80">
-                Un espacio es un lugar donde puedes colaborar con otros
-                usuarios.
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
-        <Separator className="opacity-40" />
-        <Tabs defaultValue="join" className="p-4">
-          <TabsList className="mb-3 grid h-10 w-full grid-cols-2 rounded-xl bg-muted/60 p-1">
+    <AegisModal open={open} onOpenChange={handleClose}>
+      <AegisModalHeader
+        icon={Building2}
+        title="Crear o unirse a una agencia"
+        description="Cada agencia es un espacio aislado con sus propios clientes, pólizas y miembros."
+      />
+      <AegisModalContent>
+        <Tabs defaultValue="join">
+          <TabsList className="mb-5 grid w-full grid-cols-2">
             <TabsTrigger value="join">Unirse</TabsTrigger>
             <TabsTrigger disabled={cantCreate} value="create">
               Crear
-              {cantCreate && <RiLock2Line className="size-4 ml-2" />}
+              {cantCreate ? <Lock className="ml-2 size-3.5" /> : null}
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="create" className="mt-0">
-            <form className="grid grid-cols-2 gap-2" onSubmit={handleCreate}>
-              <Input
-                required
-                value={data.name}
-                minLength={4}
-                maxLength={40}
-                disabled={isCreating}
-                onChange={(e) => setData({ ...data, name: e.target.value })}
-                placeholder="Nombre del espacio"
-                className="col-span-2"
-              />
-              <div className="flex justify-end col-span-2">
-                <Button type="submit" disabled={isCreating || isLoadingUser}>
-                  Crear
-                </Button>
-              </div>
-            </form>
-          </TabsContent>
-          <TabsContent value="join" className="mt-0">
+
+          <TabsContent value="join" className="mt-0 space-y-4">
             <form
-              className="flex flex-col items-center space-y-2"
+              className="flex flex-col items-center gap-4"
               onSubmit={handleJoin}
             >
               <InputOTP
@@ -186,32 +135,69 @@ export const CreateWorkspaceModal = () => {
                 value={joinCode}
                 disabled={isJoinPending}
                 pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
-                onChange={(value) => setJoinCode(value)}
+                onChange={(value) => setJoinCode(value.toLowerCase())}
               >
-                <InputOTPGroup className="text-rose-500 font-bold uppercase">
+                <InputOTPGroup>
                   <InputOTPSlot index={0} />
                   <InputOTPSlot index={1} />
                   <InputOTPSlot index={2} />
                 </InputOTPGroup>
                 <InputOTPSeparator />
-                <InputOTPGroup className="text-rose-500 font-bold uppercase">
+                <InputOTPGroup>
                   <InputOTPSlot index={3} />
                   <InputOTPSlot index={4} />
                   <InputOTPSlot index={5} />
                 </InputOTPGroup>
               </InputOTP>
-              <div className="text-center text-sm">
-                Ingresa el código del espacio al que deseas unirte.
+              <p className="text-center text-xs text-muted-foreground">
+                Ingresa el código de invitación de tu agencia.
+              </p>
+              <Button
+                type="submit"
+                size="lg"
+                disabled={isJoinPending}
+                className="w-full"
+              >
+                Unirse
+              </Button>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="create" className="mt-0 space-y-4">
+            <form className="space-y-4" onSubmit={handleCreate}>
+              <div className="grid gap-1.5">
+                <Label
+                  htmlFor="company-name"
+                  className="text-xs font-medium text-aegis-steel"
+                >
+                  Nombre de la agencia
+                </Label>
+                <Input
+                  id="company-name"
+                  required
+                  minLength={4}
+                  maxLength={40}
+                  disabled={isCreating}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Seguros del Valle"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Puedes crear hasta {MAX_COMPANIES} agencias con una cuenta.
+                </p>
               </div>
-              <div className="flex justify-end w-full mt-2">
-                <Button disabled={isJoinPending} type="submit">
-                  Unirse
-                </Button>
-              </div>
+              <Button
+                type="submit"
+                size="lg"
+                disabled={isCreating}
+                className="w-full"
+              >
+                Crear agencia
+              </Button>
             </form>
           </TabsContent>
         </Tabs>
-      </DialogContent>
-    </Dialog>
+      </AegisModalContent>
+    </AegisModal>
   );
 };

@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { RiSave3Fill, RiEditLine, RiCloseLine } from "@remixicon/react";
-import { useClientId } from "@/packages/clients/hooks/use-client-id";
+import { Save, Pencil, X } from "lucide-react";
+import { useClientId } from "@/packages/clients/store/use-client-id";
 import { useGetClientById, useUpdateClient } from "@/packages/clients/api";
 import { useGenerateUploadUrl } from "@/components/hooks/use-generate-upload-url";
 import { ClientStepper } from "@/packages/clients/components/client-stepper";
@@ -28,10 +28,9 @@ export default function ClientDetailPage() {
   const [basicName, setBasicName] = useState("");
   const [basicId, setBasicId] = useState("");
 
-  const sections = client.data?.templateSections as
-    | TemplateSection[]
-    | undefined;
-  const hasTemplate = Boolean(sections && sections.length > 0);
+  const sections: TemplateSection[] =
+    (client.data?.templateSections as TemplateSection[] | undefined) ?? [];
+  const hasTemplate = sections.length > 0;
   const resolvedFiles = (client.data?.resolvedFiles ?? {}) as Record<
     string,
     string
@@ -160,7 +159,7 @@ export default function ClientDetailPage() {
                   onClick={handleCancel}
                   disabled={isUpdating}
                 >
-                  <RiCloseLine className="size-3.5" />
+                  <X className="size-3.5" />
                   Cancelar
                 </Button>
                 <Button
@@ -169,7 +168,7 @@ export default function ClientDetailPage() {
                   disabled={isUpdating}
                   className="gap-1.5"
                 >
-                  <RiSave3Fill className="size-3.5" />
+                  <Save className="size-3.5" />
                   Guardar
                 </Button>
               </>
@@ -180,7 +179,7 @@ export default function ClientDetailPage() {
                 className="gap-1.5 border-border/40"
                 onClick={() => setIsEditing(true)}
               >
-                <RiEditLine className="size-3.5" />
+                <Pencil className="size-3.5" />
                 Editar
               </Button>
             )}

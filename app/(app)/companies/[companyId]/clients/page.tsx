@@ -3,10 +3,10 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { RiAddCircleFill } from "@remixicon/react";
+import { Plus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
+import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import {
   useGetClientTemplate,
   usePaginatedClients,
@@ -16,18 +16,18 @@ import {
   type ClientRow,
 } from "@/packages/clients/components/table/client-columns";
 import { ClientDataTable } from "@/packages/clients/components/table/client-data-table";
-import { useDebounce } from "@/packages/clients/hooks/use-debounce";
+import { useDebounce } from "@/components/hooks/use-debounce";
 import type { TemplateField, TemplateSection } from "@/packages/clients/types";
 
 export default function ClientsPage() {
   const router = useRouter();
-  const workspaceId = useWorkspaceId();
-  const template = useGetClientTemplate({ workspaceId });
+  const companyId = useCompanyId();
+  const template = useGetClientTemplate({ companyId });
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
   const { results, status, loadMore } = usePaginatedClients(
-    workspaceId,
+    companyId,
     debouncedSearch || undefined,
   );
 
@@ -78,11 +78,11 @@ export default function ClientsPage() {
               type="button"
               variant="outline"
               onClick={() =>
-                router.push(`/workspaces/${workspaceId}/clients/new`)
+                router.push(`/companies/${companyId}/clients/new`)
               }
               className="cursor-pointer"
             >
-              <RiAddCircleFill />
+              <Plus />
               Nuevo Cliente
             </Button>
           </div>

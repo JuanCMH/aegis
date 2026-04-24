@@ -3,7 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { checkPermission, populateMember } from "./roles";
 import { RandomReader, generateRandomString } from "@oslojs/crypto/random";
-import { workspaceErrors } from "./errors/workspace";
+import { companyErrors } from "./errors/company";
 
 const random: RandomReader = {
   read(bytes) {
@@ -19,45 +19,45 @@ export const join = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new ConvexError(workspaceErrors.unauthorized);
+    if (userId === null) throw new ConvexError(companyErrors.unauthorized);
 
-    const workspace = await ctx.db
-      .query("workspaces")
+    const company = await ctx.db
+      .query("companies")
       .withIndex("joinCode", (q) => q.eq("joinCode", args.joinCode))
       .unique();
-    if (!workspace) throw new ConvexError(workspaceErrors.joinCodeInvalid);
+    if (!company) throw new ConvexError(companyErrors.joinCodeInvalid);
 
-    const member = await populateMember(ctx, userId, workspace._id);
-    if (member) throw new ConvexError(workspaceErrors.alreadyMember);
+    const member = await populateMember(ctx, userId, company._id);
+    if (member) throw new ConvexError(companyErrors.alreadyMember);
 
     await ctx.db.insert("members", {
       userId,
-      workspaceId: workspace._id,
+      companyId: company._id,
       role: "member",
     });
 
-    return workspace._id;
+    return company._id;
   },
 });
 
 export const newJoinCode = mutation({
   args: {
-    id: v.id("workspaces"),
+    id: v.id("companies"),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new ConvexError(workspaceErrors.unauthorized);
+    if (userId === null) throw new ConvexError(companyErrors.unauthorized);
 
     const hasPermission = await checkPermission({
       ctx,
       userId,
-      permission: "inviteUsers",
-      workspaceId: args.id,
+      permission: "members_invite",
+      companyId: args.id,
     });
-    if (!hasPermission) throw new ConvexError(workspaceErrors.permissionDenied);
+    if (!hasPermission) throw new ConvexError(companyErrors.permissionDenied);
 
-    const workspace = await ctx.db.get(args.id);
-    if (!workspace) throw new ConvexError(workspaceErrors.notFound);
+    const company = await ctx.db.get(args.id);
+    if (!company) throw new ConvexError(companyErrors.notFound);
 
     const joinCode = generateCode();
     await ctx.db.patch(args.id, { joinCode });
@@ -75,22 +75,22 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new ConvexError(workspaceErrors.unauthorized);
+    if (userId === null) throw new ConvexError(companyErrors.unauthorized);
 
     const user = await ctx.db.get(userId);
-    if (!user) throw new ConvexError(workspaceErrors.userNotFound);
+    if (!user) throw new ConvexError(companyErrors.userNotFound);
 
-    const ownedWorkspaces = await ctx.db
-      .query("workspaces")
+    const ownedCompanies = await ctx.db
+      .query("companies")
       .withIndex("userId", (q) => q.eq("userId", userId))
       .collect();
 
-    const maxWorkspaces = 2;
-    if (ownedWorkspaces.length >= maxWorkspaces) {
-      throw new ConvexError(workspaceErrors.limitReached);
+    const maxCompanies = 2;
+    if (ownedCompanies.length >= maxCompanies) {
+      throw new ConvexError(companyErrors.limitReached);
     }
     const joinCode = generateCode();
-    const workspaceId = await ctx.db.insert("workspaces", {
+    const companyId = await ctx.db.insert("companies", {
       name: args.name,
       userId,
       active: true,
@@ -99,11 +99,11 @@ export const create = mutation({
 
     await ctx.db.insert("members", {
       userId,
-      workspaceId,
+      companyId,
       role: "admin",
     });
 
-    return workspaceId;
+    return companyId;
   },
 });
 
@@ -118,15 +118,15 @@ export const get = query({
       .withIndex("userId", (q) => q.eq("userId", userId))
       .collect();
 
-    const workspaceIds = members.map((m) => m.workspaceId);
-    const workspaces = [];
+    const companyIds = members.map((m) => m.companyId);
+    const companies = [];
 
-    for (const workspaceId of workspaceIds) {
-      const workspace = await ctx.db.get(workspaceId);
-      if (workspace) workspaces.push(workspace);
+    for (const companyId of companyIds) {
+      const company = await ctx.db.get(companyId);
+      if (company) companies.push(company);
     }
 
-    return workspaces;
+    return companies;
   },
 });
 
@@ -136,18 +136,18 @@ export const getOwned = query({
     const userId = await getAuthUserId(ctx);
     if (userId === null) return 0;
 
-    const workspaces = await ctx.db
-      .query("workspaces")
+    const companies = await ctx.db
+      .query("companies")
       .withIndex("userId", (q) => q.eq("userId", userId))
       .collect();
 
-    return workspaces.length;
+    return companies.length;
   },
 });
 
 export const getById = query({
   args: {
-    id: v.id("workspaces"),
+    id: v.id("companies"),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -162,7 +162,7 @@ export const getById = query({
 
 export const getByIdPublic = query({
   args: {
-    id: v.optional(v.id("workspaces")),
+    id: v.optional(v.id("companies")),
   },
   handler: async (ctx, args) => {
     if (!args.id) return null;
@@ -172,24 +172,24 @@ export const getByIdPublic = query({
 
 export const update = mutation({
   args: {
-    id: v.id("workspaces"),
+    id: v.id("companies"),
     name: v.string(),
     active: v.boolean(),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new ConvexError(workspaceErrors.unauthorized);
+    if (userId === null) throw new ConvexError(companyErrors.unauthorized);
 
     const hasPermission = await checkPermission({
       ctx,
       userId,
-      permission: "editWorkspace",
-      workspaceId: args.id,
+      permission: "company_edit",
+      companyId: args.id,
     });
-    if (!hasPermission) throw new ConvexError(workspaceErrors.permissionDenied);
+    if (!hasPermission) throw new ConvexError(companyErrors.permissionDenied);
 
-    const workspace = await ctx.db.get(args.id);
-    if (!workspace) throw new ConvexError(workspaceErrors.notFound);
+    const company = await ctx.db.get(args.id);
+    if (!company) throw new ConvexError(companyErrors.notFound);
 
     await ctx.db.patch(args.id, { name: args.name, active: args.active });
 
@@ -199,26 +199,26 @@ export const update = mutation({
 
 export const remove = mutation({
   args: {
-    id: v.id("workspaces"),
+    id: v.id("companies"),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new ConvexError(workspaceErrors.unauthorized);
+    if (userId === null) throw new ConvexError(companyErrors.unauthorized);
 
     const hasPermission = await checkPermission({
       ctx,
       userId,
-      workspaceId: args.id,
+      companyId: args.id,
     });
-    if (!hasPermission) throw new ConvexError(workspaceErrors.permissionDenied);
+    if (!hasPermission) throw new ConvexError(companyErrors.permissionDenied);
 
-    const workspace = await ctx.db.get(args.id);
-    if (!workspace) throw new ConvexError(workspaceErrors.notFound);
+    const company = await ctx.db.get(args.id);
+    if (!company) throw new ConvexError(companyErrors.notFound);
 
     const [members] = await Promise.all([
       ctx.db
         .query("members")
-        .withIndex("workspaceId", (q) => q.eq("workspaceId", args.id))
+        .withIndex("companyId", (q) => q.eq("companyId", args.id))
         .collect(),
     ]);
 
@@ -242,14 +242,14 @@ export const getByUserId = query({
       .withIndex("userId", (q) => q.eq("userId", userId))
       .collect();
 
-    const workspaces = await Promise.all(
+    const companies = await Promise.all(
       members.map(async (member) => {
-        const workspace = await ctx.db.get(member.workspaceId);
-        if (!workspace) return null;
-        return workspace;
+        const company = await ctx.db.get(member.companyId);
+        if (!company) return null;
+        return company;
       }),
     );
 
-    return workspaces;
+    return companies;
   },
 });

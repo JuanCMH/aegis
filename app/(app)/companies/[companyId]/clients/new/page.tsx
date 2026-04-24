@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { RiSave3Fill } from "@remixicon/react";
-import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
+import { Save } from "lucide-react";
+import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import {
   useGetClientTemplate,
   useCreateClient,
@@ -25,8 +25,8 @@ import { Label } from "@/components/ui/label";
 
 const NewClientPage = () => {
   const router = useRouter();
-  const workspaceId = useWorkspaceId();
-  const template = useGetClientTemplate({ workspaceId });
+  const companyId = useCompanyId();
+  const template = useGetClientTemplate({ companyId });
   const { mutate: createClient, isPending: isCreating } = useCreateClient();
   const { mutate: generateUploadUrl } = useGenerateUploadUrl();
   const { execute: extractFromDoc, isPending: isExtracting } =
@@ -156,7 +156,7 @@ const NewClientPage = () => {
 
     await createClient(
       {
-        workspaceId,
+        companyId,
         name,
         identificationNumber,
         ...(hasTemplate && template.data
@@ -166,7 +166,7 @@ const NewClientPage = () => {
       {
         onSuccess: (clientId) => {
           toast.success("Cliente creado");
-          router.push(`/workspaces/${workspaceId}/clients/${clientId}`);
+          router.push(`/companies/${companyId}/clients/${clientId}`);
         },
         onError: (err) => toast.error(err.message),
       },
@@ -199,7 +199,7 @@ const NewClientPage = () => {
                 disabled={isCreating}
                 className="gap-1.5"
               >
-                <RiSave3Fill className="size-3.5" />
+                <Save className="size-3.5" />
                 Guardar
               </Button>
             </div>
@@ -258,7 +258,7 @@ const NewClientPage = () => {
               disabled={isCreating || isExtracting}
               className="gap-1.5"
             >
-              <RiSave3Fill className="size-3.5" />
+              <Save className="size-3.5" />
               Guardar
             </Button>
           </div>

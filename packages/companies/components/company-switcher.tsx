@@ -1,14 +1,7 @@
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
+"use client";
+
+import { Building2, Check, ChevronsUpDown, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useWorkspaceId } from "../hooks/use-workspace-id";
-import { useGetWorkspace, useGetWorkspacesByUserId } from "../api";
-import { GalleryVerticalEnd } from "lucide-react";
-import { RiAddLine, RiExpandUpDownLine } from "@remixicon/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,24 +10,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { useCreateWorkspaceModal } from "../store/use-create-workspace-modal";
+import { useGetCompaniesByUserId, useGetCompany } from "../api";
+import { useCompanyId } from "../store/use-company-id";
+import { useCreateCompanyModal } from "../store/use-create-company-modal";
 
-export const WorkspaceSwitcher = () => {
+export const CompanySwitcher = () => {
   const router = useRouter();
   const { isMobile, state: sidebarState } = useSidebar();
-  const workspaceId = useWorkspaceId();
+  const companyId = useCompanyId();
 
-  const { data: workspaces, isLoading: workspacesLoading } =
-    useGetWorkspacesByUserId();
-  const { data: workspace, isLoading: workspaceLoading } = useGetWorkspace({
-    id: workspaceId,
+  const { data: companies, isLoading: companiesLoading } =
+    useGetCompaniesByUserId();
+  const { data: company, isLoading: companyLoading } = useGetCompany({
+    id: companyId,
   });
 
-  const [_openCreateWorkspace, setOpenCreateWorkspace] =
-    useCreateWorkspaceModal();
+  const [, setOpenCreateCompany] = useCreateCompanyModal();
 
-  const isLoading = workspaceLoading || workspacesLoading;
+  const isLoading = companyLoading || companiesLoading;
+  const isCollapsed = sidebarState === "collapsed" && !isMobile;
 
   return (
     <SidebarMenu>
@@ -44,30 +45,30 @@ export const WorkspaceSwitcher = () => {
             <SidebarMenuButton
               size="lg"
               disabled={isLoading}
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer gap-3"
+              className="gap-3 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex size-8 items-center justify-center rounded-xl border border-h-indigo/10 bg-h-indigo/10 text-h-indigo shrink-0">
-                <GalleryVerticalEnd className="size-4" />
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-aegis-sapphire/15 bg-aegis-sapphire/10 text-aegis-sapphire">
+                <Building2 className="size-4" />
               </div>
               {!isLoading && (
                 <div
                   className={cn(
                     "grid flex-1 text-left text-sm leading-tight transition-opacity",
-                    sidebarState === "collapsed" && !isMobile && "opacity-0",
+                    isCollapsed && "opacity-0",
                   )}
                 >
-                  <span className="truncate font-semibold">
-                    {workspace?.name}
+                  <span className="truncate font-semibold tracking-tight">
+                    {company?.name ?? "Agencia"}
                   </span>
                   <span className="truncate text-xs text-sidebar-foreground/60">
-                    Espacio actual
+                    Agencia actual
                   </span>
                 </div>
               )}
-              <RiExpandUpDownLine
+              <ChevronsUpDown
                 className={cn(
                   "ml-auto size-4 text-sidebar-foreground/60",
-                  sidebarState === "collapsed" && !isMobile && "hidden",
+                  isCollapsed && "hidden",
                 )}
               />
             </SidebarMenuButton>
@@ -76,43 +77,43 @@ export const WorkspaceSwitcher = () => {
             align="start"
             sideOffset={4}
             side={isMobile ? "bottom" : "right"}
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-60 rounded-lg"
           >
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Espacios
+            <DropdownMenuLabel className="text-xs uppercase tracking-wider text-muted-foreground">
+              Agencias
             </DropdownMenuLabel>
-            <div className="max-h-60 overflow-y-auto overflow-x-hidden space-y-1">
-              {workspaces?.map((workspace) => (
-                <DropdownMenuItem
-                  key={workspace?._id}
-                  className={cn(
-                    "gap-2 p-2 cursor-pointer",
-                    workspace?._id === workspaceId &&
-                      "bg-accent text-accent-foreground",
-                  )}
-                  onClick={() => router.push(`/workspaces/${workspace?._id}`)}
-                >
-                  <div className="flex size-6 items-center justify-center shrink-0">
-                    <GalleryVerticalEnd className="size-4" />
-                  </div>
-                  <span className="line-clamp-2">{workspace?.name}</span>
-                  {workspace?._id === workspaceId && (
-                    <div className="ml-auto">
-                      <div className="size-2 rounded-full bg-primary" />
+            <div className="max-h-60 space-y-0.5 overflow-y-auto overflow-x-hidden">
+              {companies?.map((c) => {
+                const isActive = c?._id === companyId;
+                return (
+                  <DropdownMenuItem
+                    key={c?._id}
+                    onClick={() => router.push(`/companies/${c?._id}`)}
+                    className={cn(
+                      "cursor-pointer gap-2 p-2",
+                      isActive && "bg-accent text-accent-foreground",
+                    )}
+                  >
+                    <div className="flex size-6 shrink-0 items-center justify-center rounded-md border border-border/60 bg-background text-aegis-sapphire">
+                      <Building2 className="size-3.5" />
                     </div>
-                  )}
-                </DropdownMenuItem>
-              ))}
+                    <span className="line-clamp-1 flex-1">{c?.name}</span>
+                    {isActive && (
+                      <Check className="ml-auto size-4 text-aegis-sapphire" />
+                    )}
+                  </DropdownMenuItem>
+                );
+              })}
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => setOpenCreateWorkspace(true)}
-              className="gap-2 p-2 cursor-pointer"
+              onClick={() => setOpenCreateCompany(true)}
+              className="cursor-pointer gap-2 p-2"
             >
-              <div className="flex size-6 items-center justify-center rounded-md border border-border/40 bg-background">
-                <RiAddLine className="size-4" />
+              <div className="flex size-6 shrink-0 items-center justify-center rounded-md border border-border bg-background">
+                <Plus className="size-3.5" />
               </div>
-              <div className="font-medium">Nuevo espacio</div>
+              <span className="font-medium">Nueva agencia</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

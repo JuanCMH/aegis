@@ -1,85 +1,125 @@
+"use client";
+
 import {
-  RiListView,
-  RiGroup2Fill,
-  RiAddCircleFill,
-  RiFolderShield2Fill,
-  RiMoneyDollarCircleFill,
-  RiSettings4Fill,
-  RiLayoutGridFill,
-} from "@remixicon/react";
+  Building2,
+  ClipboardList,
+  FileCheck2,
+  FileStack,
+  FileText,
+  Files,
+  KeyRound,
+  LayoutDashboard,
+  List,
+  Settings2,
+  ShieldCheck,
+  UserCircle,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import type { ComponentProps } from "react";
+import { SidebarModeToggle } from "@/components/aegis/sidebar-mode-toggle";
+import { SidebarUser } from "@/components/aegis/sidebar-user";
 import {
   Sidebar,
+  SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarContent,
 } from "@/components/ui/sidebar";
-import { ComponentProps } from "react";
-import { WorkspaceMenu } from "./workspace-menu";
-import { SidebarUser } from "@/components/sidebar-user";
-import { WorkspaceSwitcher } from "./workspace-switcher";
-import { useWorkspaceId } from "../hooks/use-workspace-id";
-import { SidebarModeToggle } from "../../../components/sidebar-mode-toggle";
+import { useCompanyId } from "../store/use-company-id";
+import { CompanyMenu } from "./company-menu";
+import { CompanySwitcher } from "./company-switcher";
 
-export function WorkspaceSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
-  const workspaceId = useWorkspaceId();
+export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
+  const companyId = useCompanyId();
 
   const data = [
     {
-      title: "Clientes",
-      icon: RiGroup2Fill,
+      title: "Inicio",
+      icon: LayoutDashboard,
       items: [
         {
-          title: "Lista de Clientes",
-          url: `/workspaces/${workspaceId}/clients`,
-          icon: RiListView,
+          title: "Dashboard",
+          url: `/companies/${companyId}`,
+          icon: LayoutDashboard,
+        },
+      ],
+    },
+    {
+      title: "Clientes",
+      icon: Users,
+      items: [
+        {
+          title: "Lista de clientes",
+          url: `/companies/${companyId}/clients`,
+          icon: List,
         },
         {
-          title: "Nuevo Cliente",
-          url: `/workspaces/${workspaceId}/clients/new`,
-          icon: RiAddCircleFill,
+          title: "Nuevo cliente",
+          url: `/companies/${companyId}/clients/new`,
+          icon: UserCircle,
+        },
+        {
+          title: "Plantilla",
+          url: `/companies/${companyId}/settings/client-template`,
+          icon: ClipboardList,
         },
       ],
     },
     {
       title: "Cotizaciones",
-      icon: RiMoneyDollarCircleFill,
+      icon: FileStack,
       items: [
         {
-          title: "Lista de Cotizaciones",
-          url: `/workspaces/${workspaceId}/quotes`,
-          icon: RiListView,
+          title: "Lista de cotizaciones",
+          url: `/companies/${companyId}/quotes`,
+          icon: List,
         },
         {
-          title: "Crear Cotización",
-          url: `/workspaces/${workspaceId}/quotes/new`,
-          icon: RiAddCircleFill,
+          title: "Nueva cotización",
+          url: `/companies/${companyId}/quotes/new`,
+          icon: FileText,
         },
       ],
     },
     {
       title: "Pólizas",
-      icon: RiFolderShield2Fill,
+      icon: Files,
       items: [
         {
-          title: "Lista de Pólizas",
-          url: `/workspaces/${workspaceId}/policies`,
-          icon: RiListView,
+          title: "Lista de pólizas",
+          url: `/companies/${companyId}/policies`,
+          icon: List,
         },
         {
-          title: "Nueva Póliza",
-          url: `/workspaces/${workspaceId}/policies/new`,
-          icon: RiAddCircleFill,
+          title: "Nueva póliza",
+          url: `/companies/${companyId}/policies/new`,
+          icon: FileCheck2,
         },
       ],
     },
     {
-      title: "Configuración",
-      icon: RiSettings4Fill,
+      title: "Agencia",
+      icon: Building2,
       items: [
         {
-          title: "Plantilla Clientes",
-          url: `/workspaces/${workspaceId}/settings/client-template`,
-          icon: RiLayoutGridFill,
+          title: "Configuración",
+          url: `/companies/${companyId}/settings`,
+          icon: Settings2,
+        },
+        {
+          title: "Miembros",
+          url: `/companies/${companyId}/settings/members`,
+          icon: UserPlus,
+        },
+        {
+          title: "Roles",
+          url: `/companies/${companyId}/settings/roles`,
+          icon: ShieldCheck,
+        },
+        {
+          title: "Permisos",
+          url: `/companies/${companyId}/settings/permissions`,
+          icon: KeyRound,
         },
       ],
     },
@@ -88,10 +128,10 @@ export function WorkspaceSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar variant="inset" collapsible="icon" desktopOverlay {...props}>
       <SidebarHeader>
-        <WorkspaceSwitcher />
+        <CompanySwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <WorkspaceMenu data={data} />
+        <CompanyMenu data={data} />
       </SidebarContent>
       <SidebarFooter>
         <SidebarModeToggle />

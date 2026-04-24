@@ -4,12 +4,12 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { getErrorMessage } from "@/lib/get-error-message";
 import {
-  RiEditFill,
-  RiArrowLeftLine,
-  RiShieldCheckFill,
-  RiDownloadLine,
-  RiFileTextLine,
-} from "@remixicon/react";
+  Pencil,
+  ArrowLeft,
+  ShieldCheck,
+  Download,
+  FileText,
+} from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -17,7 +17,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Hint } from "@/components/hint";
+import { Hint } from "@/components/aegis/hint";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
@@ -26,16 +26,16 @@ import { BondDataType } from "@/packages/bonds/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ContractDataType } from "@/packages/quotes/types";
-import { useQuoteId } from "@/packages/quotes/hooks/use-quote-id";
+import { useQuoteId } from "@/packages/quotes/store/use-quote-id";
 import BidBondInfo from "@/packages/bonds/components/bid-bond-info";
 import ContractInfo from "@/packages/quotes/components/contract-info";
 import { useGetQuoteById, useUpdateQuote } from "@/packages/quotes/api";
 import { generateQuotePDF } from "@/packages/quotes/lib/export-quote-pdf";
 import { generateQuoteExcel } from "@/packages/quotes/lib/export-quote-excel";
-import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
+import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
-import { useGetWorkspace } from "@/packages/workspaces/api";
-import { AegisLogo } from "@/components/logo";
+import { useGetCompany } from "@/packages/companies/api";
+import { AegisLogo } from "@/components/aegis/aegis-logo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,10 +46,10 @@ import {
 const QuoteIdPage = () => {
   const router = useRouter();
   const quoteId = useQuoteId();
-  const workspaceId = useWorkspaceId();
+  const companyId = useCompanyId();
 
-  const { data: workspace, isLoading: isLoadingWorkspace } = useGetWorkspace({
-    id: workspaceId,
+  const { data: company, isLoading: isLoadingCompany } = useGetCompany({
+    id: companyId,
   });
   const {
     mutate: updateQuote,
@@ -133,7 +133,7 @@ const QuoteIdPage = () => {
     }
   }, [quote]);
 
-  const onBack = () => router.push(`/workspaces/${workspaceId}/quotes`);
+  const onBack = () => router.push(`/companies/${companyId}/quotes`);
 
   const handleUpdateBidQuote = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -262,7 +262,7 @@ const QuoteIdPage = () => {
                   variant="outline"
                   onClick={onBack}
                 >
-                  <RiArrowLeftLine />
+                  <ArrowLeft />
                   Volver
                 </Button>
               </Hint>
@@ -273,7 +273,7 @@ const QuoteIdPage = () => {
                 onPressedChange={setEditMode}
                 className="cursor-pointer  data-[state=on]:*:[svg]:fill-sky-500 data-[state=on]:*:[svg]:stroke-sky-500"
               >
-                <RiEditFill />
+                <Pencil />
               </Toggle>
             </div>
           </div>
@@ -288,7 +288,7 @@ const QuoteIdPage = () => {
             <Tabs value={quote.quoteType}>
               <header className="flex items-center justify-between gap-2">
                 <div className="flex gap-2 items-center">
-                  <RiShieldCheckFill className="size-4" />
+                  <ShieldCheck className="size-4" />
                   <h1 className="text-lg font-semibold">
                     {quote.quoteType === "bidBond" && "Seriedad de la Oferta"}
                     {quote.quoteType === "performanceBonds" && "Cumplimiento"}
@@ -304,7 +304,7 @@ const QuoteIdPage = () => {
                           window.open(quote.documentUrl!, "_blank")
                         }
                       >
-                        <RiFileTextLine />
+                        <FileText />
                         Documento
                       </Button>
                     </Hint>
@@ -313,9 +313,9 @@ const QuoteIdPage = () => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         size="sm"
-                        disabled={isLoadingWorkspace}
+                        disabled={isLoadingCompany}
                       >
-                        <RiDownloadLine />
+                        <Download />
                         Exportar
                       </Button>
                     </DropdownMenuTrigger>
@@ -331,7 +331,7 @@ const QuoteIdPage = () => {
                                 ? [bidBondData]
                                 : performanceBondsData,
                             quoteType: quote.quoteType,
-                            workspaceName: workspace?.name,
+                            companyName: company?.name,
                           });
                         }}
                         className="cursor-pointer"
@@ -349,7 +349,7 @@ const QuoteIdPage = () => {
                                 ? [bidBondData]
                                 : performanceBondsData,
                             quoteType: quote.quoteType,
-                            workspaceName: workspace?.name,
+                            companyName: company?.name,
                           });
                         }}
                         className="cursor-pointer"

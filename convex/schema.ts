@@ -70,7 +70,7 @@ const schema = defineSchema({
     image: v.optional(v.string()),
     mainImage: v.optional(v.id("_storage")),
     email: v.optional(v.string()),
-    workspaces: v.optional(v.number()),
+    companies: v.optional(v.number()),
     emailVerificationTime: v.optional(v.number()),
     phone: v.optional(v.string()),
     phoneVerificationTime: v.optional(v.number()),
@@ -86,15 +86,15 @@ const schema = defineSchema({
       v.literal("delete"),
       v.literal("info"),
     ),
-    workspaceId: v.optional(v.id("workspaces")),
+    companyId: v.optional(v.id("companies")),
     affectedEntityType: v.optional(
-      v.union(v.literal("workspace"), v.literal("member"), v.literal("role")),
+      v.union(v.literal("company"), v.literal("member"), v.literal("role")),
     ),
     affectedEntityId: v.optional(v.string()),
   })
-    .index("workspaceId", ["workspaceId"])
+    .index("companyId", ["companyId"])
     .index("userId", ["userId"]),
-  workspaces: defineTable({
+  companies: defineTable({
     name: v.string(),
     joinCode: v.string(),
     userId: v.id("users"),
@@ -107,38 +107,38 @@ const schema = defineSchema({
     .index("joinCode", ["joinCode"]),
   members: defineTable({
     userId: v.id("users"),
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
     role: v.union(v.literal("admin"), v.literal("member")),
     customRoleId: v.optional(v.id("roles")),
   })
     .index("userId", ["userId"])
     .index("customRoleId", ["customRoleId"])
-    .index("workspaceId", ["workspaceId"])
-    .index("workspaceId_userId", ["workspaceId", "userId"]),
+    .index("companyId", ["companyId"])
+    .index("companyId_userId", ["companyId", "userId"]),
   roles: defineTable({
     name: v.string(),
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
     ...permissionsSchema,
-  }).index("workspaceId", ["workspaceId"]),
+  }).index("companyId", ["companyId"]),
   clientTemplates: defineTable({
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
     sections: v.array(templateSection),
-  }).index("workspaceId", ["workspaceId"]),
+  }).index("companyId", ["companyId"]),
   clients: defineTable({
     name: v.string(),
     identificationNumber: v.string(),
     templateId: v.optional(v.id("clientTemplates")),
     data: v.optional(v.any()),
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
   })
-    .index("workspaceId", ["workspaceId"])
+    .index("companyId", ["companyId"])
     .searchIndex("search_name", {
       searchField: "name",
-      filterFields: ["workspaceId"],
+      filterFields: ["companyId"],
     })
     .searchIndex("search_identificationNumber", {
       searchField: "identificationNumber",
-      filterFields: ["workspaceId"],
+      filterFields: ["companyId"],
     }),
   policies: defineTable({
     insuredName: v.string(),
@@ -177,13 +177,13 @@ const schema = defineSchema({
     // not necesary for now
     isParentPolicy: v.boolean(),
     parentPolicyId: v.optional(v.id("policies")),
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
   }).index("clientId", ["clientId"]),
   bonds: defineTable({
     name: v.string(),
     description: v.string(),
-    workspaceId: v.id("workspaces"),
-  }).index("workspaceId", ["workspaceId"]),
+    companyId: v.id("companies"),
+  }).index("companyId", ["companyId"]),
   quotes: defineTable({
     contractor: v.string(),
     contractorId: v.string(),
@@ -198,8 +198,8 @@ const schema = defineSchema({
     calculateExpensesTaxes: v.boolean(),
     quoteType: v.union(v.literal("bidBond"), v.literal("performanceBonds")),
     documentId: v.optional(v.id("_storage")),
-    workspaceId: v.id("workspaces"),
-  }).index("workspaceId", ["workspaceId"]),
+    companyId: v.id("companies"),
+  }).index("companyId", ["companyId"]),
   quoteBonds: defineTable({
     name: v.string(),
     startDate: v.number(),
@@ -208,7 +208,7 @@ const schema = defineSchema({
     percentage: v.number(),
     insuredValue: v.number(),
     rate: v.number(),
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
     quoteId: v.id("quotes"),
     bondId: v.optional(v.id("bonds")),
   }).index("quoteId", ["quoteId"]),

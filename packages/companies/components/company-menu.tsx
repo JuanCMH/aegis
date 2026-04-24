@@ -11,18 +11,18 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { RemixiconComponentType } from "@remixicon/react";
+import { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-export function WorkspaceMenu({
+export function CompanyMenu({
   data,
 }: {
   data: {
     title: string;
-    icon: RemixiconComponentType;
-    items: { title: string; url: string; icon: RemixiconComponentType }[];
+    icon: LucideIcon;
+    items: { title: string; url: string; icon: LucideIcon }[];
   }[];
 }) {
   const pathname = usePathname();
@@ -60,7 +60,7 @@ export function WorkspaceMenu({
   };
 
   const isSectionActive = (
-    items: { title: string; url: string; icon: RemixiconComponentType }[],
+    items: { title: string; url: string; icon: LucideIcon }[],
   ) => items.some((item) => isItemActive(item.url) || pathname === item.url);
 
   if (!showExpandedMenu) {

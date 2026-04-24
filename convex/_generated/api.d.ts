@@ -14,12 +14,13 @@ import type * as bonds from "../bonds.js";
 import type * as clientActions from "../clientActions.js";
 import type * as clientTemplates from "../clientTemplates.js";
 import type * as clients from "../clients.js";
+import type * as companies from "../companies.js";
 import type * as errors_bonds from "../errors/bonds.js";
 import type * as errors_clients from "../errors/clients.js";
+import type * as errors_company from "../errors/company.js";
 import type * as errors_quotes from "../errors/quotes.js";
 import type * as errors_roles from "../errors/roles.js";
 import type * as errors_users from "../errors/users.js";
-import type * as errors_workspace from "../errors/workspace.js";
 import type * as http from "../http.js";
 import type * as lib_colors from "../lib/colors.js";
 import type * as lib_permissions from "../lib/permissions.js";
@@ -28,7 +29,6 @@ import type * as resend from "../resend.js";
 import type * as roles from "../roles.js";
 import type * as upload from "../upload.js";
 import type * as users from "../users.js";
-import type * as workspaces from "../workspaces.js";
 
 import type {
   ApiFromModules,
@@ -43,12 +43,13 @@ declare const fullApi: ApiFromModules<{
   clientActions: typeof clientActions;
   clientTemplates: typeof clientTemplates;
   clients: typeof clients;
+  companies: typeof companies;
   "errors/bonds": typeof errors_bonds;
   "errors/clients": typeof errors_clients;
+  "errors/company": typeof errors_company;
   "errors/quotes": typeof errors_quotes;
   "errors/roles": typeof errors_roles;
   "errors/users": typeof errors_users;
-  "errors/workspace": typeof errors_workspace;
   http: typeof http;
   "lib/colors": typeof lib_colors;
   "lib/permissions": typeof lib_permissions;
@@ -57,7 +58,6 @@ declare const fullApi: ApiFromModules<{
   roles: typeof roles;
   upload: typeof upload;
   users: typeof users;
-  workspaces: typeof workspaces;
 }>;
 
 /**

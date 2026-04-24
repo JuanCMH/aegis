@@ -1,4 +1,4 @@
-export const workspaceErrors = {
+export const companyErrors = {
   unauthorized: "No estás autorizado para realizar esta acción",
   notFound: "El espacio de trabajo no existe",
   joinCodeInvalid: "El código de unión es inválido o el espacio no existe",

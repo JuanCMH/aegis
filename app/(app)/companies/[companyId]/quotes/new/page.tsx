@@ -3,10 +3,10 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  RiAiGenerate2,
-  RiAttachmentLine,
-  RiCloseLine,
-} from "@remixicon/react";
+  Sparkles,
+  Paperclip,
+  X,
+} from "lucide-react";
 import { BondDataType } from "@/packages/bonds/types";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -14,7 +14,7 @@ import { ContractDataType } from "@/packages/quotes/types";
 import QuoteInfo from "@/packages/quotes/components/quote-info";
 import ContractInfo from "@/packages/quotes/components/contract-info";
 import { QuoteAgentModal } from "@/packages/quotes/components/modals/quote-agent-modal";
-import { Hint } from "@/components/hint";
+import { Hint } from "@/components/aegis/hint";
 
 const NewQuotePage = () => {
   const [agentModalOpen, setAgentModalOpen] = useState(false);
@@ -74,10 +74,10 @@ const NewQuotePage = () => {
               />
               {documentFile ? (
                 <div className="flex items-center gap-1 border rounded-md px-2 py-1 text-sm">
-                  <RiAttachmentLine className="size-4 text-muted-foreground shrink-0" />
+                  <Paperclip className="size-4 text-muted-foreground shrink-0" />
                   <span className="max-w-32 truncate">{documentFile.name}</span>
                   <Button
-                    size="icon-xs"
+                    size="icon-sm"
                     variant="ghost"
                     className="size-5"
                     onClick={() => {
@@ -86,7 +86,7 @@ const NewQuotePage = () => {
                         documentInputRef.current.value = "";
                     }}
                   >
-                    <RiCloseLine className="size-3" />
+                    <X className="size-3" />
                   </Button>
                 </div>
               ) : (
@@ -98,7 +98,7 @@ const NewQuotePage = () => {
                     className="cursor-pointer"
                     onClick={() => documentInputRef.current?.click()}
                   >
-                    <RiAttachmentLine />
+                    <Paperclip />
                   </Button>
                 </Hint>
               )}
@@ -108,7 +108,7 @@ const NewQuotePage = () => {
                 className="cursor-pointer"
                 onClick={() => setAgentModalOpen(true)}
               >
-                <RiAiGenerate2 />
+                <Sparkles />
               </Button>
             </div>
           </div>

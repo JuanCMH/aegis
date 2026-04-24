@@ -3,23 +3,23 @@
 import { useDates } from "@/lib/useDates";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { RiAddCircleFill } from "@remixicon/react";
+import { Plus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useGetQuotesByWorkspace } from "@/packages/quotes/api";
+import { useGetQuotesByCompany } from "@/packages/quotes/api";
 import { columns } from "@/packages/quotes/components/table/quote-column";
-import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
+import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import { QuoteDataTable } from "@/packages/quotes/components/table/quote-data-table";
 
 const QuotePage = () => {
   const router = useRouter();
-  const workspaceId = useWorkspaceId();
+  const companyId = useCompanyId();
 
   const [{ selectedYear, selectedMonth }, setDates] = useDates();
   const currentMonthValue = `${selectedYear}-${selectedMonth.padStart(2, "0")}`;
 
-  const { data: quotes, isLoading: isLoadingQuotes } = useGetQuotesByWorkspace({
-    workspaceId,
+  const { data: quotes, isLoading: isLoadingQuotes } = useGetQuotesByCompany({
+    companyId,
     month: currentMonthValue,
   });
 
@@ -29,7 +29,7 @@ const QuotePage = () => {
   };
 
   const onNewQuoteClick = () => {
-    router.push(`/workspaces/${workspaceId}/quotes/new`);
+    router.push(`/companies/${companyId}/quotes/new`);
   };
 
   return (
@@ -51,7 +51,7 @@ const QuotePage = () => {
                 onClick={onNewQuoteClick}
                 className="cursor-pointer"
               >
-                <RiAddCircleFill />
+                <Plus />
                 Nueva Cotización
               </Button>
             </div>

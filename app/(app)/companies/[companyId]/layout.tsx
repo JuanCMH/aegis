@@ -1,19 +1,19 @@
 "use client";
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { WorkspaceSidebar } from "@/packages/workspaces/components/workspace-sidebar";
+import { CompanySidebar } from "@/packages/companies/components/company-sidebar";
 
-interface WorkspaceLayoutProps {
+interface CompanyLayoutProps {
   children: React.ReactNode;
 }
 
-const WorkspaceLayout = ({ children }: WorkspaceLayoutProps) => {
+const CompanyLayout = ({ children }: CompanyLayoutProps) => {
   return (
     <SidebarProvider defaultOpen={false}>
-      <WorkspaceSidebar />
+      <CompanySidebar />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );
 };
 
-export default WorkspaceLayout;
+export default CompanyLayout;

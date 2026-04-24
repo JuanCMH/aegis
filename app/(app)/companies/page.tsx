@@ -1,25 +1,25 @@
 "use client";
 
-import { useGetWorkspaces } from "@/packages/workspaces/api";
-import { useCreateWorkspaceModal } from "@/packages/workspaces/store/use-create-workspace-modal";
+import { useGetCompanies } from "@/packages/companies/api";
+import { useCreateCompanyModal } from "@/packages/companies/store/use-create-company-modal";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
-export default function Workspaces() {
+export default function Companies() {
   const router = useRouter();
-  const { data: workspaces, isLoading: isLoadingWorkspaces } =
-    useGetWorkspaces();
+  const { data: companies, isLoading: isLoadingCompanies } =
+    useGetCompanies();
 
-  const [open, setOpen] = useCreateWorkspaceModal();
+  const [open, setOpen] = useCreateCompanyModal();
 
-  const workspaceId = useMemo(() => workspaces?.[0]?._id, [workspaces]);
+  const companyId = useMemo(() => companies?.[0]?._id, [companies]);
 
   useEffect(() => {
-    if (isLoadingWorkspaces) return;
-    if (workspaceId) {
-      router.replace(`/workspaces/${workspaceId}`);
+    if (isLoadingCompanies) return;
+    if (companyId) {
+      router.replace(`/companies/${companyId}`);
     } else {
       setOpen(true);
     }
-  }, [workspaceId, isLoadingWorkspaces, open, setOpen]);
+  }, [companyId, isLoadingCompanies, open, setOpen]);
 }
