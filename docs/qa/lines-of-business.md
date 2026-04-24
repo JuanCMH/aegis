@@ -30,7 +30,7 @@ Específicas:
 
 | Ruta                                                | Archivo                                                               |
 |-----------------------------------------------------|-----------------------------------------------------------------------|
-| `/companies/[id]/settings/lines-of-business`        | `app/(app)/companies/[companyId]/settings/lines-of-business/page.tsx` |
+| Sidebar › Agencia › Ramos (sheet)                    | `packages/linesOfBusiness/components/lines-of-business-sheet.tsx`     |
 
 | Componente clave                  | Archivo                                                                       |
 |-----------------------------------|-------------------------------------------------------------------------------|
@@ -43,7 +43,7 @@ Específicas:
 ### 4.1 Ver listado activo
 
 **Cuenta**: `owner@aegis.test`
-**Ruta**: `/companies/[demo]/settings/lines-of-business`
+**Entrada**: Sidebar › Agencia › **Ramos** (sheet lateral)
 
 | # | Acción                            | Resultado esperado                                           |
 |---|-----------------------------------|--------------------------------------------------------------|
@@ -116,7 +116,7 @@ Específicas:
 
 | Acción / UI                              | Owner | Admin | Member | Asesor (*) | Lector (*) | Outsider |
 |------------------------------------------|-------|-------|--------|------------|------------|----------|
-| Ver página `/settings/lines-of-business` | ✅    | ✅    | ✅     | ✅         | ✅         | ❌ (404) |
+| Abrir sheet "Ramos"                      | ✅    | ✅    | ✅     | ✅         | ✅         | ❌ (sin sidebar) |
 | Ver filas en tabla                       | ✅    | ✅    | ✅     | ✅         | ✅         | ❌       |
 | Botón "Nuevo ramo"                       | ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |
 | Menú (⋯) en fila                         | ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |

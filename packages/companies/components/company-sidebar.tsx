@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useMembersSheet } from "@/packages/members/store/use-members-sheet";
 import { useInsurersSheet } from "@/packages/insurers/store/use-insurers-sheet";
+import { useLinesOfBusinessSheet } from "@/packages/linesOfBusiness/store/use-lines-of-business-sheet";
 import { useRolesSheet } from "@/packages/roles/store/use-roles-sheet";
 import { useCompanyId } from "../store/use-company-id";
 import { CompanyMenu } from "./company-menu";
@@ -39,6 +40,7 @@ export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const [, setMembersSheetOpen] = useMembersSheet();
   const [, setRolesSheetOpen] = useRolesSheet();
   const [, setInsurersSheetOpen] = useInsurersSheet();
+  const [, setLinesOfBusinessSheetOpen] = useLinesOfBusinessSheet();
 
   const data = [
     {
@@ -131,7 +133,7 @@ export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         },
         {
           title: "Ramos",
-          url: `/companies/${companyId}/settings/lines-of-business`,
+          onClick: () => setLinesOfBusinessSheetOpen(true),
           icon: Tag,
         },
         {
