@@ -209,6 +209,21 @@ const schema = defineSchema({
     description: v.string(),
     companyId: v.id("companies"),
   }).index("companyId", ["companyId"]),
+  insurers: defineTable({
+    name: v.string(),
+    taxId: v.optional(v.string()),
+    website: v.optional(v.string()),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    isActive: v.boolean(),
+    companyId: v.id("companies"),
+  })
+    .index("companyId", ["companyId"])
+    .searchIndex("search_name", {
+      searchField: "name",
+      filterFields: ["companyId"],
+    }),
   quotes: defineTable({
     contractor: v.string(),
     contractorId: v.string(),

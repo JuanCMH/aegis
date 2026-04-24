@@ -117,6 +117,11 @@ export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
           icon: ShieldCheck,
         },
         {
+          title: "Aseguradoras",
+          url: `/companies/${companyId}/settings/insurers`,
+          icon: Building2,
+        },
+        {
           title: "Permisos",
           url: `/companies/${companyId}/settings/permissions`,
           icon: KeyRound,
