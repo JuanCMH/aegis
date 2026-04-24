@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Plus, Search } from "lucide-react";
+import { Plus, Search, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import {
   Breadcrumb,
@@ -20,41 +20,41 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useGetBondsByCompany } from "@/packages/bonds/api";
+import { BondsCatalogTable } from "@/packages/bonds/components/bonds-catalog-table";
+import { BondCatalogFormModal } from "@/packages/bonds/components/modals/bond-catalog-form-modal";
+import type { BondDoc } from "@/packages/bonds/types";
 import { useCompanyId } from "@/packages/companies/store/use-company-id";
-import { useGetInsurers } from "@/packages/insurers/api";
-import { InsurerList } from "@/packages/insurers/components/insurer-list";
-import { InsurerFormModal } from "@/packages/insurers/components/modals/insurer-form-modal";
-import type { InsurerDoc } from "@/packages/insurers/types";
 import { useHasPermissions } from "@/packages/roles/api";
 import { RoleGate } from "@/packages/roles/components/role-gate";
 import { cn } from "@/lib/utils";
 
-export default function InsurersPage() {
+export default function BondsCatalogPage() {
   const companyId = useCompanyId();
   const [filter, setFilter] = useState("");
   const [scope, setScope] = useState<"active" | "all">("active");
   const [formOpen, setFormOpen] = useState(false);
-  const [editing, setEditing] = useState<InsurerDoc | null>(null);
+  const [editing, setEditing] = useState<BondDoc | null>(null);
 
-  const { data: insurers, isLoading } = useGetInsurers({
+  const { data: rows, isLoading } = useGetBondsByCompany({
     companyId,
     includeInactive: scope === "all",
   });
 
   const { permissions } = useHasPermissions({
     companyId,
-    permissions: ["insurers_manage"],
+    permissions: ["bonds_manage"],
   });
 
-  const canManage = permissions?.insurers_manage ?? false;
+  const canManage = permissions?.bonds_manage ?? false;
 
   const openCreate = () => {
     setEditing(null);
     setFormOpen(true);
   };
 
-  const openEdit = (insurer: InsurerDoc) => {
-    setEditing(insurer);
+  const openEdit = (row: BondDoc) => {
+    setEditing(row);
     setFormOpen(true);
   };
 
@@ -79,7 +79,7 @@ export default function InsurersPage() {
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>Aseguradoras</BreadcrumbPage>
+                    <BreadcrumbPage>Amparos</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
@@ -91,15 +91,15 @@ export default function InsurersPage() {
       <div className="mx-2 mt-4 flex-1 space-y-4 pb-8">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-aegis-sapphire/10 text-aegis-sapphire">
-              <Building2 className="size-5" />
+            <div className="flex size-10 items-center justify-center rounded-xl bg-aegis-amber/10 text-aegis-amber">
+              <ShieldCheck className="size-5" />
             </div>
             <div>
               <h1 className="text-lg font-semibold tracking-tight text-aegis-graphite">
-                Aseguradoras
+                Amparos
               </h1>
               <p className="text-sm text-aegis-steel">
-                Catálogo de compañías con las que emites pólizas.
+                Catálogo de amparos / fianzas que tu agencia cotiza y emite.
               </p>
             </div>
           </div>
@@ -108,7 +108,7 @@ export default function InsurersPage() {
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-aegis-steel" />
               <Input
-                placeholder="Buscar por nombre o NIT"
+                placeholder="Buscar por nombre o código"
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 className="w-full pl-9 sm:w-64"
@@ -122,21 +122,21 @@ export default function InsurersPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="active">Activas</SelectItem>
-                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="active">Activos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
               </SelectContent>
             </Select>
-            <RoleGate permission="insurers_manage">
+            <RoleGate permission="bonds_manage">
               <Button onClick={openCreate}>
                 <Plus className="size-4" />
-                Nueva aseguradora
+                Nuevo amparo
               </Button>
             </RoleGate>
           </div>
         </div>
 
-        <InsurerList
-          insurers={insurers}
+        <BondsCatalogTable
+          rows={rows}
           isLoading={isLoading}
           canManage={canManage}
           filter={filter}
@@ -144,11 +144,11 @@ export default function InsurersPage() {
         />
       </div>
 
-      <InsurerFormModal
+      <BondCatalogFormModal
         open={formOpen}
         setOpen={setFormOpen}
         companyId={companyId}
-        insurer={editing}
+        row={editing}
       />
     </div>
   );

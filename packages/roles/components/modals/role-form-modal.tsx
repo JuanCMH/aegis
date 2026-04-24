@@ -165,7 +165,11 @@ export function RoleFormModal({
               Cancelar
             </Button>
           </DialogClose>
-          <Button type="submit" form="role-form" disabled={!canSubmit || isPending}>
+          <Button
+            type="submit"
+            form="role-form"
+            disabled={!canSubmit || isPending}
+          >
             {isEdit ? "Guardar cambios" : "Crear rol"}
           </Button>
         </AegisModalFooter>

@@ -22,10 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { Id } from "@/convex/_generated/dataModel";
 import { getErrorMessage } from "@/lib/get-error-message";
-import {
-  useCreateLineOfBusiness,
-  useUpdateLineOfBusiness,
-} from "../../api";
+import { useCreateLineOfBusiness, useUpdateLineOfBusiness } from "../../api";
 import type { LineOfBusinessDoc } from "../../types";
 
 interface LineOfBusinessFormModalProps {
@@ -89,8 +86,7 @@ export function LineOfBusinessFormModal({
     return null;
   }, [form.defaultCommission]);
 
-  const canSubmit =
-    form.name.trim().length > 0 && commissionError === null;
+  const canSubmit = form.name.trim().length > 0 && commissionError === null;
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((s) => ({ ...s, [key]: value }));

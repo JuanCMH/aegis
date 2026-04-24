@@ -13,10 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useCompanyId } from "@/packages/companies/store/use-company-id";
-import {
-  useGetRolesWithCounts,
-  useHasPermissions,
-} from "@/packages/roles/api";
+import { useGetRolesWithCounts, useHasPermissions } from "@/packages/roles/api";
 import { RoleList } from "@/packages/roles/components/role-list";
 import { RoleFormModal } from "@/packages/roles/components/modals/role-form-modal";
 import { RoleGate } from "@/packages/roles/components/role-gate";

@@ -25,11 +25,7 @@ const findDuplicate = async (
     if (row._id === excludeId) continue;
     if (row.name.trim().toLowerCase() === nameLc)
       return { kind: "name" as const };
-    if (
-      codeLc &&
-      row.code &&
-      row.code.trim().toLowerCase() === codeLc
-    )
+    if (codeLc && row.code && row.code.trim().toLowerCase() === codeLc)
       return { kind: "code" as const };
   }
   return null;
@@ -103,8 +99,7 @@ export const create = mutation({
       throw new ConvexError(lineOfBusinessErrors.unauthorized);
 
     const member = await populateMember(ctx, userId, args.companyId);
-    if (!member)
-      throw new ConvexError(lineOfBusinessErrors.companyNotFound);
+    if (!member) throw new ConvexError(lineOfBusinessErrors.companyNotFound);
 
     const canManage = await checkPermission({
       ctx,
@@ -124,12 +119,7 @@ export const create = mutation({
     )
       throw new ConvexError(lineOfBusinessErrors.invalidCommission);
 
-    const dup = await findDuplicate(
-      ctx,
-      args.companyId,
-      name,
-      args.code,
-    );
+    const dup = await findDuplicate(ctx, args.companyId, name, args.code);
     if (dup?.kind === "name")
       throw new ConvexError(lineOfBusinessErrors.duplicateName);
     if (dup?.kind === "code")

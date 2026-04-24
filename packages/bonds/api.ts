@@ -4,12 +4,16 @@ import { api } from "@/convex/_generated/api";
 
 const route = api.bonds;
 
+export const useGetBondsByCompany = (data: typeof route.getByCompany._args) =>
+  useFetch(route.getByCompany, data);
+
+export const useGetBond = (data: typeof route.getById._args) =>
+  useFetch(route.getById, data);
+
 export const useCreateBond = () => useMutate(route.create);
 
 export const useUpdateBond = () => useMutate(route.update);
 
-export const useRemoveBond = () => useMutate(route.remove);
+export const useSetBondActive = () => useMutate(route.setActive);
 
-export const useGetBondsByCompany = (
-  data: typeof route.getByCompany._args,
-) => useFetch(route.getByCompany, data);
+export const useRemoveBond = () => useMutate(route.remove);

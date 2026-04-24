@@ -6,7 +6,9 @@ export type PermissionsMap = Record<PermissionKey, boolean>;
 
 /** All permissions = false. */
 export const emptyPermissions = (): PermissionsMap =>
-  Object.fromEntries(allPermissionKeys.map((k) => [k, false])) as PermissionsMap;
+  Object.fromEntries(
+    allPermissionKeys.map((k) => [k, false]),
+  ) as PermissionsMap;
 
 /** All permissions = true. */
 export const fullPermissions = (): PermissionsMap =>

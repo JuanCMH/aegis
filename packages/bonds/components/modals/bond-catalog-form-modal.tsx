@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2 } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import {
   type Dispatch,
   type SetStateAction,
@@ -22,64 +22,67 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { Id } from "@/convex/_generated/dataModel";
 import { getErrorMessage } from "@/lib/get-error-message";
-import { useCreateInsurer, useUpdateInsurer } from "../../api";
-import type { InsurerDoc } from "../../types";
+import { useCreateBond, useUpdateBond } from "../../api";
+import type { BondDoc } from "../../types";
 
-interface InsurerFormModalProps {
+interface BondCatalogFormModalProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   companyId: Id<"companies">;
-  insurer: InsurerDoc | null;
+  row: BondDoc | null;
 }
 
 interface FormState {
   name: string;
-  taxId: string;
-  website: string;
-  email: string;
-  phone: string;
-  notes: string;
+  code: string;
+  description: string;
+  defaultRate: string;
 }
 
 const emptyState: FormState = {
   name: "",
-  taxId: "",
-  website: "",
-  email: "",
-  phone: "",
-  notes: "",
+  code: "",
+  description: "",
+  defaultRate: "",
 };
 
-export function InsurerFormModal({
+export function BondCatalogFormModal({
   open,
   setOpen,
   companyId,
-  insurer,
-}: InsurerFormModalProps) {
-  const isEdit = Boolean(insurer);
+  row,
+}: BondCatalogFormModalProps) {
+  const isEdit = Boolean(row);
   const [form, setForm] = useState<FormState>(emptyState);
 
-  const { mutate: createInsurer, isPending: isCreating } = useCreateInsurer();
-  const { mutate: updateInsurer, isPending: isUpdating } = useUpdateInsurer();
+  const { mutate: createRow, isPending: isCreating } = useCreateBond();
+  const { mutate: updateRow, isPending: isUpdating } = useUpdateBond();
   const isPending = isCreating || isUpdating;
 
   useEffect(() => {
     if (!open) return;
-    if (insurer) {
+    if (row) {
       setForm({
-        name: insurer.name,
-        taxId: insurer.taxId ?? "",
-        website: insurer.website ?? "",
-        email: insurer.email ?? "",
-        phone: insurer.phone ?? "",
-        notes: insurer.notes ?? "",
+        name: row.name,
+        code: row.code ?? "",
+        description: row.description ?? "",
+        defaultRate:
+          row.defaultRate !== undefined ? String(row.defaultRate) : "",
       });
     } else {
       setForm(emptyState);
     }
-  }, [open, insurer]);
+  }, [open, row]);
 
-  const canSubmit = useMemo(() => form.name.trim().length > 0, [form.name]);
+  const rateError = useMemo(() => {
+    if (!form.defaultRate.trim()) return null;
+    const n = Number(form.defaultRate);
+    if (!Number.isFinite(n)) return "Debe ser un número";
+    if (n < 0 || n > 100) return "Entre 0 y 100";
+    return null;
+  }, [form.defaultRate]);
+
+  const canSubmit = form.name.trim().length > 0 && rateError === null;
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((s) => ({ ...s, [key]: value }));
@@ -88,21 +91,23 @@ export function InsurerFormModal({
     e.preventDefault();
     if (!canSubmit) return;
 
+    const rate = form.defaultRate.trim()
+      ? Number(form.defaultRate)
+      : undefined;
+
     const payload = {
       name: form.name.trim(),
-      taxId: form.taxId.trim() || undefined,
-      website: form.website.trim() || undefined,
-      email: form.email.trim() || undefined,
-      phone: form.phone.trim() || undefined,
-      notes: form.notes.trim() || undefined,
+      code: form.code.trim() || undefined,
+      description: form.description.trim() || undefined,
+      defaultRate: rate,
     };
 
-    if (isEdit && insurer) {
-      await updateInsurer(
-        { id: insurer._id, ...payload },
+    if (isEdit && row) {
+      await updateRow(
+        { id: row._id, ...payload },
         {
           onSuccess: () => {
-            toast.success("Aseguradora actualizada");
+            toast.success("Amparo actualizado");
             setOpen(false);
           },
           onError: (err) => toast.error(getErrorMessage(err)),
@@ -111,11 +116,11 @@ export function InsurerFormModal({
       return;
     }
 
-    await createInsurer(
+    await createRow(
       { companyId, ...payload },
       {
         onSuccess: () => {
-          toast.success("Aseguradora creada");
+          toast.success("Amparo creado");
           setOpen(false);
         },
         onError: (err) => toast.error(getErrorMessage(err)),
@@ -126,16 +131,17 @@ export function InsurerFormModal({
   return (
     <AegisModal open={open} onOpenChange={setOpen} maxWidth="sm:max-w-lg">
       <AegisModalHeader
-        icon={Building2}
-        title={isEdit ? "Editar aseguradora" : "Nueva aseguradora"}
+        icon={ShieldCheck}
+        iconClassName="bg-aegis-amber/10 border-aegis-amber/10 text-aegis-amber"
+        title={isEdit ? "Editar amparo" : "Nuevo amparo"}
         description={
           isEdit
-            ? "Actualiza los datos de contacto de la aseguradora."
-            : "Registra una nueva aseguradora en tu catálogo."
+            ? "Actualiza los datos del amparo."
+            : "Agrega un amparo al catálogo de tu agencia."
         }
       />
       <form
-        id="insurer-form"
+        id="bond-catalog-form"
         onSubmit={handleSubmit}
         className="contents"
         noValidate
@@ -144,7 +150,7 @@ export function InsurerFormModal({
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field
               label="Nombre *"
-              htmlFor="insurer-name"
+              htmlFor="bond-name"
               required
               autoFocus
               maxLength={80}
@@ -154,53 +160,45 @@ export function InsurerFormModal({
               className="sm:col-span-2"
             />
             <Field
-              label="NIT / RUT"
-              htmlFor="insurer-tax-id"
-              maxLength={40}
-              value={form.taxId}
+              label="Código"
+              htmlFor="bond-code"
+              placeholder="Ej. SERIEDAD, CUMPL"
+              maxLength={20}
+              value={form.code}
               disabled={isPending}
-              onChange={(v) => update("taxId", v)}
+              onChange={(v) => update("code", v.toUpperCase())}
             />
             <Field
-              label="Sitio web"
-              htmlFor="insurer-website"
-              type="url"
-              placeholder="https://"
-              maxLength={200}
-              value={form.website}
+              label="Tasa por defecto (%)"
+              htmlFor="bond-rate"
+              type="number"
+              inputMode="decimal"
+              min={0}
+              max={100}
+              step="0.01"
+              placeholder="Ej. 2.5"
+              value={form.defaultRate}
               disabled={isPending}
-              onChange={(v) => update("website", v)}
+              onChange={(v) => update("defaultRate", v)}
+              inputClassName={rateError ? "border-destructive" : ""}
             />
-            <Field
-              label="Correo de contacto"
-              htmlFor="insurer-email"
-              type="email"
-              maxLength={120}
-              value={form.email}
-              disabled={isPending}
-              onChange={(v) => update("email", v)}
-            />
-            <Field
-              label="Teléfono"
-              htmlFor="insurer-phone"
-              type="tel"
-              maxLength={40}
-              value={form.phone}
-              disabled={isPending}
-              onChange={(v) => update("phone", v)}
-            />
+            {rateError && (
+              <p className="text-xs text-destructive sm:col-span-2 -mt-1">
+                {rateError}
+              </p>
+            )}
             <div className="sm:col-span-2">
-              <Label htmlFor="insurer-notes" className="text-xs line-clamp-1">
-                Notas internas
+              <Label htmlFor="bond-description" className="text-xs line-clamp-1">
+                Descripción
               </Label>
               <Textarea
-                id="insurer-notes"
+                id="bond-description"
                 maxLength={500}
                 rows={3}
-                placeholder="Referencias, horarios, comisiones estándar…"
-                value={form.notes}
+                placeholder="Breve descripción del alcance del amparo…"
+                value={form.description}
                 disabled={isPending}
-                onChange={(e) => update("notes", e.target.value)}
+                onChange={(e) => update("description", e.target.value)}
               />
             </div>
           </div>
@@ -213,10 +211,10 @@ export function InsurerFormModal({
           </DialogClose>
           <Button
             type="submit"
-            form="insurer-form"
+            form="bond-catalog-form"
             disabled={!canSubmit || isPending}
           >
-            {isEdit ? "Guardar cambios" : "Crear aseguradora"}
+            {isEdit ? "Guardar cambios" : "Crear amparo"}
           </Button>
         </AegisModalFooter>
       </form>

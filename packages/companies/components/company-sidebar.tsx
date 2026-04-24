@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   List,
   Settings2,
+  Shield,
   ShieldCheck,
   Tag,
   UserCircle,
@@ -126,6 +127,11 @@ export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
           title: "Ramos",
           url: `/companies/${companyId}/settings/lines-of-business`,
           icon: Tag,
+        },
+        {
+          title: "Amparos",
+          url: `/companies/${companyId}/settings/bonds`,
+          icon: Shield,
         },
         {
           title: "Permisos",

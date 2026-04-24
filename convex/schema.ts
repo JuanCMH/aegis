@@ -206,9 +206,18 @@ const schema = defineSchema({
   }).index("clientId", ["clientId"]),
   bonds: defineTable({
     name: v.string(),
-    description: v.string(),
+    code: v.optional(v.string()),
+    description: v.optional(v.string()),
+    /** Default rate (per mil / percentage) applied to this bond type. */
+    defaultRate: v.optional(v.number()),
+    isActive: v.boolean(),
     companyId: v.id("companies"),
-  }).index("companyId", ["companyId"]),
+  })
+    .index("companyId", ["companyId"])
+    .searchIndex("search_name", {
+      searchField: "name",
+      filterFields: ["companyId"],
+    }),
   insurers: defineTable({
     name: v.string(),
     taxId: v.optional(v.string()),

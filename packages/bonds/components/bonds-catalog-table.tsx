@@ -5,7 +5,7 @@ import {
   Pencil,
   Power,
   PowerOff,
-  Tag,
+  ShieldCheck,
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
@@ -31,24 +31,24 @@ import {
 } from "@/components/ui/table";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { cn } from "@/lib/utils";
-import { useRemoveLineOfBusiness, useSetLineOfBusinessActive } from "../api";
-import type { LineOfBusinessDoc } from "../types";
+import { useRemoveBond, useSetBondActive } from "../api";
+import type { BondDoc } from "../types";
 
-interface LinesOfBusinessTableProps {
-  rows: LineOfBusinessDoc[] | undefined;
+interface BondsCatalogTableProps {
+  rows: BondDoc[] | undefined;
   isLoading: boolean;
   canManage: boolean;
   filter: string;
-  onEdit: (row: LineOfBusinessDoc) => void;
+  onEdit: (row: BondDoc) => void;
 }
 
-export function LinesOfBusinessTable({
+export function BondsCatalogTable({
   rows,
   isLoading,
   canManage,
   filter,
   onEdit,
-}: LinesOfBusinessTableProps) {
+}: BondsCatalogTableProps) {
   if (isLoading) {
     return (
       <div className="rounded-xl border border-border/60 bg-card">
@@ -82,17 +82,17 @@ export function LinesOfBusinessTable({
   if (filtered.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/60 bg-card px-6 py-12 text-center">
-        <div className="flex size-12 items-center justify-center rounded-full bg-aegis-cyan/10 text-aegis-cyan">
-          <Tag className="size-5" />
+        <div className="flex size-12 items-center justify-center rounded-full bg-aegis-amber/10 text-aegis-amber">
+          <ShieldCheck className="size-5" />
         </div>
         <div>
           <p className="text-sm font-medium text-aegis-graphite">
-            {filter.trim() ? "Sin resultados" : "Aún no hay ramos"}
+            {filter.trim() ? "Sin resultados" : "Aún no hay amparos"}
           </p>
           <p className="mt-1 max-w-sm text-xs text-aegis-steel">
             {filter.trim()
               ? "Prueba con otro nombre, código o descripción."
-              : "Define los ramos o líneas de negocio con los que trabaja tu agencia."}
+              : "Define los amparos o fianzas que cotiza y emite tu agencia."}
           </p>
         </div>
       </div>
@@ -105,13 +105,13 @@ export function LinesOfBusinessTable({
         <TableHeader>
           <TableRow className="bg-muted/30 hover:bg-muted/30">
             <TableHead className="h-10 text-xs font-medium text-aegis-steel">
-              Ramo
+              Amparo
             </TableHead>
             <TableHead className="h-10 text-xs font-medium text-aegis-steel">
               Código
             </TableHead>
             <TableHead className="h-10 text-xs font-medium text-aegis-steel">
-              Comisión
+              Tasa
             </TableHead>
             <TableHead className="h-10 text-xs font-medium text-aegis-steel">
               Estado
@@ -121,7 +121,7 @@ export function LinesOfBusinessTable({
         </TableHeader>
         <TableBody>
           {filtered.map((row) => (
-            <LineRow
+            <BondRow
               key={row._id}
               row={row}
               canManage={canManage}
@@ -136,23 +136,22 @@ export function LinesOfBusinessTable({
 
 /* ---------------------------------- row ----------------------------------- */
 
-function LineRow({
+function BondRow({
   row,
   canManage,
   onEdit,
 }: {
-  row: LineOfBusinessDoc;
+  row: BondDoc;
   canManage: boolean;
-  onEdit: (row: LineOfBusinessDoc) => void;
+  onEdit: (row: BondDoc) => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { mutate: setActive, isPending: isToggling } =
-    useSetLineOfBusinessActive();
-  const { mutate: remove, isPending: isRemoving } = useRemoveLineOfBusiness();
+  const { mutate: setActive, isPending: isToggling } = useSetBondActive();
+  const { mutate: remove, isPending: isRemoving } = useRemoveBond();
 
   const [DeleteConfirm, confirmDelete] = useConfirm({
-    title: "Eliminar ramo",
-    message: `Se eliminará "${row.name}" del catálogo. Las pólizas existentes mantienen el nombre registrado, pero no podrás seleccionarlo en nuevas pólizas.`,
+    title: "Eliminar amparo",
+    message: `Se eliminará "${row.name}" del catálogo. Las cotizaciones y pólizas existentes mantienen el nombre registrado, pero no podrás seleccionarlo en nuevas emisiones.`,
     type: "critical",
     confirmText: "Eliminar",
   });
@@ -163,7 +162,7 @@ function LineRow({
       { id: row._id, isActive: !row.isActive },
       {
         onSuccess: () =>
-          toast.success(row.isActive ? "Ramo archivado" : "Ramo activado"),
+          toast.success(row.isActive ? "Amparo archivado" : "Amparo activado"),
         onError: (err) => toast.error(getErrorMessage(err)),
       },
     );
@@ -176,7 +175,7 @@ function LineRow({
     await remove(
       { id: row._id },
       {
-        onSuccess: () => toast.success("Ramo eliminado"),
+        onSuccess: () => toast.success("Amparo eliminado"),
         onError: (err) => toast.error(getErrorMessage(err)),
       },
     );
@@ -188,8 +187,8 @@ function LineRow({
       <TableRow className={cn(!row.isActive && "opacity-70")}>
         <TableCell className="py-3">
           <div className="flex items-center gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-aegis-cyan/10 text-aegis-cyan">
-              <Tag className="size-4" />
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-aegis-amber/10 text-aegis-amber">
+              <ShieldCheck className="size-4" />
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-aegis-graphite">
@@ -211,9 +210,9 @@ function LineRow({
           )}
         </TableCell>
         <TableCell className="text-xs">
-          {row.defaultCommission !== undefined ? (
+          {row.defaultRate !== undefined ? (
             <span className="font-mono text-aegis-graphite">
-              {row.defaultCommission}%
+              {row.defaultRate}%
             </span>
           ) : (
             <span className="text-aegis-steel/60">—</span>

@@ -1,6 +1,12 @@
 "use client";
 
-import { MoreHorizontal, Pencil, ShieldCheck, Trash2, Users } from "lucide-react";
+import {
+  MoreHorizontal,
+  Pencil,
+  ShieldCheck,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useConfirm } from "@/components/hooks/use-confirm";
@@ -15,10 +21,7 @@ import {
 import { getErrorMessage } from "@/lib/get-error-message";
 import { cn } from "@/lib/utils";
 import { useRemoveRole } from "../api";
-import {
-  countPermissions,
-  permissionsFromRecord,
-} from "../lib/role-templates";
+import { countPermissions, permissionsFromRecord } from "../lib/role-templates";
 import type { RoleWithCount } from "../types";
 
 interface RoleCardProps {

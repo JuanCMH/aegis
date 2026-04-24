@@ -25,10 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { cn } from "@/lib/utils";
-import {
-  useRemoveInsurer,
-  useSetInsurerActive,
-} from "../api";
+import { useRemoveInsurer, useSetInsurerActive } from "../api";
 import type { InsurerDoc } from "../types";
 
 interface InsurerCardProps {

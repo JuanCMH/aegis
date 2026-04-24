@@ -32,7 +32,7 @@ export const SelectedBondModal = ({
 }: SelectedBondModalProps) => {
   const [updateData, setUpdateData] = useState<BondFormData>({
     name: selectedBond ? selectedBond.name : "",
-    description: selectedBond ? selectedBond.description : "",
+    description: selectedBond?.description ?? "",
   });
 
   const handleClose = () => {

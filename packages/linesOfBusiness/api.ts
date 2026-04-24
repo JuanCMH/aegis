@@ -4,9 +4,8 @@ import { api } from "@/convex/_generated/api";
 
 const route = api.linesOfBusiness;
 
-export const useGetLinesOfBusiness = (
-  data: typeof route.getByCompany._args,
-) => useFetch(route.getByCompany, data);
+export const useGetLinesOfBusiness = (data: typeof route.getByCompany._args) =>
+  useFetch(route.getByCompany, data);
 
 export const useGetLineOfBusiness = (data: typeof route.getById._args) =>
   useFetch(route.getById, data);
