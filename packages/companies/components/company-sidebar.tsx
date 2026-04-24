@@ -27,6 +27,7 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+import { useBondsSheet } from "@/packages/bonds/store/use-bonds-sheet";
 import { useMembersSheet } from "@/packages/members/store/use-members-sheet";
 import { useInsurersSheet } from "@/packages/insurers/store/use-insurers-sheet";
 import { useLinesOfBusinessSheet } from "@/packages/linesOfBusiness/store/use-lines-of-business-sheet";
@@ -41,6 +42,7 @@ export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const [, setRolesSheetOpen] = useRolesSheet();
   const [, setInsurersSheetOpen] = useInsurersSheet();
   const [, setLinesOfBusinessSheetOpen] = useLinesOfBusinessSheet();
+  const [, setBondsSheetOpen] = useBondsSheet();
 
   const data = [
     {
@@ -138,7 +140,7 @@ export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         },
         {
           title: "Amparos",
-          url: `/companies/${companyId}/settings/bonds`,
+          onClick: () => setBondsSheetOpen(true),
           icon: Shield,
         },
         {

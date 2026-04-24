@@ -31,7 +31,7 @@ Específicas:
 
 | Ruta                                          | Archivo                                                         |
 |-----------------------------------------------|-----------------------------------------------------------------|
-| `/companies/[id]/settings/bonds`              | `app/(app)/companies/[companyId]/settings/bonds/page.tsx`       |
+| Sidebar › Agencia › Amparos (sheet)           | `packages/bonds/components/bonds-sheet.tsx`                     |
 
 | Componente clave            | Archivo                                                              |
 |-----------------------------|----------------------------------------------------------------------|
@@ -44,7 +44,7 @@ Específicas:
 ### 4.1 Ver listado activo
 
 **Cuenta**: `owner@aegis.test`
-**Ruta**: `/companies/[demo]/settings/bonds`
+**Entrada**: Sidebar › Agencia › **Amparos** (sheet lateral)
 
 | # | Acción                            | Resultado esperado                                           |
 |---|-----------------------------------|--------------------------------------------------------------|
@@ -117,7 +117,7 @@ Específicas:
 
 | Acción / UI                              | Owner | Admin | Member | Asesor (*) | Lector (*) | Outsider |
 |------------------------------------------|-------|-------|--------|------------|------------|----------|
-| Ver página `/settings/bonds`             | ✅    | ✅    | ✅     | ✅         | ✅         | ❌ (404) |
+| Abrir sheet "Amparos"                    | ✅    | ✅    | ✅     | ✅         | ✅         | ❌ (sin sidebar) |
 | Ver filas en tabla                       | ✅    | ✅    | ✅     | ✅         | ✅         | ❌       |
 | Botón "Nuevo amparo"                     | ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |
 | Menú (⋯) en fila                         | ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |
@@ -149,8 +149,8 @@ Específicas:
   (`packages/bonds/components/modals/amparos-picker-modal.tsx`). Este
   modal **solo lee** `getByCompany({ includeInactive: false })` y permite
   marcar amparos con checkbox para añadirlos a `performanceBondsData`.
-  **No expone CRUD**: para crear / editar / archivar amparos hay un link
-  "Gestionar catálogo →" que navega a `/companies/[id]/settings/bonds`
+  **No expone CRUD**: para crear / editar / archivar amparos hay un botón
+  "Gestionar catálogo →" que cierra el picker y abre el `BondsSheet`
   (solo visible con `bonds_manage`).
 - **Precarga de tasa**: al marcar un amparo en el picker, su
   `defaultRate` se copia como `rate` inicial en la instancia

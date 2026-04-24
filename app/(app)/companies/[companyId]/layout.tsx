@@ -1,6 +1,7 @@
 "use client";
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { BondsSheet } from "@/packages/bonds/components/bonds-sheet";
 import { CompanySidebar } from "@/packages/companies/components/company-sidebar";
 import { InsurersSheet } from "@/packages/insurers/components/insurers-sheet";
 import { LinesOfBusinessSheet } from "@/packages/linesOfBusiness/components/lines-of-business-sheet";
@@ -20,6 +21,7 @@ const CompanyLayout = ({ children }: CompanyLayoutProps) => {
       <RolesSheet />
       <InsurersSheet />
       <LinesOfBusinessSheet />
+      <BondsSheet />
     </SidebarProvider>
   );
 };

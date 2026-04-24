@@ -2,7 +2,6 @@
 
 import { differenceInCalendarDays } from "date-fns";
 import { ExternalLink, ShieldCheck } from "lucide-react";
-import Link from "next/link";
 import type { Dispatch, SetStateAction } from "react";
 import {
   AegisModal,
@@ -17,6 +16,7 @@ import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import type { ContractDataType } from "@/packages/quotes/types";
 import { useHasPermissions } from "@/packages/roles/api";
 import { useGetBondsByCompany } from "../../api";
+import { useBondsSheet } from "../../store/use-bonds-sheet";
 import type { BondDataType } from "../../types";
 
 interface AmparosPickerModalProps {
@@ -31,8 +31,9 @@ interface AmparosPickerModalProps {
  * Selector de amparos (catálogo → cotización).
  *
  * Lee de `bonds.getByCompany` sólo los activos y permite marcarlos como
- * parte de la cotización. El CRUD del catálogo vive en
- * `/companies/[id]/settings/bonds`; este modal es sólo consumidor.
+ * parte de la cotización. El CRUD del catálogo vive en el sheet
+ * `BondsSheet` (sidebar › Agencia › Amparos); este modal es sólo
+ * consumidor.
  */
 export const AmparosPickerModal = ({
   open,
@@ -42,6 +43,7 @@ export const AmparosPickerModal = ({
   setPerformanceBondsData,
 }: AmparosPickerModalProps) => {
   const companyId = useCompanyId();
+  const [, setBondsSheetOpen] = useBondsSheet();
 
   const { data: bonds, isLoading } = useGetBondsByCompany({ companyId });
 
@@ -102,18 +104,17 @@ export const AmparosPickerModal = ({
           </h2>
           {canManageCatalog && (
             <Button
-              asChild
+              type="button"
               variant="ghost"
               size="sm"
               className="h-7 gap-1 px-2 text-xs text-aegis-steel"
+              onClick={() => {
+                setOpen(false);
+                setBondsSheetOpen(true);
+              }}
             >
-              <Link
-                href={`/companies/${companyId}/settings/bonds`}
-                target="_blank"
-              >
-                Gestionar catálogo
-                <ExternalLink className="size-3" />
-              </Link>
+              Gestionar catálogo
+              <ExternalLink className="size-3" />
             </Button>
           )}
         </header>
@@ -142,10 +143,17 @@ export const AmparosPickerModal = ({
                     : "Pide a un administrador que cree amparos en la agencia."}
                 </p>
                 {canManageCatalog && (
-                  <Button asChild size="sm" variant="outline" className="mt-3">
-                    <Link href={`/companies/${companyId}/settings/bonds`}>
-                      Ir al catálogo
-                    </Link>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="mt-3"
+                    onClick={() => {
+                      setOpen(false);
+                      setBondsSheetOpen(true);
+                    }}
+                  >
+                    Ir al catálogo
                   </Button>
                 )}
               </div>
