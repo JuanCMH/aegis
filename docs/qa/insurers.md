@@ -33,7 +33,7 @@ Específicas:
 
 | Ruta                                          | Archivo                                                            |
 |-----------------------------------------------|--------------------------------------------------------------------|
-| `/companies/[id]/settings/insurers`           | `app/(app)/companies/[companyId]/settings/insurers/page.tsx`       |
+| Sidebar › Agencia › Aseguradoras (sheet)      | `packages/insurers/components/insurers-sheet.tsx`                  |
 
 | Componente clave        | Archivo                                                        |
 |-------------------------|----------------------------------------------------------------|
@@ -47,7 +47,7 @@ Específicas:
 ### 4.1 Ver listado con scope "Activas"
 
 **Cuenta**: `owner@aegis.test`
-**Ruta**: `/companies/[demo]/settings/insurers`
+**Entrada**: Sidebar › Agencia › **Aseguradoras** (sheet lateral)
 
 | # | Acción                                    | Resultado esperado                                                    |
 |---|-------------------------------------------|-----------------------------------------------------------------------|
@@ -132,7 +132,7 @@ Específicas:
 
 | Acción / UI                       | Owner | Admin | Member | Asesor (*) | Lector (*) | Outsider |
 |-----------------------------------|-------|-------|--------|------------|------------|----------|
-| Ver página `/settings/insurers`   | ✅    | ✅    | ✅     | ✅         | ✅         | ❌ (404) |
+| Abrir sheet "Aseguradoras"        | ✅    | ✅    | ✅     | ✅         | ✅         | ❌ (sin sidebar) |
 | Ver cards                         | ✅    | ✅    | ✅     | ✅         | ✅         | ❌       |
 | Botón "Nueva aseguradora"         | ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |
 | Menú (⋯) en card                  | ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |

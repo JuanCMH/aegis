@@ -28,6 +28,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import { useMembersSheet } from "@/packages/members/store/use-members-sheet";
+import { useInsurersSheet } from "@/packages/insurers/store/use-insurers-sheet";
 import { useRolesSheet } from "@/packages/roles/store/use-roles-sheet";
 import { useCompanyId } from "../store/use-company-id";
 import { CompanyMenu } from "./company-menu";
@@ -37,6 +38,7 @@ export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const companyId = useCompanyId();
   const [, setMembersSheetOpen] = useMembersSheet();
   const [, setRolesSheetOpen] = useRolesSheet();
+  const [, setInsurersSheetOpen] = useInsurersSheet();
 
   const data = [
     {
@@ -124,7 +126,7 @@ export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         },
         {
           title: "Aseguradoras",
-          url: `/companies/${companyId}/settings/insurers`,
+          onClick: () => setInsurersSheetOpen(true),
           icon: Building2,
         },
         {
