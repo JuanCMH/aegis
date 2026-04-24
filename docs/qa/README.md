@@ -67,7 +67,7 @@ No modifiques código de la app. Solo observa y reporta.
 | Lines of Business      | `lines-of-business.md`    | ✅ documentado   |
 | Bonds (Amparos)        | `bonds.md`                | ✅ documentado   |
 | Clients                | `clients.md`              | ✅ documentado   |
-| Quotes                 | `quotes.md`               | ⏳ pendiente     |
+| Quotes                 | `quotes.md`               | ✅ documentado   |
 | Policies               | `policies.md`             | ⏳ pendiente     |
 | Dashboard              | `dashboard.md`            | ⏳ pendiente     |
 | Logs (Audit)           | `logs.md`                 | ⏳ pendiente     |
