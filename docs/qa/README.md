@@ -63,7 +63,7 @@ No modifiques código de la app. Solo observa y reporta.
 |------------------------|---------------------------|------------------|
 | Members + Invitations  | `members.md`              | ✅ documentado   |
 | Roles                  | `roles.md`                | ✅ documentado   |
-| Insurers               | `insurers.md`             | ⏳ pendiente     |
+| Insurers               | `insurers.md`             | ✅ documentado   |
 | Lines of Business      | `lines-of-business.md`    | ⏳ pendiente     |
 | Bonds (Amparos)        | `bonds.md`                | ⏳ pendiente     |
 | Clients                | `clients.md`              | ⏳ pendiente     |
