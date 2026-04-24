@@ -62,7 +62,7 @@ No modifiques código de la app. Solo observa y reporta.
 | Módulo                 | Archivo                   | Estado           |
 |------------------------|---------------------------|------------------|
 | Members + Invitations  | `members.md`              | ✅ documentado   |
-| Roles                  | `roles.md`                | ⏳ pendiente     |
+| Roles                  | `roles.md`                | ✅ documentado   |
 | Insurers               | `insurers.md`             | ⏳ pendiente     |
 | Lines of Business      | `lines-of-business.md`    | ⏳ pendiente     |
 | Bonds (Amparos)        | `bonds.md`                | ⏳ pendiente     |
