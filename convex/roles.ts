@@ -182,6 +182,40 @@ export const get = query({
 });
 
 /**
+ * Roles with member counts, for the roles settings page.
+ * Returned shape: `{ ...role, memberCount: number }`.
+ */
+export const getWithCounts = query({
+  args: {
+    companyId: v.id("companies"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) return [];
+
+    const member = await populateMember(ctx, userId, args.companyId);
+    if (!member) return [];
+
+    const roles = await ctx.db
+      .query("roles")
+      .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
+      .collect();
+
+    const withCounts = await Promise.all(
+      roles.map(async (role) => {
+        const assigned = await ctx.db
+          .query("members")
+          .withIndex("customRoleId", (q) => q.eq("customRoleId", role._id))
+          .collect();
+        return { ...role, memberCount: assigned.length };
+      }),
+    );
+
+    return withCounts;
+  },
+});
+
+/**
  * Client-side permission check. Used by `<RoleGate>` and `useHasPermission`.
  * Returns `false` for unauthenticated users and non-members.
  */

@@ -9,6 +9,9 @@ const route = api.roles;
 export const useGetRoles = (data: typeof route.get._args) =>
   useFetch(route.get, data);
 
+export const useGetRolesWithCounts = (data: typeof route.getWithCounts._args) =>
+  useFetch(route.getWithCounts, data);
+
 export const useGetRole = (data: typeof route.getById._args) =>
   useFetch(route.getById, data);
 
