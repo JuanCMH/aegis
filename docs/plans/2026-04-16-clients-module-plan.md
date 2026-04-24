@@ -4,7 +4,7 @@
 
 **Goal:** Build a dynamic, template-driven client management module with a drag & drop template builder, AI-assisted template generation, AI-powered data extraction from documents, paginated search, and full CRUD.
 
-**Architecture:** The module has two main subsystems: (1) **Client Templates** — per-workspace form configuration stored in `clientTemplates` table, managed through a drag & drop builder at `/settings/client-template`, with AI assistance for generation and review. (2) **Clients** — CRUD with dynamic data stored as `{ name, identificationNumber, templateId, data: Record<string, any>, workspaceId }`, rendered by the active template, with AI extraction from uploaded file/image fields.
+**Architecture:** The module has two main subsystems: (1) **Client Templates** — per-company form configuration stored in `clientTemplates` table, managed through a drag & drop builder at `/settings/client-template`, with AI assistance for generation and review. (2) **Clients** — CRUD with dynamic data stored as `{ name, identificationNumber, templateId, data: Record<string, any>, companyId }`, rendered by the active template, with AI extraction from uploaded file/image fields.
 
 **Tech Stack:** Convex (backend, storage, search indexes), Next.js App Router, @dnd-kit (drag & drop), @convex-dev/agent + Gemini 2.5 Flash (AI), shadcn/ui, TanStack Table, Sonner, date-fns, Remixicon, unpdf.
 
@@ -118,30 +118,30 @@ Then define the two tables:
 
 ```ts
 clientTemplates: defineTable({
-  workspaceId: v.id("workspaces"),
+  companyId: v.id("companies"),
   sections: v.array(templateSection),
-}).index("workspaceId", ["workspaceId"]),
+}).index("companyId", ["companyId"]),
 
 clients: defineTable({
   name: v.string(),
   identificationNumber: v.string(),
   templateId: v.id("clientTemplates"),
   data: v.any(),
-  workspaceId: v.id("workspaces"),
+  companyId: v.id("companies"),
 })
-  .index("workspaceId", ["workspaceId"])
+  .index("companyId", ["companyId"])
   .searchIndex("search_name", {
     searchField: "name",
-    filterFields: ["workspaceId"],
+    filterFields: ["companyId"],
   })
   .searchIndex("search_identificationNumber", {
     searchField: "identificationNumber",
-    filterFields: ["workspaceId"],
+    filterFields: ["companyId"],
   }),
 ```
 
 > Note: `v.any()` is used for `data` since it's a dynamic Record<string, any>. Convex supports `v.any()` for flexible data.
-> Note: Two separate `searchIndex` definitions enable full-text search on both `name` and `identificationNumber`, each scoped to a workspace. This avoids using `.filter()` in queries, which is forbidden per Convex best practices — always use indexes instead.
+> Note: Two separate `searchIndex` definitions enable full-text search on both `name` and `identificationNumber`, each scoped to a company. This avoids using `.filter()` in queries, which is forbidden per Convex best practices — always use indexes instead.
 
 **Step 2: Verify schema compiles**
 
@@ -168,7 +168,7 @@ export const clientErrors = {
   unauthorized: "No estás autorizado para realizar esta acción",
   notFound: "El cliente no existe",
   templateNotFound: "La plantilla de clientes no existe para este espacio de trabajo",
-  workspaceNotFound: "El espacio de trabajo no existe o no eres miembro",
+  companyNotFound: "El espacio de trabajo no existe o no eres miembro",
   permissionDenied: "No tienes permisos para gestionar clientes en este espacio",
   nameRequired: "El nombre del cliente es obligatorio",
   identificationRequired: "El número de identificación es obligatorio",
@@ -191,7 +191,7 @@ git commit -m "[FEAT] Add client error messages"
 **Files:**
 - Create: `convex/clientTemplates.ts`
 
-This file handles create, update, and get for the per-workspace template. Pattern follows `convex/quote.ts` for auth/member checks.
+This file handles create, update, and get for the per-company template. Pattern follows `convex/quote.ts` for auth/member checks.
 
 **Step 1: Write the backend**
 
@@ -259,32 +259,32 @@ const sectionValidator = v.object({
   fields: v.array(fieldValidator),
 });
 
-export const getByWorkspace = query({
-  args: { workspaceId: v.id("workspaces") },
+export const getByCompany = query({
+  args: { companyId: v.id("companies") },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) return null;
 
-    const member = await populateMember(ctx, userId, args.workspaceId);
+    const member = await populateMember(ctx, userId, args.companyId);
     if (!member) return null;
 
     return await ctx.db
       .query("clientTemplates")
-      .withIndex("workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
       .unique();
   },
 });
 
 export const save = mutation({
   args: {
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
     sections: v.array(sectionValidator),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new ConvexError(clientErrors.unauthorized);
 
-    const member = await populateMember(ctx, userId, args.workspaceId);
+    const member = await populateMember(ctx, userId, args.companyId);
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
 
     // Validate that fixed fields (name, identificationNumber) exist
@@ -301,7 +301,7 @@ export const save = mutation({
 
     const existing = await ctx.db
       .query("clientTemplates")
-      .withIndex("workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
       .unique();
 
     if (existing) {
@@ -310,7 +310,7 @@ export const save = mutation({
     }
 
     return await ctx.db.insert("clientTemplates", {
-      workspaceId: args.workspaceId,
+      companyId: args.companyId,
       sections: args.sections,
     });
   },
@@ -325,7 +325,7 @@ Run: `npx convex dev --once`
 
 ```bash
 git add convex/clientTemplates.ts
-git commit -m "[FEAT] Add clientTemplates backend (save, getByWorkspace)"
+git commit -m "[FEAT] Add clientTemplates backend (save, getByCompany)"
 ```
 
 ---
@@ -351,13 +351,13 @@ export const create = mutation({
     identificationNumber: v.string(),
     templateId: v.id("clientTemplates"),
     data: v.any(),
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new ConvexError(clientErrors.unauthorized);
 
-    const member = await populateMember(ctx, userId, args.workspaceId);
+    const member = await populateMember(ctx, userId, args.companyId);
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
 
     if (!args.name.trim()) throw new ConvexError(clientErrors.nameRequired);
@@ -369,7 +369,7 @@ export const create = mutation({
       identificationNumber: args.identificationNumber,
       templateId: args.templateId,
       data: args.data,
-      workspaceId: args.workspaceId,
+      companyId: args.companyId,
     });
   },
 });
@@ -388,7 +388,7 @@ export const update = mutation({
     const client = await ctx.db.get(args.id);
     if (!client) throw new ConvexError(clientErrors.notFound);
 
-    const member = await populateMember(ctx, userId, client.workspaceId);
+    const member = await populateMember(ctx, userId, client.companyId);
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
 
     if (!args.name.trim()) throw new ConvexError(clientErrors.nameRequired);
@@ -414,7 +414,7 @@ export const remove = mutation({
     const client = await ctx.db.get(args.id);
     if (!client) throw new ConvexError(clientErrors.notFound);
 
-    const member = await populateMember(ctx, userId, client.workspaceId);
+    const member = await populateMember(ctx, userId, client.companyId);
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
 
     // Clean up file/image fields stored in Convex storage
@@ -444,9 +444,9 @@ export const remove = mutation({
   },
 });
 
-export const getByWorkspace = query({
+export const getByCompany = query({
   args: {
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
     search: v.optional(v.string()),
     paginationOpts: paginationOptsValidator,
   },
@@ -454,7 +454,7 @@ export const getByWorkspace = query({
     const userId = await getAuthUserId(ctx);
     if (userId === null) return { page: [], isDone: true, continueCursor: "" };
 
-    const member = await populateMember(ctx, userId, args.workspaceId);
+    const member = await populateMember(ctx, userId, args.companyId);
     if (!member) return { page: [], isDone: true, continueCursor: "" };
 
     // If search term provided, use search indexes (no .filter() per Convex best practices)
@@ -462,14 +462,14 @@ export const getByWorkspace = query({
       const byName = await ctx.db
         .query("clients")
         .withSearchIndex("search_name", (q) =>
-          q.search("name", args.search!).eq("workspaceId", args.workspaceId),
+          q.search("name", args.search!).eq("companyId", args.companyId),
         )
         .take(25);
 
       const byIdNumber = await ctx.db
         .query("clients")
         .withSearchIndex("search_identificationNumber", (q) =>
-          q.search("identificationNumber", args.search!).eq("workspaceId", args.workspaceId),
+          q.search("identificationNumber", args.search!).eq("companyId", args.companyId),
         )
         .take(25);
 
@@ -489,7 +489,7 @@ export const getByWorkspace = query({
     // No search: paginated list using official paginationOptsValidator
     return await ctx.db
       .query("clients")
-      .withIndex("workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
       .order("desc")
       .paginate(args.paginationOpts);
   },
@@ -504,7 +504,7 @@ export const getById = query({
     const client = await ctx.db.get(args.id);
     if (!client) return null;
 
-    const member = await populateMember(ctx, userId, client.workspaceId);
+    const member = await populateMember(ctx, userId, client.companyId);
     if (!member) return null;
 
     // Resolve file/image URLs from storage
@@ -557,8 +557,8 @@ import { useMutate } from "@/components/hooks/use-mutate";
 const templateRoute = api.clientTemplates;
 
 export const useGetClientTemplate = (
-  data: typeof templateRoute.getByWorkspace._args,
-) => useFetch(templateRoute.getByWorkspace, data);
+  data: typeof templateRoute.getByCompany._args,
+) => useFetch(templateRoute.getByCompany, data);
 
 export const useSaveClientTemplate = () => useMutate(templateRoute.save);
 
@@ -571,9 +571,9 @@ export const useUpdateClient = () => useMutate(clientRoute.update);
 
 export const useRemoveClient = () => useMutate(clientRoute.remove);
 
-export const useGetClientsByWorkspace = (
-  data: typeof clientRoute.getByWorkspace._args,
-) => useFetch(clientRoute.getByWorkspace, data);
+export const useGetClientsByCompany = (
+  data: typeof clientRoute.getByCompany._args,
+) => useFetch(clientRoute.getByCompany, data);
 
 export const useGetClientById = (data: typeof clientRoute.getById._args) =>
   useFetch(clientRoute.getById, data);
@@ -659,7 +659,7 @@ git commit -m "[FEAT] Add client module TypeScript types"
 **Files:**
 - Create: `packages/clients/hooks/use-client-id.ts`
 
-**Step 1: Write hook (same pattern as `use-workspace-id.ts`)**
+**Step 1: Write hook (same pattern as `use-company-id.ts`)**
 
 ```ts
 import { useParams } from "next/navigation";
@@ -682,7 +682,7 @@ git commit -m "[FEAT] Add useClientId param hook"
 
 ## Phase 2: Template Builder UI
 
-The drag & drop form builder where workspace admins design their client form.
+The drag & drop form builder where company admins design their client form.
 
 ---
 
@@ -770,7 +770,7 @@ Renders tabs above the canvas, one per section:
 
 **Files:**
 - Create: `packages/clients/components/template-builder/template-builder.tsx`
-- Create: `app/(app)/workspaces/[workspaceId]/settings/client-template/page.tsx`
+- Create: `app/(app)/companies/[companyId]/settings/client-template/page.tsx`
 
 **template-builder.tsx** — Main component that:
 - Wraps everything in `DndContext` from @dnd-kit/core
@@ -793,7 +793,7 @@ export default function ClientTemplatePage() {
 
 **Step: Add sidebar navigation link for settings**
 
-Modify `packages/workspaces/components/workspace-sidebar.tsx` — add a "Configuración" section or add "Plantilla Clientes" link under the "Clientes" group.
+Modify `packages/companies/components/company-sidebar.tsx` — add a "Configuración" section or add "Plantilla Clientes" link under the "Clientes" group.
 
 ---
 
@@ -814,7 +814,7 @@ Implement the core DnD handlers:
 **Files:**
 - Modify: `packages/clients/components/template-builder/template-builder.tsx`
 
-When no template exists for the workspace, create a default starting state:
+When no template exists for the company, create a default starting state:
 
 ```ts
 const defaultSections: TemplateSection[] = [
@@ -915,7 +915,7 @@ Props:
 ### Task 3.3: Create the new client page
 
 **Files:**
-- Modify: `app/(app)/workspaces/[workspaceId]/clients/new/page.tsx` (currently just a shell rendering static form)
+- Modify: `app/(app)/companies/[companyId]/clients/new/page.tsx` (currently just a shell rendering static form)
 
 Rewrite to:
 1. Load the active template via `useGetClientTemplate`
@@ -924,14 +924,14 @@ Rewrite to:
 4. Render `ClientStepper` with template sections
 5. Handle file uploads: use `useGenerateUploadUrl` → upload to storage → store storage ID in values
 6. Save button: extract `name` and `identificationNumber` from values, call `useCreateClient`
-7. On success → redirect to `/workspaces/[workspaceId]/clients/[newClientId]`
+7. On success → redirect to `/companies/[companyId]/clients/[newClientId]`
 
 ---
 
 ### Task 3.4: Create the client detail/edit page
 
 **Files:**
-- Create: `app/(app)/workspaces/[workspaceId]/clients/[clientId]/page.tsx`
+- Create: `app/(app)/companies/[companyId]/clients/[clientId]/page.tsx`
 
 Similar to quotes `[quoteId]/page.tsx`:
 1. Load client via `useGetClientById`
@@ -947,7 +947,7 @@ Similar to quotes `[quoteId]/page.tsx`:
 ### Task 3.5: Create the client list page — table with search
 
 **Files:**
-- Modify: `app/(app)/workspaces/[workspaceId]/clients/page.tsx` (currently exists but is a basic shell)
+- Modify: `app/(app)/companies/[companyId]/clients/page.tsx` (currently exists but is a basic shell)
 - Create: `packages/clients/components/table/client-columns.tsx`
 - Create: `packages/clients/components/table/client-data-table.tsx`
 - Create: `packages/clients/components/table/client-actions.tsx`
@@ -958,7 +958,7 @@ Similar to quotes `[quoteId]/page.tsx`:
 - Actions column with dropdown menu
 
 **client-data-table.tsx:**
-- Search input (debounced 300ms) that passes `search` to `useGetClientsByWorkspace`
+- Search input (debounced 300ms) that passes `search` to `useGetClientsByCompany`
 - TanStack Table with the columns
 - Pagination controls (Next/Previous using `continueCursor`)
 - Row click → navigate to client detail
@@ -1098,7 +1098,7 @@ For switch fields, use true/false.
 
 **Files:**
 - Modify: `packages/clients/components/dynamic-field.tsx` — for file/image types, after upload show toast "¿Extraer datos con IA?"
-- Modify: `app/(app)/workspaces/[workspaceId]/clients/new/page.tsx` — handle AI extraction callback
+- Modify: `app/(app)/companies/[companyId]/clients/new/page.tsx` — handle AI extraction callback
 - Modify: `packages/clients/api.ts` — add `useExtractClientFromDoc` hook (useExecute, pointing to `api.clientActions.extractFromDoc`)
 
 Flow:
@@ -1140,13 +1140,13 @@ Two modes:
 ### Task 5.1: Add sidebar navigation link for template settings
 
 **Files:**
-- Modify: `packages/workspaces/components/workspace-sidebar.tsx`
+- Modify: `packages/companies/components/company-sidebar.tsx`
 
 Add under the "Clientes" section a third link:
 ```ts
 {
   title: "Plantilla",
-  url: `/workspaces/${workspaceId}/settings/client-template`,
+  url: `/companies/${companyId}/settings/client-template`,
   icon: RiSettings3Fill,  // or RiLayout2Fill
 },
 ```
@@ -1156,9 +1156,9 @@ Add under the "Clientes" section a third link:
 ### Task 5.2: Add settings layout (if needed)
 
 **Files:**
-- Create: `app/(app)/workspaces/[workspaceId]/settings/layout.tsx` (if no settings layout exists)
+- Create: `app/(app)/companies/[companyId]/settings/layout.tsx` (if no settings layout exists)
 
-Simple layout wrapper consistent with the workspace layout pattern.
+Simple layout wrapper consistent with the company layout pattern.
 
 ---
 

@@ -18,24 +18,24 @@ Plataforma de gestión de seguros: pólizas, cotizaciones de garantías, cliente
 | Módulo | Descripción |
 |--------|-------------|
 | **Auth** | Login con email/password, Google y OTP |
-| **Workspaces** | Multi-tenant con códigos de invitación, logos y colores |
-| **Roles** | Sistema de permisos granulares por workspace |
+| **Companies** | Multi-tenant con códigos de invitación, logos y colores |
+| **Roles** | Sistema de permisos granulares por company |
 | **Clients** | Gestión de clientes (datos personales, identificación) |
 | **Policies** | Pólizas de seguros (asegurado, beneficiario, estados, comisiones) |
 | **Quotes** | Cotizaciones de garantías (bid bonds y performance bonds) con extracción AI |
 | **Bonds** | Catálogo de tipos de garantía |
-| **Logs** | Auditoría de acciones por workspace |
+| **Logs** | Auditoría de acciones por company |
 
 ## Estructura del Proyecto
 
 ```
 app/              → Rutas de Next.js (App Router)
-  (app)/          → Rutas protegidas (workspaces, clientes, pólizas, cotizaciones)
+  (app)/          → Rutas protegidas (companies, clientes, pólizas, cotizaciones)
   auth/           → Pantalla de autenticación
 components/       → Componentes compartidos, UI (shadcn), hooks, providers
 convex/           → Backend: schema, funciones, auth, agentes AI
 lib/              → Utilidades (formatos, sanitización, cálculos)
-packages/         → Feature modules (auth, bonds, clients, policies, quotes, users, workspaces)
+packages/         → Feature modules (auth, bonds, clients, policies, quotes, users, companies)
 public/           → Assets estáticos
 ```
 

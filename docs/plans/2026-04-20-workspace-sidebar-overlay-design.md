@@ -1,10 +1,10 @@
-# Workspace Sidebar Overlay Design
+# Company Sidebar Overlay Design
 
 **Date:** 2026-04-20
 
 **Context**
 
-The current workspace shell uses `SidebarProvider`, `WorkspaceSidebar`, and `SidebarInset` in `app/(app)/workspaces/[workspaceId]/layout.tsx`. On desktop, the sidebar panel is already rendered as a fixed element, but the layout still reserves width through the desktop gap element in `components/ui/sidebar.tsx`. Because of that, expanding the workspace sidebar reduces the available width for every page and makes the content feel smaller or compressed.
+The current company shell uses `SidebarProvider`, `CompanySidebar`, and `SidebarInset` in `app/(app)/companies/[companyId]/layout.tsx`. On desktop, the sidebar panel is already rendered as a fixed element, but the layout still reserves width through the desktop gap element in `components/ui/sidebar.tsx`. Because of that, expanding the company sidebar reduces the available width for every page and makes the content feel smaller or compressed.
 
 The goal is to preserve a fixed collapsed rail while allowing the expanded desktop sidebar to float above the content instead of participating in layout width calculations.
 
@@ -12,11 +12,11 @@ The goal is to preserve a fixed collapsed rail while allowing the expanded deskt
 
 ## Goals
 
-- Keep the desktop workspace sidebar visible as a collapsed icon rail.
+- Keep the desktop company sidebar visible as a collapsed icon rail.
 - Make the expanded desktop sidebar render above page content without changing content width.
 - Keep mobile behavior based on `Sheet` unchanged.
 - Close the expanded desktop sidebar on click outside, `Esc`, and route navigation.
-- Replace dropdown-based workspace navigation with directly visible navigation groups.
+- Replace dropdown-based company navigation with directly visible navigation groups.
 - Keep all navigation groups always visible when expanded.
 
 ## Non-Goals
@@ -34,15 +34,15 @@ The goal is to preserve a fixed collapsed rail while allowing the expanded deskt
 
 The desktop sidebar uses a dedicated gap element in `components/ui/sidebar.tsx` that changes width depending on the expanded or collapsed state. Even though the visible sidebar panel is `fixed`, the reserved gap changes content width and causes every screen to resize when the sidebar expands.
 
-### 2. Workspace Navigation Behaves Like A Launcher
+### 2. Company Navigation Behaves Like A Launcher
 
-`packages/workspaces/components/workspace-menu.tsx` currently renders each top-level section as a `DropdownMenu`. That makes the sidebar act more like a trigger for extra overlays than a persistent navigation surface. It increases clicks and weakens route orientation.
+`packages/companies/components/company-menu.tsx` currently renders each top-level section as a `DropdownMenu`. That makes the sidebar act more like a trigger for extra overlays than a persistent navigation surface. It increases clicks and weakens route orientation.
 
 ### 3. Weak Visual Hierarchy In The Sidebar Shell
 
-The workspace switcher, theme toggle, and profile controls work functionally, but they do not yet feel like a cohesive shell. In particular:
+The company switcher, theme toggle, and profile controls work functionally, but they do not yet feel like a cohesive shell. In particular:
 
-- `WorkspaceSwitcher` uses a hardcoded blue icon block instead of Harmony tokens.
+- `CompanySwitcher` uses a hardcoded blue icon block instead of Harmony tokens.
 - The current footer competes for attention between theme and profile.
 - The empty `Principal` section adds noise without clear navigational value.
 
@@ -65,7 +65,7 @@ The only major behavioral mismatch is the width reservation strategy used by the
 
 ### Why This Approach
 
-Compared with building a separate workspace-only sidebar, adapting the primitive keeps behavior centralized and avoids maintaining two sidebar systems.
+Compared with building a separate company-only sidebar, adapting the primitive keeps behavior centralized and avoids maintaining two sidebar systems.
 
 Compared with treating desktop exactly like mobile `Sheet`, this preserves the constant rail presence, which improves orientation and fits the desired hybrid behavior better.
 
@@ -99,12 +99,12 @@ Compared with treating desktop exactly like mobile `Sheet`, this preserves the c
 
 ### Header
 
-The header should contain the `WorkspaceSwitcher` as the main context control.
+The header should contain the `CompanySwitcher` as the main context control.
 
 Desired improvements:
 
 - Use Harmony-aligned colors and surfaces.
-- Make the active workspace more legible.
+- Make the active company more legible.
 - Keep the switcher compact in collapsed state and more descriptive in expanded state.
 
 ### Content
@@ -182,7 +182,7 @@ Keep:
 - `SidebarProvider`
 - `Sidebar`
 - `SidebarInset`
-- `WorkspaceSidebar`
+- `CompanySidebar`
 
 This avoids invasive shell changes and keeps compatibility with the rest of the app.
 
@@ -190,7 +190,7 @@ This avoids invasive shell changes and keeps compatibility with the rest of the 
 
 The main desktop change should happen in `components/ui/sidebar.tsx`.
 
-The desktop gap element should reserve only the collapsed rail width for the workspace sidebar flow, while the expanded panel width is handled purely by the fixed positioned sidebar container.
+The desktop gap element should reserve only the collapsed rail width for the company sidebar flow, while the expanded panel width is handled purely by the fixed positioned sidebar container.
 
 That creates the visual result of a floating expansion without forcing page content to shrink.
 
@@ -202,13 +202,13 @@ This behavior should be scoped to desktop expanded state only.
 
 ### 4. Close On Navigation
 
-The workspace navigation component should close the expanded panel when a route is selected.
+The company navigation component should close the expanded panel when a route is selected.
 
 This is especially important because no backdrop will be shown.
 
 ### 5. Replace Dropdown-Based Menu Rendering
 
-`packages/workspaces/components/workspace-menu.tsx` should render groups and links directly in expanded mode.
+`packages/companies/components/company-menu.tsx` should render groups and links directly in expanded mode.
 
 Collapsed mode can still render icon-only first-level entries, but expanded mode should use visible nested links.
 
@@ -228,13 +228,13 @@ The sidebar should feel like part of the Harmony shell rather than a default adm
 
 ### Specific Improvements To Existing Components
 
-#### WorkspaceSwitcher
+#### CompanySwitcher
 
 - Replace hardcoded `bg-blue-500` with Harmony-aligned styling.
-- Improve distinction between workspace name and support label.
+- Improve distinction between company name and support label.
 - Keep the switcher compact but prominent.
 
-#### WorkspaceMenu
+#### CompanyMenu
 
 - Move from dropdown triggers to visible grouped navigation.
 - Improve scanning with better group spacing and active states.
@@ -276,4 +276,4 @@ Because the expanded sidebar closes on navigation, route changes must not leave 
 
 Proceed with a desktop `rail + floating expanded panel` implementation by adapting the existing shadcn sidebar primitive rather than replacing it.
 
-At the same time, refactor the workspace navigation from dropdown-based sections to always-visible grouped links in expanded mode, remove the empty `Principal` group, and clean up the switcher/footer styling so the sidebar becomes a real workspace shell instead of a launcher.
+At the same time, refactor the company navigation from dropdown-based sections to always-visible grouped links in expanded mode, remove the empty `Principal` group, and clean up the switcher/footer styling so the sidebar becomes a real company shell instead of a launcher.

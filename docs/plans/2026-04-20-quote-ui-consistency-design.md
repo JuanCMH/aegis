@@ -4,7 +4,7 @@
 
 ## Goal
 
-Unify the visual language of quote creation cards, related modals, the performance bonds sheet, and shared confirmation/workspace dialogs so the experience feels like one product family.
+Unify the visual language of quote creation cards, related modals, the performance bonds sheet, and shared confirmation/company dialogs so the experience feels like one product family.
 
 ## Scope
 
@@ -18,7 +18,7 @@ In scope:
 - `packages/bonds/components/modal/selected-bond-modal.tsx`
 - `packages/bonds/components/performance-bonds-list.tsx`
 - `components/hooks/use-confirm.tsx`
-- `packages/workspaces/components/modals/create-workspace-modal.tsx`
+- `packages/companies/components/modals/create-company-modal.tsx`
 
 Out of scope:
 - Mobile-specific refinement
@@ -82,9 +82,9 @@ All dialogs in this scope should use the same core recipe:
 - Clearly separated footer area for the financial summary
 - Avoid stacked card-within-card feeling in the footer
 
-### Workspace modal
+### Company modal
 
-`create-workspace-modal` should stop feeling visually detached from the rest of the app.
+`create-company-modal` should stop feeling visually detached from the rest of the app.
 - Same header recipe
 - Same surface language
 - Tabs remain, but integrated cleanly into the body rather than appearing like a different UI kit

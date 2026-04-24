@@ -40,7 +40,7 @@ Actúa como un **Senior Creative Technologist** y **Lead Frontend Engineer** de 
 **Objetivo:** Diseñar y construir una landing page de alta fidelidad, "pixel perfect", con estética de software premium para:
 
 - **Marca / Proyecto:** Aegis
-- **Qué es:** Plataforma SaaS para gestión integral de seguros y garantías — pólizas, clientes, cotizaciones con IA, equipos y auditoría, todo en un solo workspace
+- **Qué es:** Plataforma SaaS para gestión integral de seguros y garantías — pólizas, clientes, cotizaciones con IA, equipos y auditoría, todo en un solo company
 - **Público:** Agentes de seguros, corredores y agencias en Colombia y Latinoamérica que necesitan centralizar su operación
 - **CTA principal:** "Solicitar acceso anticipado"
 - **Identidad estética:** "Infraestructura de misión crítica" + "Software de precisión para profesionales del riesgo"
@@ -170,7 +170,7 @@ Panel oscuro (`#0D1F3C`) con:
 
 ---
 
-**Feature 2 — "Telemetría del workspace en vivo"**
+**Feature 2 — "Telemetría del company en vivo"**
 
 Texto que se escribe solo (tipo terminal) en fondo oscuro, cambiando mensajes cada 3s:
 ```
@@ -238,10 +238,10 @@ Animación: aparición por palabras al entrar en viewport. Elegante y sobrio.
 - Al final de la línea: aparece valor cotizado (`$1.247.500 COP`) con fade
 - Abajo: comparación de 3 aseguradoras con barra de precio animada
 
-**Tarjeta 3 — "Multi-Workspace"**
-- Animación: 3 workspaces que aparecen como "islas" con logos diferentes (Agencia Norte, Seguros del Valle, Broker Central)
-- Un usuario-punto se mueve entre workspaces con trayectoria curva (SVG path)
-- Cada workspace tiene un color primario distinto — demo del sistema de temas
+**Tarjeta 3 — "Multi-Company"**
+- Animación: 3 companies que aparecen como "islas" con logos diferentes (Agencia Norte, Seguros del Valle, Broker Central)
+- Un usuario-punto se mueve entre companies con trayectoria curva (SVG path)
+- Cada company tiene un color primario distinto — demo del sistema de temas
 
 ---
 
@@ -260,7 +260,7 @@ Fondo `#F4F6FB`. Título:
 |--|--------|-------------------|---------|
 | | Agentes independientes | **Agencias medianas** | Grandes corredores |
 | | $0 / mes | **$149.000 COP / mes** | A convenir |
-| | 1 workspace | **Workspaces ilimitados** | Onboarding dedicado |
+| | 1 company | **Companies ilimitados** | Onboarding dedicado |
 | | | fondo `#0D1F3C`, botón zafiro | |
 
 El plan del medio tiene:

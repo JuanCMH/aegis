@@ -4,7 +4,7 @@
 
 **Goal:** Stabilize client template logic across builder, client CRUD, detail rendering, and client listing so templates are saved consistently and validated safely.
 
-**Architecture:** Keep `field_name` and `field_identificationNumber` as the canonical fixed-field IDs across AI, builder, frontend, and backend. Move template-aware validation into Convex so server mutations reject inconsistent client payloads, and return historical template sections from `clients.getById` while the list page derives dynamic columns from the active workspace template.
+**Architecture:** Keep `field_name` and `field_identificationNumber` as the canonical fixed-field IDs across AI, builder, frontend, and backend. Move template-aware validation into Convex so server mutations reject inconsistent client payloads, and return historical template sections from `clients.getById` while the list page derives dynamic columns from the active company template.
 
 **Tech Stack:** Next.js App Router, React, TypeScript, Convex, TanStack Table, Sonner.
 
@@ -40,8 +40,8 @@
 ### Task 3: Fix new/detail client pages to use consistent template sources
 
 **Files:**
-- Modify: `app/(app)/workspaces/[workspaceId]/clients/new/page.tsx`
-- Modify: `app/(app)/workspaces/[workspaceId]/clients/[clientId]/page.tsx`
+- Modify: `app/(app)/companies/[companyId]/clients/new/page.tsx`
+- Modify: `app/(app)/companies/[companyId]/clients/[clientId]/page.tsx`
 
 **Step 1:** Fix the detail page initialization order bug.
 
@@ -55,7 +55,7 @@
 
 **Files:**
 - Modify: `packages/clients/components/table/client-columns.tsx`
-- Modify: `app/(app)/workspaces/[workspaceId]/clients/page.tsx`
+- Modify: `app/(app)/companies/[companyId]/clients/page.tsx`
 - Verify: `packages/clients/components/table/client-data-table.tsx`
 
 **Step 1:** Extract reusable base columns and add a helper to generate dynamic columns from template fields.

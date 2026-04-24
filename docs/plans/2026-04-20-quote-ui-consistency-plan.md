@@ -2,7 +2,7 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Align quote creation cards, related modals, the performance bonds sheet, and shared confirmation/workspace dialogs under one consistent visual system.
+**Goal:** Align quote creation cards, related modals, the performance bonds sheet, and shared confirmation/company dialogs under one consistent visual system.
 
 **Architecture:** Keep the refactor local to the affected feature components instead of changing global `Dialog` and `Sheet` primitives. Reuse the same shell, header rhythm, separator usage, and icon capsule treatment across cards, modals, and sheets so the UI converges without widening scope.
 
@@ -39,7 +39,7 @@
 - Modify: `packages/bonds/components/modal/bonds-modal.tsx`
 - Modify: `packages/bonds/components/modal/selected-bond-modal.tsx`
 - Modify: `components/hooks/use-confirm.tsx`
-- Modify: `packages/workspaces/components/modals/create-workspace-modal.tsx`
+- Modify: `packages/companies/components/modals/create-company-modal.tsx`
 
 **Step 1: Standardize content shells**
 - Ensure each dialog uses `p-0 gap-0 overflow-hidden` and separator-led structure.
@@ -77,7 +77,7 @@
 - Modify: `docs/plans/2026-04-20-quote-ui-consistency-plan.md`
 
 **Step 1: Run static validation**
-- Run: `cd /home/juanc/work/aegis && bunx biome check packages/quotes/components/contract-info.tsx packages/quotes/components/quote-info.tsx packages/quotes/components/results-card.tsx packages/quotes/components/modals/quote-agent-modal.tsx packages/bonds/components/modal/create-bond-modal.tsx packages/bonds/components/modal/bonds-modal.tsx packages/bonds/components/modal/selected-bond-modal.tsx packages/bonds/components/performance-bonds-list.tsx components/hooks/use-confirm.tsx packages/workspaces/components/modals/create-workspace-modal.tsx`
+- Run: `cd /home/juanc/work/aegis && bunx biome check packages/quotes/components/contract-info.tsx packages/quotes/components/quote-info.tsx packages/quotes/components/results-card.tsx packages/quotes/components/modals/quote-agent-modal.tsx packages/bonds/components/modal/create-bond-modal.tsx packages/bonds/components/modal/bonds-modal.tsx packages/bonds/components/modal/selected-bond-modal.tsx packages/bonds/components/performance-bonds-list.tsx components/hooks/use-confirm.tsx packages/companies/components/modals/create-company-modal.tsx`
 - Expected: no Biome errors.
 
 **Step 2: Run browser verification**

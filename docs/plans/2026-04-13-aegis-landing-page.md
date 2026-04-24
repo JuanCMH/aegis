@@ -387,14 +387,14 @@ git commit -m "[FEAT] Add manifesto section with word-reveal animation"
 **Files:**
 - Create: `packages/landing/components/stacked-cards/policies-card.tsx`
 - Create: `packages/landing/components/stacked-cards/quotes-card.tsx`
-- Create: `packages/landing/components/stacked-cards/workspaces-card.tsx`
+- Create: `packages/landing/components/stacked-cards/companies-card.tsx`
 - Create: `packages/landing/components/stacked-cards/stacked-section.tsx`
 
 **Behavior:**
 - 3 full-height cards stacked. On scroll, new card pushes previous to `scale(0.92)` + `blur(16px)` + `opacity(0.4)`
 - Card 1 — Policies table with rows entering one by one (SURA, Bolívar, Allianz, etc.)
 - Card 2 — Quotes waveform animation with price reveal
-- Card 3 — Multi-workspace islands with animated user dot moving between them via SVG path
+- Card 3 — Multi-company islands with animated user dot moving between them via SVG path
 - GSAP ScrollTrigger with `pin: true` for sticky stacking effect
 - Each card is a client component; the container orchestrates GSAP pinning
 
@@ -408,7 +408,7 @@ git commit -m "[FEAT] Add manifesto section with word-reveal animation"
 
 ```bash
 git add packages/landing/components/stacked-cards/ app/\(home\)/page.tsx
-git commit -m "[FEAT] Add stacked cards section (policies, quotes, workspaces)"
+git commit -m "[FEAT] Add stacked cards section (policies, quotes, companies)"
 ```
 
 ---
@@ -553,7 +553,7 @@ git commit -m "[STYLE] Responsive and polish pass for landing page"
 | 8 | Feature: Roles & permissions panel | FEAT |
 | 9 | Features container section | FEAT |
 | 10 | Manifesto section (word reveal) | FEAT |
-| 11 | Stacked cards (policies, quotes, workspaces) | FEAT |
+| 11 | Stacked cards (policies, quotes, companies) | FEAT |
 | 12 | Pricing section (3-tier) | FEAT |
 | 13 | Footer | FEAT |
 | 14 | Assemble final page | FEAT |

@@ -9,7 +9,7 @@ description: "Prescriptive interface design system for the Harmony project. Use 
 
 Harmony is a comprehensive operational management SaaS platform for private security companies. It centralizes the entire operational cycle — from shift scheduling to month-end financial closing — replacing spreadsheets and manual processes with a structured, real-time system with full audit traceability.
 
-**Domain model:** Organizations → Workspaces → Customers → Areas → Points (service locations), with Workers assigned to Points via Shifts that follow rotation Sequences.
+**Domain model:** Organizations → Companies → Customers → Areas → Points (service locations), with Workers assigned to Points via Shifts that follow rotation Sequences.
 
 **Key modules:**
 - **Scheduling**: Shift assignment with rotation sequences, shift labels (time-range visual tags), operational concepts (overtime, night, holiday rules), and period locks for month-end closing.
@@ -18,7 +18,7 @@ Harmony is a comprehensive operational management SaaS platform for private secu
 - **Incidents**: Categorized incident recording with traceability, color-coded severity, configurable shift impact.
 - **Finance**: Income/expense records per customer with charts and org-level reports.
 - **Analytics**: Dashboard with 12 exportable report types, activity charts, worker distribution, incident analysis.
-- **Workflows**: ReactFlow-based activity visualization at org, workspace, and customer levels.
+- **Workflows**: ReactFlow-based activity visualization at org, company, and customer levels.
 - **Audit**: Full CRUD logging across 22 entity types.
 - **Access Control**: Custom roles with 53 granular permissions.
 - **Communications**: Verified emails for report delivery (Resend), in-app chat.
@@ -438,7 +438,7 @@ The core rule: **HarmonyModal = fixed content, HarmonySheet = variable content.*
 
 ### 2.5 MultiSelect
 
-**When to use:** Filtering or selecting multiple items from a list (e.g., filter by customer, select workspaces). Use instead of a `Select` when users need to pick more than one option.
+**When to use:** Filtering or selecting multiple items from a list (e.g., filter by customer, select companies). Use instead of a `Select` when users need to pick more than one option.
 
 **Import:** `@/components/ui/select` (named export `MultiSelect`)
 
@@ -471,7 +471,7 @@ The core rule: **HarmonyModal = fixed content, HarmonySheet = variable content.*
 
 **Key rules:**
 - Use `size="sm"` when inside toolbars or compact filter areas.
-- Set `enableSelectAll={false}` for small option lists (e.g., customers in a specific view). Keep it `true` for large lists (e.g., workspaces).
+- Set `enableSelectAll={false}` for small option lists (e.g., customers in a specific view). Keep it `true` for large lists (e.g., companies).
 - An empty `value` array (`[]`) means "all" / no filter applied. Never use a sentinel value like `"all"` — an empty array is the unfiltered state.
 - Options should have the shape `{ value: string; label: string }`. Build them from data with `useMemo`.
 - Reset the selection (set to `[]`) when switching context (e.g., changing tabs).
@@ -492,7 +492,7 @@ The core rule: **HarmonyModal = fixed content, HarmonySheet = variable content.*
 // Sidebar component
 <Sidebar variant="inset" collapsible="icon" {...props}>
   <SidebarHeader>
-    <WorkspaceSwitcher /> {/* or OrganizationSwitcher */}
+    <CompanySwitcher /> {/* or OrganizationSwitcher */}
   </SidebarHeader>
   <SidebarContent>
     <SidebarGroup>

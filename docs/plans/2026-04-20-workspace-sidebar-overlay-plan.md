@@ -1,10 +1,10 @@
-# Workspace Sidebar Overlay Implementation Plan
+# Company Sidebar Overlay Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Convert the workspace desktop sidebar into a fixed rail with a floating expanded panel that does not resize page content, while simplifying navigation into always-visible grouped links.
+**Goal:** Convert the company desktop sidebar into a fixed rail with a floating expanded panel that does not resize page content, while simplifying navigation into always-visible grouped links.
 
-**Architecture:** Keep the existing shadcn sidebar primitive and workspace shell structure, but decouple reserved layout width from expanded desktop width. Rework the workspace navigation components so the expanded panel shows visible groups and links directly, and close the panel on outside click, `Esc`, and navigation.
+**Architecture:** Keep the existing shadcn sidebar primitive and company shell structure, but decouple reserved layout width from expanded desktop width. Rework the company navigation components so the expanded panel shows visible groups and links directly, and close the panel on outside click, `Esc`, and navigation.
 
 **Tech Stack:** Next.js App Router, React, TypeScript, shadcn/ui sidebar primitive, Harmony design system.
 
@@ -14,11 +14,11 @@
 
 **Files:**
 - Modify: `components/ui/sidebar.tsx`
-- Verify: `app/(app)/workspaces/[workspaceId]/layout.tsx`
+- Verify: `app/(app)/companies/[companyId]/layout.tsx`
 
 **Step 1:** Identify the desktop gap logic that currently reserves expanded width.
 
-**Step 2:** Change the desktop layout reservation so the workspace shell always reserves only collapsed rail width.
+**Step 2:** Change the desktop layout reservation so the company shell always reserves only collapsed rail width.
 
 **Step 3:** Keep the visible desktop sidebar container fixed and allow its expanded width to float above content.
 
@@ -38,8 +38,8 @@
 ### Task 3: Replace dropdown navigation with visible grouped links
 
 **Files:**
-- Modify: `packages/workspaces/components/workspace-menu.tsx`
-- Modify: `packages/workspaces/components/workspace-sidebar.tsx`
+- Modify: `packages/companies/components/company-menu.tsx`
+- Modify: `packages/companies/components/company-sidebar.tsx`
 
 **Step 1:** Replace section dropdown triggers with grouped visible navigation content for expanded mode.
 
@@ -52,11 +52,11 @@
 ### Task 4: Improve sidebar shell hierarchy
 
 **Files:**
-- Modify: `packages/workspaces/components/workspace-switcher.tsx`
+- Modify: `packages/companies/components/company-switcher.tsx`
 - Modify: `components/sidebar-mode-toggle.tsx`
 - Verify: `components/sidebar-user.tsx`
 
-**Step 1:** Align `WorkspaceSwitcher` with Harmony tokens and improve hierarchy.
+**Step 1:** Align `CompanySwitcher` with Harmony tokens and improve hierarchy.
 
 **Step 2:** Reduce utility noise in the theme control and remove ad hoc typography overrides.
 
@@ -65,7 +65,7 @@
 ### Task 5: Close sidebar on navigation
 
 **Files:**
-- Modify: `packages/workspaces/components/workspace-menu.tsx`
+- Modify: `packages/companies/components/company-menu.tsx`
 
 **Step 1:** Close the expanded desktop sidebar when the user selects a route.
 

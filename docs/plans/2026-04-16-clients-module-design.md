@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-16
 
-**Goal:** Build a dynamic, template-driven client management module where each workspace configures its own form structure with drag & drop, AI-assisted template generation, and AI-powered data extraction from uploaded documents.
+**Goal:** Build a dynamic, template-driven client management module where each company configures its own form structure with drag & drop, AI-assisted template generation, and AI-powered data extraction from uploaded documents.
 
 ---
 
@@ -27,11 +27,11 @@
 
 ### Table: `clientTemplates`
 
-One active template per workspace. Defines the form structure.
+One active template per company. Defines the form structure.
 
 ```
 clientTemplates {
-  workspaceId: Id<"workspaces">
+  companyId: Id<"companies">
   sections: [{
     id: string                    // UUID
     label: string                 // "Información Básica", "Documentos", etc.
@@ -58,7 +58,7 @@ clientTemplates {
     }]
   }]
 }
-// Index: workspaceId
+// Index: companyId
 ```
 
 ### Table: `clients`
@@ -71,9 +71,9 @@ clients {
   identificationNumber: string          // Fixed, always present, indexed
   templateId: Id<"clientTemplates">     // Reference to template used at creation
   data: Record<string, any>             // Dynamic values: { "field_uuid": value }
-  workspaceId: Id<"workspaces">
+  companyId: Id<"companies">
 }
-// Indexes: workspaceId
+// Indexes: companyId
 // Search index: name, identificationNumber
 ```
 
@@ -82,7 +82,7 @@ clients {
 ## 2. Template Builder
 
 ### Location
-`/workspaces/[workspaceId]/settings/client-template`
+`/companies/[companyId]/settings/client-template`
 
 ### Layout
 - **Left panel:** Field palette — draggable field types (text, textarea, number, currency, date, select, phone, email, file, image, switch, url)
@@ -119,7 +119,7 @@ clients {
 
 ## 3. Create / Edit / View Client
 
-### Create Client (`/workspaces/[workspaceId]/clients/new`)
+### Create Client (`/companies/[companyId]/clients/new`)
 
 **Layout:**
 - Header: "Nuevo Cliente" + "Guardar" button
@@ -127,7 +127,7 @@ clients {
 - Each step renders section fields according to template grid
 
 **Standard flow:**
-1. Load active workspace template
+1. Load active company template
 2. User navigates sections filling fields
 3. Required fields validated on save (not on section change — navigation stays unblocked)
 4. Save: full validation → `create` mutation → redirect to client detail
@@ -139,7 +139,7 @@ clients {
 4. Fields auto-fill with suggested values (visually highlighted)
 5. User reviews and adjusts
 
-### View/Edit Client (`/workspaces/[workspaceId]/clients/[clientId]`)
+### View/Edit Client (`/companies/[companyId]/clients/[clientId]`)
 
 **Layout:**
 - Header: client name + "Editar"/"Guardar" toggle button
@@ -157,7 +157,7 @@ clients {
 ## 4. Client List & Table
 
 ### Location
-`/workspaces/[workspaceId]/clients`
+`/companies/[companyId]/clients`
 
 **Layout:**
 - Header: "Clientes" + "Nuevo Cliente" button
@@ -177,4 +177,4 @@ clients {
 - Results replace paginated table when search term is active
 
 **Row click:**
-- Navigates to `/workspaces/[workspaceId]/clients/[clientId]` in view mode
+- Navigates to `/companies/[companyId]/clients/[clientId]` in view mode
