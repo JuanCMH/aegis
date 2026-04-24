@@ -22,7 +22,9 @@ export function calculatePasswordStrength(value: string): PasswordStrength {
   score += hasSymbol ? 1 : 0;
 
   const percent = Math.round((score / 5) * 100);
-  const categoriesMet = [hasLower, hasUpper, hasNumber, hasSymbol].filter(Boolean).length;
+  const categoriesMet = [hasLower, hasUpper, hasNumber, hasSymbol].filter(
+    Boolean,
+  ).length;
   const isAcceptable = lengthOk && categoriesMet >= 3;
   const isStrong = lengthOk && categoriesMet === 4;
 
@@ -47,5 +49,3 @@ export function calculatePasswordStrength(value: string): PasswordStrength {
 
   return { score, label, colorClass, percent, isAcceptable, isStrong };
 }
-
-

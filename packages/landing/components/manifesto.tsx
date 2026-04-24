@@ -10,13 +10,7 @@ const firstParagraph =
   "Las agencias de seguros en Colombia administran millones en pólizas en hojas de cálculo.";
 const secondParagraph = "Aegis es el sistema que ese dinero merece.";
 
-function SplitWords({
-  text,
-  className,
-}: {
-  text: string;
-  className: string;
-}) {
+function SplitWords({ text, className }: { text: string; className: string }) {
   return (
     <>
       {text.split(" ").map((word, i) => (
@@ -37,9 +31,7 @@ export function Manifesto() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const words = gsap.utils.toArray<HTMLElement>(
-        "[data-manifesto-word]"
-      );
+      const words = gsap.utils.toArray<HTMLElement>("[data-manifesto-word]");
 
       gsap.to(words, {
         opacity: 1,

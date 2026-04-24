@@ -314,10 +314,7 @@ const QuoteIdPage = () => {
                   )}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button
-                        size="sm"
-                        disabled={isLoadingCompany}
-                      >
+                      <Button size="sm" disabled={isLoadingCompany}>
                         <Download />
                         Exportar
                       </Button>

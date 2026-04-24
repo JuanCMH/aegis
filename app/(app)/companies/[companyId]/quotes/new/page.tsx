@@ -2,11 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Sparkles,
-  Paperclip,
-  X,
-} from "lucide-react";
+import { Sparkles, Paperclip, X } from "lucide-react";
 import { BondDataType } from "@/packages/bonds/types";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";

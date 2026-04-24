@@ -68,7 +68,13 @@ export function QuotesCard() {
             className="animate-pulse"
           />
           {showPrice && (
-            <circle cx="350" cy="35" r="4" fill="#10B981" className="animate-pulse" />
+            <circle
+              cx="350"
+              cy="35"
+              r="4"
+              fill="#10B981"
+              className="animate-pulse"
+            />
           )}
         </svg>
       </div>

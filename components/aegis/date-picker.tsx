@@ -51,9 +51,7 @@ export function DatePicker({
             )}
           >
             <span className="truncate">{dateText}</span>
-            {!readOnly && (
-              <ChevronDown className="ml-auto h-4 w-4 shrink-0" />
-            )}
+            {!readOnly && <ChevronDown className="ml-auto h-4 w-4 shrink-0" />}
           </Button>
         </PopoverTrigger>
       </Hint>

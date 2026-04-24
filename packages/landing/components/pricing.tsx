@@ -122,7 +122,10 @@ export function Pricing() {
 
               <ul className="mb-8 space-y-3">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2.5 text-sm">
+                  <li
+                    key={feature}
+                    className="flex items-center gap-2.5 text-sm"
+                  >
                     <Check
                       className={`size-4 shrink-0 ${plan.highlighted ? "text-emerald" : "text-sapphire"}`}
                     />
@@ -145,7 +148,9 @@ export function Pricing() {
                     : "bg-graphite text-white hover:bg-graphite/90"
                 }`}
               >
-                {plan.price === "A convenir" ? "Contactar ventas" : "Solicitar acceso"}
+                {plan.price === "A convenir"
+                  ? "Contactar ventas"
+                  : "Solicitar acceso"}
               </a>
             </div>
           ))}

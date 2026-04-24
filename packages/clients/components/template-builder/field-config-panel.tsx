@@ -55,9 +55,7 @@ export function FieldConfigPanel({
     onUpdate({ ...field, ...partial });
   };
 
-  const updateConfig = (
-    partial: Partial<TemplateField["config"]>,
-  ) => {
+  const updateConfig = (partial: Partial<TemplateField["config"]>) => {
     onUpdate({ ...field, config: { ...field.config, ...partial } });
   };
 
@@ -90,9 +88,7 @@ export function FieldConfigPanel({
               </div>
             )}
             <div>
-              <SheetTitle className="text-sm">
-                Configurar campo
-              </SheetTitle>
+              <SheetTitle className="text-sm">Configurar campo</SheetTitle>
               <p className="text-xs text-muted-foreground/80">
                 {fieldTypeConfig?.label}
               </p>
@@ -350,7 +346,11 @@ export function FieldConfigPanel({
             </Button>
           )}
           <SheetClose asChild>
-            <Button variant="outline" size="sm" className="border-border/40 ml-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-border/40 ml-auto"
+            >
               Cerrar
             </Button>
           </SheetClose>

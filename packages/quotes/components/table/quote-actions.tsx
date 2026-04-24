@@ -11,11 +11,7 @@ import { useRouter } from "next/navigation";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { useConfirm } from "@/components/hooks/use-confirm";
 import { RoleGate } from "@/packages/roles/components/role-gate";
-import {
-  X,
-  Eye,
-  FileText,
-} from "lucide-react";
+import { X, Eye, FileText } from "lucide-react";
 
 interface QuoteActionsProps {
   id: Id<"quotes">;

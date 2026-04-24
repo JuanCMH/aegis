@@ -13,9 +13,8 @@ export const useUpdateQuote = () => useMutate(route.update);
 
 export const useRemoveQuote = () => useMutate(route.remove);
 
-export const useGetQuotesByCompany = (
-  data: typeof route.getByCompany._args,
-) => useFetch(route.getByCompany, data);
+export const useGetQuotesByCompany = (data: typeof route.getByCompany._args) =>
+  useFetch(route.getByCompany, data);
 
 export const useGetQuoteById = (data: typeof route.getById._args) =>
   useFetch(route.getById, data);

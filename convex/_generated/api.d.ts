@@ -32,6 +32,7 @@ import type * as lib_colors from "../lib/colors.js";
 import type * as lib_permissions from "../lib/permissions.js";
 import type * as linesOfBusiness from "../linesOfBusiness.js";
 import type * as members from "../members.js";
+import type * as migrations from "../migrations.js";
 import type * as quote from "../quote.js";
 import type * as resend from "../resend.js";
 import type * as roles from "../roles.js";
@@ -69,6 +70,7 @@ declare const fullApi: ApiFromModules<{
   "lib/permissions": typeof lib_permissions;
   linesOfBusiness: typeof linesOfBusiness;
   members: typeof members;
+  migrations: typeof migrations;
   quote: typeof quote;
   resend: typeof resend;
   roles: typeof roles;

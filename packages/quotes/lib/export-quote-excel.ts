@@ -61,22 +61,20 @@ export const generateQuoteExcel = async ({
   titleRow.height = 30;
   worksheet.mergeCells("A1:G1");
   const titleCell = worksheet.getCell("A1");
-  
+
   const titleText = `Cotización ${
     quoteType === "bidBond" ? "de Seriedad de la oferta" : "de Cumplimiento"
   }`;
-  
-  titleCell.value = companyName 
-    ? `${titleText} - ${companyName}`
-    : titleText;
-    
+
+  titleCell.value = companyName ? `${titleText} - ${companyName}` : titleText;
+
   titleCell.style = headerStyle;
 
   worksheet.addRow([]); // Spacer
 
   // Contract Info Layout
   // Using two columns for displaying info roughly like the PDF
-  
+
   // Left side
   worksheet.getCell("A3").value = "Contratante:";
   worksheet.getCell("A3").font = { bold: true };
@@ -105,26 +103,27 @@ export const generateQuoteExcel = async ({
 
   worksheet.getCell("D5").value = "Vigencia:";
   worksheet.getCell("D5").font = { bold: true };
-  worksheet.getCell("E5").value = `${fullDate(contractData.contractStart)} - ${fullDate(contractData.contractEnd)}`;
+  worksheet.getCell("E5").value =
+    `${fullDate(contractData.contractStart)} - ${fullDate(contractData.contractEnd)}`;
 
   // Adjust column widths
   worksheet.getColumn(1).width = 15; // Labels
   worksheet.getColumn(2).width = 30; // Values Left
-  worksheet.getColumn(3).width = 5;  // Spacer
+  worksheet.getColumn(3).width = 5; // Spacer
   worksheet.getColumn(4).width = 20; // Labels Right
   worksheet.getColumn(5).width = 30; // Values Right
   worksheet.getColumn(6).width = 20; // Extra space
   worksheet.getColumn(7).width = 15; // Extra space
 
-
   worksheet.addRow([]); // Spacer
   worksheet.addRow(["Amparos"]);
   const amparosTitleRow = worksheet.lastRow;
-  if(amparosTitleRow) { // null check
-      const cell = amparosTitleRow.getCell(1);
-      cell.font = { bold: true, size: 12 };
+  if (amparosTitleRow) {
+    // null check
+    const cell = amparosTitleRow.getCell(1);
+    cell.font = { bold: true, size: 12 };
   }
-  
+
   // Bonds Table
   const bondsHeaderRow = worksheet.addRow([
     "Amparo",
@@ -135,7 +134,7 @@ export const generateQuoteExcel = async ({
     "Valor Asegurado",
     "Tasa",
   ]);
-  
+
   bondsHeaderRow.eachCell((cell) => {
     cell.style = tableHeaderStyle;
   });
@@ -162,12 +161,12 @@ export const generateQuoteExcel = async ({
     "Prima",
     "Total",
   ]);
-  
+
   totalsHeaderRow.eachCell((cell, colNumber) => {
-      // Only style first 5 cells
-      if(colNumber <= 5) {
-          cell.style = tableHeaderStyle;
-      }
+    // Only style first 5 cells
+    if (colNumber <= 5) {
+      cell.style = tableHeaderStyle;
+    }
   });
 
   worksheet.addRow([
@@ -183,11 +182,11 @@ export const generateQuoteExcel = async ({
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-  
+
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `cotizacion-${contractData.contractor.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.xlsx`;
+  a.download = `cotizacion-${contractData.contractor.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.xlsx`;
   a.click();
   window.URL.revokeObjectURL(url);
 };

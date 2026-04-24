@@ -3,13 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Plus,
-  Trash2,
-  Pencil,
-  Check,
-  X,
-} from "lucide-react";
+import { Plus, Trash2, Pencil, Check, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,

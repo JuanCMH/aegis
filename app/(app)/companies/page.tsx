@@ -7,8 +7,7 @@ import { useEffect, useMemo } from "react";
 
 export default function Companies() {
   const router = useRouter();
-  const { data: companies, isLoading: isLoadingCompanies } =
-    useGetCompanies();
+  const { data: companies, isLoading: isLoadingCompanies } = useGetCompanies();
 
   const [open, setOpen] = useCreateCompanyModal();
 

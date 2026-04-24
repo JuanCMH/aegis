@@ -95,9 +95,7 @@ export function WorkspacesCard() {
           <div
             key={ws.name}
             className={`absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-700 ${
-              i < visibleWs
-                ? "scale-100 opacity-100"
-                : "scale-75 opacity-0"
+              i < visibleWs ? "scale-100 opacity-100" : "scale-75 opacity-0"
             }`}
             style={{ left: `${ws.x}%`, top: `${ws.y}%` }}
           >

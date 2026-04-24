@@ -1,9 +1,4 @@
-import {
-  MoreHorizontal,
-  ArrowUp,
-  ArrowDown,
-  Info,
-} from "lucide-react";
+import { MoreHorizontal, ArrowUp, ArrowDown, Info } from "lucide-react";
 import { Hint } from "@/components/aegis/hint";
 import { formatCop } from "@/lib/format-cop";
 import { Badge } from "@/components/ui/badge";

@@ -87,9 +87,7 @@ function SortableField({
         {field.required && (
           <span className="text-[10px] text-destructive/80">*</span>
         )}
-        {field.isFixed && (
-          <Lock className="size-3 text-muted-foreground/40" />
-        )}
+        {field.isFixed && <Lock className="size-3 text-muted-foreground/40" />}
       </div>
     </div>
   );

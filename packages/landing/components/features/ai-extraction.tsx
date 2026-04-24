@@ -107,9 +107,7 @@ export function AiExtraction() {
       {/* Completion badge */}
       <div
         className={`mt-6 inline-flex items-center gap-2 rounded-full bg-emerald/15 px-4 py-1.5 font-(family-name:--font-jetbrains) text-xs text-emerald transition-all duration-500 ${
-          complete
-            ? "translate-y-0 opacity-100"
-            : "translate-y-2 opacity-0"
+          complete ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         }`}
       >
         <Check className="size-3.5" />
