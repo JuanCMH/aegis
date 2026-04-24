@@ -1,20 +1,16 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
+import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { calculatePasswordStrength } from "../lib/password-strength";
 import type { SignInFlow } from "../types";
-import { getErrorMessage } from "@/lib/get-error-message";
+import { PasswordField } from "./password-field";
+import { PasswordStrengthMeter } from "./password-strength-meter";
+import { TextField } from "./text-field";
 
 interface ResetCardProps {
   setState: (state: SignInFlow) => void;
@@ -22,14 +18,14 @@ interface ResetCardProps {
 
 export const ResetCard = ({ setState }: ResetCardProps) => {
   const { signIn } = useAuthActions();
-  const [step, setStep] = useState<"code" | "email">("email");
+  const [step, setStep] = useState<"email" | "code">("email");
 
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [code, setCode] = useState("");
   const [pending, setPending] = useState(false);
 
-  const onSengCode = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSendCode = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPending(true);
     signIn("password", { email, flow: "reset" })
@@ -37,12 +33,8 @@ export const ResetCard = ({ setState }: ResetCardProps) => {
         toast.success("Código de verificación enviado");
         setStep("code");
       })
-      .catch((err) => {
-        toast.error(getErrorMessage(err));
-      })
-      .finally(() => {
-        setPending(false);
-      });
+      .catch((err) => toast.error(getErrorMessage(err)))
+      .finally(() => setPending(false));
   };
 
   const onPasswordReset = (e: React.FormEvent<HTMLFormElement>) => {
@@ -61,111 +53,73 @@ export const ResetCard = ({ setState }: ResetCardProps) => {
   };
 
   return (
-    <Card className="w-full h-full p-4">
-      <CardHeader className="px-0 pt-0 space-y-1 text-center">
-        <CardDescription>
-          Restablece tu contraseña ingresando tu correo electrónico.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3 px-0 pb-0">
-        {step === "email" ? (
-          <form className="space-y-2" onSubmit={onSengCode}>
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-muted-foreground"
-              >
-                Correo
-              </label>
-              <Input
-                required
-                type="email"
-                value={email}
-                disabled={pending}
-                placeholder="ejemplo@mail.com"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              disabled={pending}
-            >
-              Enviar código
-            </Button>
-          </form>
-        ) : (
-          <form className="space-y-2" onSubmit={onPasswordReset}>
-            <div>
-              <label
-                htmlFor="newPassword"
-                className="block text-sm font-medium text-muted-foreground"
-              >
-                Nueva contraseña
-              </label>
-              <Input
-                required
-                type="password"
-                value={newPassword}
-                disabled={pending}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-              {newPassword && (
-                <div className="mt-1.5 space-y-0.5" aria-live="polite">
-                  {(() => {
-                    const s = calculatePasswordStrength(newPassword);
-                    return (
-                      <>
-                        <div className="h-2 w-full bg-muted rounded">
-                          <div
-                            className={`h-2 rounded ${s.colorClass}`}
-                            style={{ width: `${s.percent}%` }}
-                          />
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {s.label}
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="code"
-                className="block text-sm font-medium text-muted-foreground"
-              >
-                Código de verificación
-              </label>
-              <Input
-                required
-                value={code}
-                disabled={pending}
-                onChange={(e) => setCode(e.target.value)}
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              disabled={pending}
-            >
-              Restablecer contraseña
-            </Button>
-          </form>
-        )}
-        <Separator />
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-xl font-semibold tracking-tight text-aegis-graphite">
+          Restablecer contraseña
+        </h1>
         <p className="text-sm text-muted-foreground">
-          <span
-            onClick={() => setState("signIn")}
-            className="hover:underline cursor-pointer"
-          >
-            Regresar al inicio de sesión
-          </span>
+          {step === "email"
+            ? "Te enviaremos un código de verificación a tu correo."
+            : "Ingresa el código que recibiste y tu nueva contraseña."}
         </p>
-      </CardContent>
-    </Card>
+      </div>
+
+      {step === "email" ? (
+        <form className="space-y-4" onSubmit={onSendCode}>
+          <TextField
+            id="reset-email"
+            label="Correo"
+            type="email"
+            value={email}
+            required
+            disabled={pending}
+            autoComplete="email"
+            placeholder="ejemplo@mail.com"
+            onChange={setEmail}
+          />
+          <Button type="submit" size="lg" className="w-full" disabled={pending}>
+            Enviar código
+          </Button>
+        </form>
+      ) : (
+        <form className="space-y-4" onSubmit={onPasswordReset}>
+          <TextField
+            id="reset-code"
+            label="Código de verificación"
+            value={code}
+            required
+            disabled={pending}
+            autoComplete="one-time-code"
+            onChange={setCode}
+          />
+          <div>
+            <PasswordField
+              id="reset-password"
+              label="Nueva contraseña"
+              value={newPassword}
+              required
+              revealable
+              disabled={pending}
+              autoComplete="new-password"
+              onChange={setNewPassword}
+            />
+            <PasswordStrengthMeter password={newPassword} />
+          </div>
+          <Button type="submit" size="lg" className="w-full" disabled={pending}>
+            Restablecer contraseña
+          </Button>
+        </form>
+      )}
+
+      <button
+        type="button"
+        onClick={() => setState("signIn")}
+        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-aegis-sapphire"
+      >
+        <ArrowLeft className="size-3.5" />
+        Regresar al inicio de sesión
+      </button>
+    </div>
   );
 };

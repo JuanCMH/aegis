@@ -1,7 +1,7 @@
-import { CurrencyInput } from "@/components/currency-input";
-import { DatePicker } from "@/components/date-picker";
-import { Field } from "@/components/field";
-import { TaxPicker } from "@/components/tax-picker";
+import { CurrencyInput } from "@/components/aegis/currency-input";
+import { DatePicker } from "@/components/aegis/date-picker";
+import { Field } from "@/components/aegis/field";
+import { TaxPicker } from "@/components/aegis/tax-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { sanitizeDecimal, sanitizeInteger } from "@/lib/sanitize";

@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { ContractDataType } from "../../quotes/types";
-import { BondPicker } from "@/components/bond-picker";
-import { RiListCheck3, RiMore2Line, RiShieldCheckFill } from "@remixicon/react";
+import { BondPicker } from "@/components/aegis/bond-picker";
+import { ListChecks, MoreHorizontal, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BondsModal } from "@/packages/bonds/components/modal/bonds-modal";
+import { BondsModal } from "@/packages/bonds/components/modals/bonds-modal";
 import { Id } from "@/convex/_generated/dataModel";
 import { BondDataType } from "@/packages/bonds/types";
 import Bond from "./bond";
@@ -112,7 +112,7 @@ const PerformanceBondsInfo = ({
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button size="icon" variant="outline">
-                  <RiMore2Line />
+                  <MoreHorizontal />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end">
@@ -122,7 +122,7 @@ const PerformanceBondsInfo = ({
                   className="cursor-pointer"
                   onClick={() => setBondsModalOpen(true)}
                 >
-                  <RiShieldCheckFill />
+                  <ShieldCheck />
                   Amparos
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -130,7 +130,7 @@ const PerformanceBondsInfo = ({
                   onClick={() => setListOpen(true)}
                   disabled={performanceBondsData.length === 0}
                 >
-                  <RiListCheck3 />
+                  <ListChecks />
                   Amparos agregados{` (${performanceBondsData.length})`}
                 </DropdownMenuItem>
               </DropdownMenuContent>

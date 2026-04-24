@@ -9,11 +9,11 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { generateQuotePDF } from "../lib/export-quote-pdf";
 import { generateQuoteExcel } from "../lib/export-quote-excel";
 import { Dispatch, SetStateAction, useState } from "react";
-import { useGetWorkspace } from "@/packages/workspaces/api";
+import { useGetCompany } from "@/packages/companies/api";
 import { Id } from "@/convex/_generated/dataModel";
 import BidBondInfo from "@/packages/bonds/components/bid-bond-info";
-import { RiDownloadLine, RiShieldCheckFill } from "@remixicon/react";
-import { useWorkspaceId } from "@/packages/workspaces/hooks/use-workspace-id";
+import { Download, ShieldCheck } from "lucide-react";
+import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import { useGenerateUploadUrl } from "@/components/hooks/use-generate-upload-url";
 import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
 import {
@@ -50,7 +50,7 @@ const QuoteInfo = ({
   documentFile,
   setDocumentFile,
 }: QuoteInfoProps) => {
-  const workspaceId = useWorkspaceId();
+  const companyId = useCompanyId();
 
   const [expenses, setExpenses] = useState(0);
   const [calculateExpensesTaxes, setCalculateExpensesTaxes] = useState(false);
@@ -63,8 +63,8 @@ const QuoteInfo = ({
 
   const { mutate: generateUploadUrl } = useGenerateUploadUrl();
 
-  const { data: workspace, isLoading: isLoadingWorkspace } = useGetWorkspace({
-    id: workspaceId,
+  const { data: company, isLoading: isLoadingCompany } = useGetCompany({
+    id: companyId,
   });
 
   const handleQuoteTypeChange = (value: string) => {
@@ -149,7 +149,7 @@ const QuoteInfo = ({
 
     createQuote(
       {
-        workspaceId,
+        companyId,
         quoteType: "bidBond",
         quoteBonds: [
           {
@@ -218,7 +218,7 @@ const QuoteInfo = ({
 
     createQuote(
       {
-        workspaceId,
+        companyId,
         quoteType: "performanceBonds",
         quoteBonds: performanceBondsData.map((bond) => ({
           name: bond.name,
@@ -261,8 +261,8 @@ const QuoteInfo = ({
       <Tabs value={quoteType} onValueChange={handleQuoteTypeChange}>
         <header className="flex items-center justify-between gap-3 p-4">
           <div className="flex items-center gap-2">
-            <div className="flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
-              <RiShieldCheckFill className="size-4" />
+            <div className="flex size-9 items-center justify-center rounded-lg border border-aegis-sapphire/10 bg-aegis-sapphire/10 text-aegis-sapphire">
+              <ShieldCheck className="size-4" />
             </div>
             <TabsList className="h-10 rounded-xl bg-muted/60 p-1">
               <TabsTrigger
@@ -284,12 +284,12 @@ const QuoteInfo = ({
               <Button
                 size="icon-sm"
                 variant="outline"
-                disabled={isLoadingWorkspace}
+                disabled={isLoadingCompany}
                 className={cn(
                   "border-border/40 bg-background/80 hover:bg-accent/60 dark:bg-background/30",
                 )}
               >
-                <RiDownloadLine />
+                <Download />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -304,7 +304,7 @@ const QuoteInfo = ({
                         ? [bidBondData]
                         : performanceBondsData,
                     quoteType: quoteType,
-                    workspaceName: workspace?.name,
+                    companyName: company?.name,
                   });
                 }}
                 className="cursor-pointer"
@@ -322,7 +322,7 @@ const QuoteInfo = ({
                         ? [bidBondData]
                         : performanceBondsData,
                     quoteType: quoteType,
-                    workspaceName: workspace?.name,
+                    companyName: company?.name,
                   });
                 }}
                 className="cursor-pointer"

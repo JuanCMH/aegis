@@ -1,19 +1,17 @@
-import { Dispatch, SetStateAction } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
-import { PerformanceBondCard } from "./performance-bond-card";
-import { BondDataType } from "../types";
-import ResultsCard from "@/packages/quotes/components/results-card";
-import { getQuoteTotals } from "@/lib/get-quote-totals";
 import { differenceInCalendarDays } from "date-fns";
-import { Id } from "@/convex/_generated/dataModel";
-import { RiListCheck3 } from "@remixicon/react";
+import { ListChecks } from "lucide-react";
+import type { Dispatch, SetStateAction } from "react";
+import {
+  AegisSheet,
+  AegisSheetContent,
+  AegisSheetFooter,
+  AegisSheetHeader,
+} from "@/components/aegis/aegis-sheet";
+import type { Id } from "@/convex/_generated/dataModel";
+import { getQuoteTotals } from "@/lib/get-quote-totals";
+import ResultsCard from "@/packages/quotes/components/results-card";
+import type { BondDataType } from "../types";
+import { PerformanceBondCard } from "./performance-bond-card";
 
 interface PerformanceBondsListProps {
   open: boolean;
@@ -39,55 +37,42 @@ export const PerformanceBondsList = ({
   performanceBondsData,
 }: PerformanceBondsListProps) => {
   const results = getQuoteTotals(
-    performanceBondsData.map((data) => {
-      return {
-        insuredValue: data.insuredValue,
-        rate: data.rate,
-        days: differenceInCalendarDays(data.endDate, data.startDate),
-      };
-    }),
+    performanceBondsData.map((data) => ({
+      insuredValue: data.insuredValue,
+      rate: data.rate,
+      days: differenceInCalendarDays(data.endDate, data.startDate),
+    })),
   );
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="flex flex-col gap-0 p-0 sm:max-w-lg">
-        <SheetHeader>
-          <div className="flex items-start gap-3 pr-8">
-            <div className="flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
-              <RiListCheck3 className="size-4" />
-            </div>
-            <div className="space-y-1">
-              <SheetTitle className="truncate">Lista de garantías</SheetTitle>
-              <SheetDescription>
-                Revisa las garantías de cumplimiento agregadas a la cotización.
-              </SheetDescription>
-            </div>
-          </div>
-        </SheetHeader>
-        <Separator className="opacity-40" />
-        <main className="h-full space-y-2 overflow-y-auto p-4">
-          {performanceBondsData.map((bond, index) => (
-            <PerformanceBondCard
-              key={index}
-              bondData={bond}
-              setOpen={setOpen}
-              setQuoteType={setQuoteType}
-              setSelectedBondId={setSelectedBondId}
-            />
-          ))}
-        </main>
-        <footer className="border-t border-border/40 p-4">
-          <ResultsCard
-            vat={results.vat}
-            total={results.total}
-            premium={results.premium}
-            expenses={expenses}
-            setExpenses={setExpenses}
-            calculateExpensesTaxes={calculateExpensesTaxes}
-            setCalculateExpensesTaxes={setCalculateExpensesTaxes}
+    <AegisSheet open={open} onOpenChange={setOpen} maxWidth="sm:max-w-lg">
+      <AegisSheetHeader
+        icon={ListChecks}
+        title="Lista de garantías"
+        description="Revisa las garantías de cumplimiento agregadas a la cotización."
+      />
+      <AegisSheetContent className="px-4">
+        {performanceBondsData.map((bond, index) => (
+          <PerformanceBondCard
+            key={`${bond.name}-${index}`}
+            bondData={bond}
+            setOpen={setOpen}
+            setQuoteType={setQuoteType}
+            setSelectedBondId={setSelectedBondId}
           />
-        </footer>
-      </SheetContent>
-    </Sheet>
+        ))}
+      </AegisSheetContent>
+      <AegisSheetFooter className="block">
+        <ResultsCard
+          vat={results.vat}
+          total={results.total}
+          premium={results.premium}
+          expenses={expenses}
+          setExpenses={setExpenses}
+          calculateExpensesTaxes={calculateExpensesTaxes}
+          setCalculateExpensesTaxes={setCalculateExpensesTaxes}
+        />
+      </AegisSheetFooter>
+    </AegisSheet>
   );
 };

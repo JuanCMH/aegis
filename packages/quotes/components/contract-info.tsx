@@ -1,13 +1,13 @@
-import { Field } from "@/components/field";
+import { Field } from "@/components/aegis/field";
 import { ContractDataType } from "../types";
 import { isAfter, isBefore } from "date-fns";
 import { Label } from "@/components/ui/label";
 import { Dispatch, SetStateAction } from "react";
-import { RiContractFill } from "@remixicon/react";
+import { FileText } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { DatePicker } from "@/components/date-picker";
+import { DatePicker } from "@/components/aegis/date-picker";
 import { Separator } from "@/components/ui/separator";
-import { CurrencyInput } from "@/components/currency-input";
+import { CurrencyInput } from "@/components/aegis/currency-input";
 
 interface ContractInfoProps {
   readOnly?: boolean;
@@ -40,8 +40,8 @@ const ContractInfo = ({
   return (
     <section className="m-2 overflow-hidden rounded-xl border border-border/40 bg-card/90 backdrop-blur-sm">
       <header className="flex items-center gap-3 p-4">
-        <div className="flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
-          <RiContractFill className="size-4" />
+        <div className="flex size-9 items-center justify-center rounded-lg border border-aegis-sapphire/10 bg-aegis-sapphire/10 text-aegis-sapphire">
+          <FileText className="size-4" />
         </div>
         <div>
           <h1 className="text-lg font-semibold tracking-tight">

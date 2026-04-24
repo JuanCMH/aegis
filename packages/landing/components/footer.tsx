@@ -1,4 +1,4 @@
-import { AegisLogo } from "@/components/logo";
+import { AegisLogo } from "@/components/aegis/aegis-logo";
 
 const productLinks = [
   { label: "Funcionalidades", href: "#funcionalidades" },

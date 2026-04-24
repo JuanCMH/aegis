@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { RiCoinsLine } from "@remixicon/react";
+import { CircleDollarSign } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
-import { CurrencyInput } from "@/components/currency-input";
+import { CurrencyInput } from "@/components/aegis/currency-input";
 
 interface ResultsCardProps {
   vat: number;
@@ -50,8 +50,8 @@ const ResultsCard = ({
   return (
     <section className="space-y-3">
       <div className="flex items-center gap-3">
-        <div className="flex size-8 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo">
-          <RiCoinsLine className="size-4" />
+        <div className="flex size-8 items-center justify-center rounded-lg border border-aegis-sapphire/10 bg-aegis-sapphire/10 text-aegis-sapphire">
+          <CircleDollarSign className="size-4" />
         </div>
         <div>
           <p className="text-sm font-semibold tracking-tight">
@@ -133,7 +133,7 @@ const ResultsCard = ({
             id="bid-bond-calculate-taxes"
             checked={calculateExpensesTaxes}
             onCheckedChange={readOnly ? undefined : setCalculateExpensesTaxes}
-            className="data-[state=checked]:bg-h-indigo"
+            className="data-[state=checked]:bg-aegis-sapphire"
           />
           <Label
             htmlFor="bid-bond-calculate-taxes"

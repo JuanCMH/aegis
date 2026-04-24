@@ -1,20 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { RiGoogleFill } from "@remixicon/react";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useState } from "react";
 import { toast } from "sonner";
+import { GoogleIcon } from "@/components/aegis/icons/google";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardDescription,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import type { SignInFlow } from "../types";
 import { getErrorMessage } from "@/lib/get-error-message";
+import type { SignInFlow } from "../types";
+import { PasswordField } from "./password-field";
+import { TextField } from "./text-field";
 
 interface SignInCardProps {
   setState: (state: SignInFlow) => void;
@@ -37,78 +32,75 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
 
   const onProviderSignIn = (value: "google") => {
     setPending(true);
-    signIn(value, { redirectTo: "/workspaces" }).finally(() =>
+    signIn(value, { redirectTo: "/companies" }).finally(() =>
       setPending(false),
     );
   };
 
   return (
-    <Card className="w-full h-full p-4">
-      <CardHeader className="px-0 pt-0 space-y-1 text-center">
-        <CardDescription>
-          Puedes iniciar sesión con tu cuenta de correo o con tu cuenta de
-          Google.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3 px-0 pb-0">
-        <form className="space-y-2" onSubmit={onPasswordSignIn}>
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-muted-foreground"
-            >
-              Correo
-            </label>
-            <Input
-              required
-              type="email"
-              value={email}
-              disabled={pending}
-              placeholder="ejemplo@mail.com"
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-muted-foreground"
-            >
-              Contraseña
-            </label>
-            <Input
-              required
-              type="password"
-              value={password}
-              disabled={pending}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <p
-            onClick={() => setState("reset")}
-            className="text-sm text-muted-foreground hover:underline cursor-pointer text-center"
-          >
-            ¿Olvidaste tu contraseña?
-          </p>
-          <Button type="submit" className="w-full" size="lg" disabled={pending}>
-            Iniciar sesión
-          </Button>
-        </form>
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-xl font-semibold tracking-tight text-aegis-graphite">
+          Bienvenido de nuevo
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Ingresa a tu agencia con correo y contraseña.
+        </p>
+      </div>
+
+      <form className="space-y-4" onSubmit={onPasswordSignIn}>
+        <TextField
+          id="signin-email"
+          label="Correo"
+          type="email"
+          value={email}
+          required
+          disabled={pending}
+          autoComplete="email"
+          placeholder="ejemplo@mail.com"
+          onChange={setEmail}
+        />
+        <PasswordField
+          id="signin-password"
+          label="Contraseña"
+          value={password}
+          required
+          disabled={pending}
+          onChange={setPassword}
+        />
+
+        <button
+          type="button"
+          onClick={() => setState("reset")}
+          className="text-xs text-muted-foreground transition-colors hover:text-aegis-sapphire"
+        >
+          ¿Olvidaste tu contraseña?
+        </button>
+
+        <Button type="submit" size="lg" className="w-full" disabled={pending}>
+          Iniciar sesión
+        </Button>
+      </form>
+
+      <div className="relative">
         <Separator />
-        <div className="flex flex-col gap-y-2">
-          <Button
-            disabled={pending}
-            onClick={() => onProviderSignIn("google")}
-            variant="outline"
-            size="lg"
-            className="w-full relative pl-10"
-          >
-            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-              <RiGoogleFill className="size-5" />
-            </span>
-            Continuar con Google
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+        <span className="absolute inset-0 flex items-center justify-center">
+          <span className="bg-background px-3 text-xs uppercase tracking-wider text-muted-foreground">
+            o
+          </span>
+        </span>
+      </div>
+
+      <Button
+        size="lg"
+        variant="outline"
+        disabled={pending}
+        onClick={() => onProviderSignIn("google")}
+        className="relative w-full"
+      >
+        <GoogleIcon className="mr-2 size-5" />
+        Continuar con Google
+      </Button>
+    </div>
   );
 };

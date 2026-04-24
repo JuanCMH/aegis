@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Doc } from "@/convex/_generated/dataModel";
-import { RiArrowRightLine } from "@remixicon/react";
+import { ArrowRight } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 import { BondDataType } from "../types";
 import { ContractDataType } from "@/packages/quotes/types";
 import { differenceInCalendarDays } from "date-fns";
-import { Hint } from "@/components/hint";
+import { Hint } from "@/components/aegis/hint";
 
 interface BondItemProps {
   bond: Doc<"bonds">;
@@ -74,7 +74,7 @@ export const BondItem = ({
             variant="outline"
             onClick={() => setSelectedBond(bond)}
           >
-            <RiArrowRightLine className="size-4" />
+            <ArrowRight className="size-4" />
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">{bond.description}</p>

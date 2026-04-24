@@ -14,7 +14,7 @@ const proxy = convexAuthNextjsMiddleware(
       return nextjsMiddlewareRedirect(request, "/auth");
     }
     if (isAutPage(request) && (await convexAuth.isAuthenticated())) {
-      return nextjsMiddlewareRedirect(request, "/workspaces");
+      return nextjsMiddlewareRedirect(request, "/companies");
     }
   },
   {

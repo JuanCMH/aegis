@@ -1,20 +1,16 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
-import { RiEyeLine, RiEyeOffLine, RiGoogleFill } from "@remixicon/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { GoogleIcon } from "@/components/aegis/icons/google";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { calculatePasswordStrength } from "../lib/password-strength";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { calculatePasswordStrength } from "../lib/password-strength";
+import { PasswordField } from "./password-field";
+import { PasswordStrengthMeter } from "./password-strength-meter";
+import { TextField } from "./text-field";
 
 export const SignUpCard = () => {
   const { signIn } = useAuthActions();
@@ -24,8 +20,6 @@ export const SignUpCard = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pending, setPending] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const onPasswordSignUp = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -48,168 +42,94 @@ export const SignUpCard = () => {
 
   const onProviderSignIn = (value: "google") => {
     setPending(true);
-    signIn(value, { redirectTo: "/workspaces" }).finally(() =>
+    signIn(value, { redirectTo: "/companies" }).finally(() =>
       setPending(false),
     );
   };
 
   return (
-    <Card className="w-full h-full p-4">
-      <CardHeader className="px-0 pt-0 space-y-1 text-center">
-        <CardDescription>
-          Crea tu cuenta y comienza a aprovechar los beneficios de nuestra
-          plataforma.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3 px-0 pb-0">
-        <form className="space-y-2" onSubmit={onPasswordSignUp}>
-          <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-muted-foreground"
-            >
-              Nombre
-            </label>
-            <Input
-              required
-              value={name}
-              disabled={pending}
-              placeholder="Juan Perez"
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-muted-foreground"
-            >
-              Correo
-            </label>
-            <Input
-              required
-              type="email"
-              value={email}
-              disabled={pending}
-              placeholder="ejemplo@mail.com"
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-muted-foreground"
-            >
-              Contraseña
-            </label>
-            <div className="relative">
-              <Input
-                required
-                type={showPassword ? "text" : "password"}
-                value={password}
-                disabled={pending}
-                autoComplete="new-password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground cursor-pointer"
-                aria-label={
-                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
-                }
-                title={
-                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
-                }
-                tabIndex={-1}
-              >
-                {showPassword ? (
-                  <RiEyeOffLine className="size-4" />
-                ) : (
-                  <RiEyeLine className="size-4" />
-                )}
-              </button>
-            </div>
-            {password && (
-              <div className="mt-1.5 space-y-0.5" aria-live="polite">
-                {(() => {
-                  const s = calculatePasswordStrength(password);
-                  return (
-                    <>
-                      <div className="h-2 w-full bg-muted rounded">
-                        <div
-                          className={`h-2 rounded ${s.colorClass}`}
-                          style={{ width: `${s.percent}%` }}
-                        />
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {s.label}
-                      </div>
-                    </>
-                  );
-                })()}
-              </div>
-            )}
-          </div>
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-muted-foreground"
-            >
-              Confirmar contraseña
-            </label>
-            <div className="relative">
-              <Input
-                required
-                disabled={pending}
-                type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                autoComplete="new-password"
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword((v) => !v)}
-                className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground cursor-pointer"
-                aria-label={
-                  showConfirmPassword
-                    ? "Ocultar confirmación"
-                    : "Mostrar confirmación"
-                }
-                title={
-                  showConfirmPassword
-                    ? "Ocultar confirmación"
-                    : "Mostrar confirmación"
-                }
-                tabIndex={-1}
-              >
-                {showConfirmPassword ? (
-                  <RiEyeOffLine className="size-4" />
-                ) : (
-                  <RiEyeLine className="size-4" />
-                )}
-              </button>
-            </div>
-          </div>
-          <Button type="submit" className="w-full" size="lg" disabled={pending}>
-            Crear cuenta
-          </Button>
-        </form>
-        <Separator />
-        <div className="flex flex-col gap-y-2">
-          <Button
-            size="lg"
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-xl font-semibold tracking-tight text-aegis-graphite">
+          Crea tu cuenta
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Regístrate para empezar a centralizar tu operación.
+        </p>
+      </div>
+
+      <form className="space-y-4" onSubmit={onPasswordSignUp}>
+        <TextField
+          id="signup-name"
+          label="Nombre"
+          value={name}
+          required
+          disabled={pending}
+          autoComplete="name"
+          placeholder="Juan Pérez"
+          onChange={setName}
+        />
+        <TextField
+          id="signup-email"
+          label="Correo"
+          type="email"
+          value={email}
+          required
+          disabled={pending}
+          autoComplete="email"
+          placeholder="ejemplo@mail.com"
+          onChange={setEmail}
+        />
+
+        <div>
+          <PasswordField
+            id="signup-password"
+            label="Contraseña"
+            value={password}
+            required
+            revealable
             disabled={pending}
-            variant="outline"
-            className="w-full relative pl-10"
-            onClick={() => onProviderSignIn("google")}
-          >
-            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-              <RiGoogleFill className="size-5" />
-            </span>
-            Continuar con Google
-          </Button>
+            autoComplete="new-password"
+            onChange={setPassword}
+          />
+          <PasswordStrengthMeter password={password} />
         </div>
-      </CardContent>
-    </Card>
+
+        <PasswordField
+          id="signup-confirm"
+          label="Confirmar contraseña"
+          value={confirmPassword}
+          required
+          revealable
+          disabled={pending}
+          autoComplete="new-password"
+          onChange={setConfirmPassword}
+        />
+
+        <Button type="submit" size="lg" className="w-full" disabled={pending}>
+          Crear cuenta
+        </Button>
+      </form>
+
+      <div className="relative">
+        <Separator />
+        <span className="absolute inset-0 flex items-center justify-center">
+          <span className="bg-background px-3 text-xs uppercase tracking-wider text-muted-foreground">
+            o
+          </span>
+        </span>
+      </div>
+
+      <Button
+        size="lg"
+        variant="outline"
+        disabled={pending}
+        onClick={() => onProviderSignIn("google")}
+        className="relative w-full"
+      >
+        <GoogleIcon className="mr-2 size-5" />
+        Continuar con Google
+      </Button>
+    </div>
   );
 };

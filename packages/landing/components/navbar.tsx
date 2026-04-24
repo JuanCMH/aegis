@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import { AegisLogo } from "@/components/logo";
+import { AegisLogo } from "@/components/aegis/aegis-logo";
 
 const navLinks = [
   { label: "Producto", href: "#producto" },

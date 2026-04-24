@@ -1,10 +1,10 @@
-import { Field } from "@/components/field";
+import { FileCheck2 } from "lucide-react";
+import { CurrencyInput } from "@/components/aegis/currency-input";
+import { DatePicker } from "@/components/aegis/date-picker";
+import { Field } from "@/components/aegis/field";
+import { PolicyStatusPicker } from "@/components/aegis/policy-status-picker";
 import { Label } from "@/components/ui/label";
-import { RiFileTextFill } from "@remixicon/react";
 import { Separator } from "@/components/ui/separator";
-import { DatePicker } from "@/components/date-picker";
-import { PolicyStatusPicker } from "@/components/policy-status-picker";
-import { CurrencyInput } from "@/components/currency-input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -14,13 +14,19 @@ interface PolicyFormProps {
 
 const PolicyForm = ({ readOnly }: PolicyFormProps) => {
   return (
-    <section className="m-2 border p-2 rounded-md shadow-sm bg-card">
-      <div className="flex gap-2 items-center">
-        <RiFileTextFill className="size-4" />
-        <h1 className="text-lg font-semibold">Información de la póliza</h1>
-      </div>
-      <Separator className="my-2" />
-      <div className="mt-2 gap-2 grid grid-cols-2 lg:grid-cols-4">
+    <section className="m-2 overflow-hidden rounded-xl border border-border/40 bg-card/90 backdrop-blur-sm">
+      <header className="flex items-center gap-3 p-4">
+        <div className="flex size-9 items-center justify-center rounded-lg border border-aegis-sapphire/10 bg-aegis-sapphire/10 text-aegis-sapphire">
+          <FileCheck2 className="size-4" />
+        </div>
+        <div>
+          <h1 className="text-lg font-semibold tracking-tight">
+            Información de la póliza
+          </h1>
+        </div>
+      </header>
+      <Separator className="opacity-40" />
+      <div className="grid grid-cols-2 gap-2 p-4 lg:grid-cols-4">
         {/* General Info */}
         <Field
           label="NÚMERO DE PÓLIZA*"

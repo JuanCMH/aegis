@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dispatch, SetStateAction } from "react";
 import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import { RiArrowRightLine } from "@remixicon/react";
+import { ArrowRight } from "lucide-react";
 
 interface PerformanceBondCardProps {
   bondData: BondDataType;
@@ -48,7 +48,7 @@ export const PerformanceBondCard = ({
             variant="outline"
             onClick={() => handleEditBond()}
           >
-            <RiArrowRightLine className="size-4" />
+            <ArrowRight className="size-4" />
           </Button>
         </div>
       </CardHeader>
