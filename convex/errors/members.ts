@@ -4,7 +4,8 @@ export const memberErrors = {
   companyNotFound: "La agencia no existe o no eres miembro",
   permissionDenied: "No tienes permisos para gestionar miembros",
   cannotRemoveOwner: "No puedes eliminar al propietario de la agencia",
-  cannotRemoveSelf: "No puedes eliminarte a ti mismo. Usa la opción «Salir de la agencia»",
+  cannotRemoveSelf:
+    "No puedes eliminarte a ti mismo. Usa la opción «Salir de la agencia»",
   cannotRemoveLastAdmin:
     "No puedes eliminar al último administrador de la agencia",
   cannotAssignRoleToOwner:

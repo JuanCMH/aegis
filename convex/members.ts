@@ -116,8 +116,7 @@ export const changeRole = mutation({
 
     if (args.customRoleId) {
       const customRole = await ctx.db.get(args.customRoleId);
-      if (!customRole)
-        throw new ConvexError(memberErrors.customRoleNotFound);
+      if (!customRole) throw new ConvexError(memberErrors.customRoleNotFound);
       if (customRole.companyId !== target.companyId)
         throw new ConvexError(memberErrors.customRoleMismatch);
     }
@@ -160,9 +159,7 @@ export const remove = mutation({
     if (target.role === "admin") {
       const admins = await ctx.db
         .query("members")
-        .withIndex("companyId", (q) =>
-          q.eq("companyId", target.companyId),
-        )
+        .withIndex("companyId", (q) => q.eq("companyId", target.companyId))
         .collect();
       const adminCount = admins.filter((m) => m.role === "admin").length;
       if (adminCount <= 1)

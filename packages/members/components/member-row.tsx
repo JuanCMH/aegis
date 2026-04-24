@@ -83,8 +83,7 @@ export function MemberRow({
     );
   };
 
-  const showMenu =
-    !member.isOwner && !isSelf && (canAssignRole || canExpel);
+  const showMenu = !member.isOwner && !isSelf && (canAssignRole || canExpel);
 
   return (
     <>
@@ -144,9 +143,7 @@ export function MemberRow({
                     </DropdownMenuLabel>
                     <DropdownMenuItem
                       onClick={() => handleChangeRole("admin")}
-                      disabled={
-                        member.role === "admin" && !member.customRoleId
-                      }
+                      disabled={member.role === "admin" && !member.customRoleId}
                     >
                       <ShieldCheck className="size-4 text-aegis-sapphire" />
                       Administrador
@@ -168,9 +165,7 @@ export function MemberRow({
                         {customRoles.map((role) => (
                           <DropdownMenuItem
                             key={role._id}
-                            onClick={() =>
-                              handleChangeRole("member", role._id)
-                            }
+                            onClick={() => handleChangeRole("member", role._id)}
                             disabled={member.customRoleId === role._id}
                           >
                             <ShieldCheck className="size-4 text-aegis-cyan" />

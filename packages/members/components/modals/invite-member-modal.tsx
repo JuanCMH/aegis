@@ -1,12 +1,7 @@
 "use client";
 
 import { Check, Copy, Mail, UserPlus } from "lucide-react";
-import {
-  type Dispatch,
-  type SetStateAction,
-  useEffect,
-  useState,
-} from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   AegisModal,

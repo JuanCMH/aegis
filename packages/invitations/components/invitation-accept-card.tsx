@@ -125,9 +125,9 @@ export function InvitationAcceptCard({ token }: InvitationAcceptCardProps) {
       {isAuthenticated && !isUserLoading ? (
         emailMismatch ? (
           <p className="mt-4 rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">
-            Estás autenticado como{" "}
-            <strong>{currentUser?.email}</strong>. Cierra sesión e ingresa con{" "}
-            <strong>{invitation.email}</strong> para aceptar.
+            Estás autenticado como <strong>{currentUser?.email}</strong>. Cierra
+            sesión e ingresa con <strong>{invitation.email}</strong> para
+            aceptar.
           </p>
         ) : (
           <Button

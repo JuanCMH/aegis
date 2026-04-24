@@ -65,8 +65,7 @@ type ChipVariant = "amber" | "sapphire" | "cyan" | "slate";
 
 const variantClasses: Record<ChipVariant, string> = {
   amber: "bg-aegis-amber/10 text-aegis-amber border-aegis-amber/20",
-  sapphire:
-    "bg-aegis-sapphire/10 text-aegis-sapphire border-aegis-sapphire/20",
+  sapphire: "bg-aegis-sapphire/10 text-aegis-sapphire border-aegis-sapphire/20",
   cyan: "bg-aegis-cyan/10 text-aegis-cyan border-aegis-cyan/20",
   slate: "bg-aegis-slate/10 text-aegis-steel border-aegis-slate/30",
 };

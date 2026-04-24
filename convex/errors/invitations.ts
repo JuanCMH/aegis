@@ -11,7 +11,6 @@ export const invitationErrors = {
   emailMismatch:
     "Esta invitación fue enviada a otro correo. Inicia sesión con el correo correcto",
   invalidToken: "El enlace de invitación no es válido",
-  customRoleMismatch:
-    "El rol personalizado no pertenece a esta agencia",
+  customRoleMismatch: "El rol personalizado no pertenece a esta agencia",
   cannotInviteSelf: "No puedes invitarte a ti mismo",
 } as const;

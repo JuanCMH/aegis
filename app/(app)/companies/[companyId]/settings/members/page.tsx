@@ -32,8 +32,9 @@ export default function MembersPage() {
   const [inviteOpen, setInviteOpen] = useState(false);
 
   const { data: currentUser } = useCurrentUser();
-  const { data: members, isLoading: isLoadingMembers } =
-    useGetMembersByCompany({ companyId });
+  const { data: members, isLoading: isLoadingMembers } = useGetMembersByCompany(
+    { companyId },
+  );
   const { data: invitations, isLoading: isLoadingInvitations } =
     useGetPendingInvitations({ companyId });
   const { data: customRoles } = useGetRoles({ companyId });

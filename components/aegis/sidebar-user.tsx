@@ -19,18 +19,10 @@ import {
 import type { Id } from "@/convex/_generated/dataModel";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useCurrentUser } from "@/packages/auth/api";
-import {
-  useGetCurrentMember,
-  useLeaveCompany,
-} from "@/packages/members/api";
+import { useGetCurrentMember, useLeaveCompany } from "@/packages/members/api";
 import { ProfileModal } from "@/packages/users/components/modals/profile-modal";
 import { useAuthActions } from "@convex-dev/auth/react";
-import {
-  ChevronsUpDown,
-  LogOut,
-  User,
-  X,
-} from "lucide-react";
+import { ChevronsUpDown, LogOut, User, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -47,7 +39,9 @@ export function SidebarUser() {
   const companyId = params?.companyId;
 
   const { data: currentMember } = useGetCurrentMember(
-    companyId ? { companyId } : { companyId: undefined as unknown as Id<"companies"> },
+    companyId
+      ? { companyId }
+      : { companyId: undefined as unknown as Id<"companies"> },
   );
   const { mutate: leave, isPending: isLeaving } = useLeaveCompany();
 

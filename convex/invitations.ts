@@ -163,13 +163,8 @@ export const create = mutation({
       throw new ConvexError(invitationErrors.cannotInviteSelf);
 
     // Already a member?
-    const existingMember = await findMemberByEmail(
-      ctx,
-      args.companyId,
-      email,
-    );
-    if (existingMember)
-      throw new ConvexError(invitationErrors.alreadyMember);
+    const existingMember = await findMemberByEmail(ctx, args.companyId, email);
+    if (existingMember) throw new ConvexError(invitationErrors.alreadyMember);
 
     // Pending invitation already exists?
     const existing = await ctx.db
@@ -192,15 +187,13 @@ export const create = mutation({
     }
 
     const token = generateToken();
-    const expiresAt =
-      Date.now() + INVITATION_TTL_DAYS * 24 * 60 * 60 * 1000;
+    const expiresAt = Date.now() + INVITATION_TTL_DAYS * 24 * 60 * 60 * 1000;
 
     const invitationId = await ctx.db.insert("invitations", {
       companyId: args.companyId,
       email,
       roleType: args.roleType,
-      customRoleId:
-        args.roleType === "custom" ? args.customRoleId : undefined,
+      customRoleId: args.roleType === "custom" ? args.customRoleId : undefined,
       token,
       invitedBy: userId,
       status: "pending",
@@ -240,8 +233,7 @@ export const accept = mutation({
     }
 
     const user = await ctx.db.get(userId);
-    if (!user?.email)
-      throw new ConvexError(invitationErrors.emailMismatch);
+    if (!user?.email) throw new ConvexError(invitationErrors.emailMismatch);
     if (normalizeEmail(user.email) !== invitation.email)
       throw new ConvexError(invitationErrors.emailMismatch);
 
@@ -261,9 +253,7 @@ export const accept = mutation({
       companyId: invitation.companyId,
       role: invitation.roleType === "admin" ? "admin" : "member",
       customRoleId:
-        invitation.roleType === "custom"
-          ? invitation.customRoleId
-          : undefined,
+        invitation.roleType === "custom" ? invitation.customRoleId : undefined,
     });
 
     await ctx.db.patch(invitation._id, {
@@ -326,8 +316,7 @@ export const resend = mutation({
       throw new ConvexError(invitationErrors.revoked);
 
     const token = generateToken();
-    const expiresAt =
-      Date.now() + INVITATION_TTL_DAYS * 24 * 60 * 60 * 1000;
+    const expiresAt = Date.now() + INVITATION_TTL_DAYS * 24 * 60 * 60 * 1000;
 
     await ctx.db.patch(args.id, {
       token,
@@ -350,17 +339,15 @@ export const resend = mutation({
 export const sendEmail = internalAction({
   args: { invitationId: v.id("invitations") },
   handler: async (ctx, args) => {
-    const invitation = await ctx.runQuery(
-      internal.invitations._getForEmail,
-      { id: args.invitationId },
-    );
+    const invitation = await ctx.runQuery(internal.invitations._getForEmail, {
+      id: args.invitationId,
+    });
     if (!invitation) return;
 
     const apiKey = process.env.AUTH_RESEND_KEY;
     if (!apiKey) return;
 
-    const siteUrl =
-      process.env.AEGIS_SITE_URL ?? process.env.SITE_URL ?? "";
+    const siteUrl = process.env.AEGIS_SITE_URL ?? process.env.SITE_URL ?? "";
     const link = `${siteUrl}/auth?invitation=${invitation.token}`;
 
     const resend = new ResendAPI(apiKey);
