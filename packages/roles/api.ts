@@ -1,0 +1,27 @@
+import { useFetch } from "@/components/hooks/use-fetch";
+import { useMutate } from "@/components/hooks/use-mutate";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import type { PermissionKey } from "./types";
+
+const route = api.roles;
+
+export const useGetRoles = (data: typeof route.get._args) =>
+  useFetch(route.get, data);
+
+export const useGetRole = (data: typeof route.getById._args) =>
+  useFetch(route.getById, data);
+
+export const useCreateRole = () => useMutate(route.create);
+
+export const useUpdateRole = () => useMutate(route.update);
+
+export const useRemoveRole = () => useMutate(route.remove);
+
+/**
+ * Reactive permission check. Returns `undefined` while loading, then `boolean`.
+ */
+export const useHasPermission = (args: {
+  companyId: Id<"companies">;
+  permission: PermissionKey;
+}) => useFetch(route.hasPermission, args);

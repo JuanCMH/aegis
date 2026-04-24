@@ -2,7 +2,11 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 import { mutation, query, QueryCtx } from "./_generated/server";
-import { permissionsSchema } from "./lib/permissions";
+import {
+  memberPermissionDefaults,
+  type PermissionKey,
+  permissionsSchema,
+} from "./lib/permissions";
 import { roleErrors } from "./errors/roles";
 
 const populateCustomRole = (ctx: QueryCtx, id: Id<"roles">) => ctx.db.get(id);
@@ -10,19 +14,19 @@ const populateCustomRole = (ctx: QueryCtx, id: Id<"roles">) => ctx.db.get(id);
 type checkPermissionArgs = {
   ctx: QueryCtx;
   userId: Id<"users">;
-  workspaceId: Id<"workspaces">;
-  permission?: keyof typeof permissionsSchema;
+  companyId: Id<"companies">;
+  permission?: PermissionKey;
 };
 
 export const populateMember = (
   ctx: QueryCtx,
   userId: Id<"users">,
-  workspaceId: Id<"workspaces">,
+  companyId: Id<"companies">,
 ) =>
   ctx.db
     .query("members")
-    .withIndex("workspaceId_userId", (q) =>
-      q.eq("workspaceId", workspaceId).eq("userId", userId),
+    .withIndex("companyId_userId", (q) =>
+      q.eq("companyId", companyId).eq("userId", userId),
     )
     .unique();
 
@@ -30,17 +34,20 @@ export const checkPermission = async ({
   ctx,
   userId,
   permission,
-  workspaceId,
+  companyId,
 }: checkPermissionArgs) => {
-  const member = await populateMember(ctx, userId, workspaceId);
+  const member = await populateMember(ctx, userId, companyId);
   if (!member) return false;
   if (member.role === "admin") return true;
+  if (!permission) return false;
 
-  const customRole =
-    member?.customRoleId &&
-    (await populateCustomRole(ctx, member.customRoleId));
+  if (member.customRoleId) {
+    const customRole = await populateCustomRole(ctx, member.customRoleId);
+    return Boolean(customRole?.[permission]);
+  }
 
-  return permission ? customRole?.[permission] : false;
+  // Literal "member" role with no customRoleId → fall back to Member defaults.
+  return memberPermissionDefaults[permission] ?? false;
 };
 
 export const update = mutation({
@@ -59,8 +66,8 @@ export const update = mutation({
     const hasPermission = await checkPermission({
       ctx,
       userId,
-      permission: "editRoles",
-      workspaceId: role.workspaceId,
+      permission: "roles_edit",
+      companyId: role.companyId,
     });
     if (!hasPermission) throw new ConvexError(roleErrors.cannotEditRoles);
 
@@ -88,8 +95,8 @@ export const remove = mutation({
     const hasPermission = await checkPermission({
       ctx,
       userId,
-      permission: "deleteRoles",
-      workspaceId: role.workspaceId,
+      permission: "roles_delete",
+      companyId: role.companyId,
     });
     if (!hasPermission) throw new ConvexError(roleErrors.cannotDeleteRoles);
 
@@ -113,7 +120,7 @@ export const remove = mutation({
 export const create = mutation({
   args: {
     name: v.string(),
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
     ...permissionsSchema,
   },
   handler: async (ctx, args) => {
@@ -123,8 +130,8 @@ export const create = mutation({
     const hasPermission = await checkPermission({
       ctx,
       userId,
-      permission: "createRoles",
-      workspaceId: args.workspaceId,
+      permission: "roles_create",
+      companyId: args.companyId,
     });
     if (!hasPermission) throw new ConvexError(roleErrors.cannotCreateRoles);
 
@@ -147,7 +154,7 @@ export const getById = query({
     const role = await ctx.db.get(args.id);
     if (!role) return null;
 
-    const member = await populateMember(ctx, userId, role.workspaceId);
+    const member = await populateMember(ctx, userId, role.companyId);
     if (!member) return null;
 
     return role;
@@ -156,20 +163,75 @@ export const getById = query({
 
 export const get = query({
   args: {
-    workspaceId: v.id("workspaces"),
+    companyId: v.id("companies"),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) return [];
 
-    const member = await populateMember(ctx, userId, args.workspaceId);
+    const member = await populateMember(ctx, userId, args.companyId);
     if (!member) return [];
 
     const roles = await ctx.db
       .query("roles")
-      .withIndex("workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
       .collect();
 
     return roles;
+  },
+});
+
+/**
+ * Client-side permission check. Used by `<RoleGate>` and `useHasPermission`.
+ * Returns `false` for unauthenticated users and non-members.
+ */
+export const hasPermission = query({
+  args: {
+    companyId: v.id("companies"),
+    permission: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) return false;
+    // Runtime guard: reject unknown permission keys.
+    if (!(args.permission in permissionsSchema)) return false;
+    return await checkPermission({
+      ctx,
+      userId,
+      companyId: args.companyId,
+      permission: args.permission as PermissionKey,
+    });
+  },
+});
+
+/**
+ * Batch variant of `hasPermission`. Returns a record keyed by permission.
+ * Used by `<RoleGate>` when multiple permissions are requested via `permissions`.
+ */
+export const hasPermissions = query({
+  args: {
+    companyId: v.id("companies"),
+    permissions: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    const result: Record<string, boolean> = {};
+    if (userId === null) {
+      for (const p of args.permissions) result[p] = false;
+      return result;
+    }
+    for (const p of args.permissions) {
+      if (!(p in permissionsSchema)) {
+        result[p] = false;
+        continue;
+      }
+      result[p] = await checkPermission({
+        ctx,
+        userId,
+        companyId: args.companyId,
+        permission: p as PermissionKey,
+      });
+    }
+    return result;
   },
 });
