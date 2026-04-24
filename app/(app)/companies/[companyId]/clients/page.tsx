@@ -17,6 +17,7 @@ import {
 } from "@/packages/clients/components/table/client-columns";
 import { ClientDataTable } from "@/packages/clients/components/table/client-data-table";
 import { useDebounce } from "@/components/hooks/use-debounce";
+import { RoleGate } from "@/packages/roles/components/role-gate";
 import type { TemplateField, TemplateSection } from "@/packages/clients/types";
 
 export default function ClientsPage() {
@@ -73,18 +74,20 @@ export default function ClientsPage() {
           />
           <h1 className="text-base font-medium">Lista de Clientes</h1>
           <div className="ml-auto flex items-center gap-2">
-            <Button
-              size="sm"
-              type="button"
-              variant="outline"
-              onClick={() =>
-                router.push(`/companies/${companyId}/clients/new`)
-              }
-              className="cursor-pointer"
-            >
-              <Plus />
-              Nuevo Cliente
-            </Button>
+            <RoleGate permission="clients_create">
+              <Button
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  router.push(`/companies/${companyId}/clients/new`)
+                }
+                className="cursor-pointer"
+              >
+                <Plus />
+                Nuevo Cliente
+              </Button>
+            </RoleGate>
           </div>
         </div>
       </header>

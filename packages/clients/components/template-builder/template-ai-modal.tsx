@@ -23,6 +23,7 @@ import {
   useReviewTemplate,
 } from "@/packages/clients/api";
 import type { TemplateField, TemplateSection } from "@/packages/clients/types";
+import { useCompanyId } from "@/packages/companies/store/use-company-id";
 
 type ReviewSuggestion = {
   type: "add" | "modify" | "remove";
@@ -47,6 +48,7 @@ export function TemplateAiModal({
   onApplyGenerated,
   onApplySuggestions,
 }: TemplateAiModalProps) {
+  const companyId = useCompanyId();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [tab, setTab] = useState<"generate" | "review">("generate");
@@ -89,7 +91,7 @@ export function TemplateAiModal({
         return;
       }
 
-      const response = await generateFromDoc({ prompt: text });
+      const response = await generateFromDoc({ companyId, prompt: text });
       if (!response) return;
 
       const cleaned = response.replace(/```json\n?|```/g, "").trim();
@@ -115,6 +117,7 @@ export function TemplateAiModal({
 
     try {
       const response = await reviewTemplate({
+        companyId,
         sections,
         instruction: instruction.trim() || undefined,
       });

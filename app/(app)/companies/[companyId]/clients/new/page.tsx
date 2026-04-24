@@ -92,6 +92,7 @@ const NewClientPage = () => {
       }
 
       const response = await extractFromDoc({
+        companyId,
         prompt: text,
         templateSections: sections,
       });

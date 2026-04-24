@@ -3,6 +3,7 @@
 import { ConvexError, v } from "convex/values";
 import { action } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { api } from "./_generated/api";
 import { clientAgent } from "./agents";
 import { clientErrors } from "./errors/clients";
 
@@ -39,12 +40,19 @@ function describeFields(sections: SectionDescriptor[]): string {
  */
 export const extractFromDoc = action({
   args: {
+    companyId: v.id("companies"),
     prompt: v.string(),
     templateSections: v.any(),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new ConvexError(clientErrors.unauthorized);
+
+    const canUseAI = await ctx.runQuery(api.roles.hasPermission, {
+      companyId: args.companyId,
+      permission: "clients_useAI",
+    });
+    if (!canUseAI) throw new ConvexError(clientErrors.permissionDenied);
 
     const fieldsDescription = describeFields(
       args.templateSections as SectionDescriptor[],
@@ -78,11 +86,18 @@ For switch fields, use true/false.
  */
 export const generateFromDoc = action({
   args: {
+    companyId: v.id("companies"),
     prompt: v.string(),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new ConvexError(clientErrors.unauthorized);
+
+    const canUseAI = await ctx.runQuery(api.roles.hasPermission, {
+      companyId: args.companyId,
+      permission: "clients_useAI",
+    });
+    if (!canUseAI) throw new ConvexError(clientErrors.permissionDenied);
 
     const fullPrompt = `
 TASK: Analyze the following document and generate a client template.
@@ -147,12 +162,19 @@ OUTPUT: Return a JSON object with this exact structure:
  */
 export const reviewTemplate = action({
   args: {
+    companyId: v.id("companies"),
     sections: v.any(),
     instruction: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new ConvexError(clientErrors.unauthorized);
+
+    const canUseAI = await ctx.runQuery(api.roles.hasPermission, {
+      companyId: args.companyId,
+      permission: "clients_useAI",
+    });
+    if (!canUseAI) throw new ConvexError(clientErrors.permissionDenied);
 
     const sectionsJson = JSON.stringify(args.sections, null, 2);
     const userInstruction = args.instruction

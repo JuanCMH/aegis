@@ -15,6 +15,7 @@ import type { TemplateSection } from "@/packages/clients/types";
 import { validateClientData } from "@/packages/clients/lib/validate-client-data";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RoleGate } from "@/packages/roles/components/role-gate";
 
 export default function ClientDetailPage() {
   const clientId = useClientId();
@@ -173,15 +174,17 @@ export default function ClientDetailPage() {
                 </Button>
               </>
             ) : (
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-1.5 border-border/40"
-                onClick={() => setIsEditing(true)}
-              >
-                <Pencil className="size-3.5" />
-                Editar
-              </Button>
+              <RoleGate permission="clients_edit">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1.5 border-border/40"
+                  onClick={() => setIsEditing(true)}
+                >
+                  <Pencil className="size-3.5" />
+                  Editar
+                </Button>
+              </RoleGate>
             )}
           </div>
         </div>

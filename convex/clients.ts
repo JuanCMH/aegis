@@ -2,7 +2,7 @@ import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { populateMember } from "./roles";
+import { checkPermission, populateMember } from "./roles";
 import { clientErrors } from "./errors/clients";
 
 const FIXED_NAME_FIELD_ID = "field_name";
@@ -221,6 +221,14 @@ export const create = mutation({
     const member = await populateMember(ctx, userId, args.companyId);
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
 
+    const canCreate = await checkPermission({
+      ctx,
+      userId,
+      companyId: args.companyId,
+      permission: "clients_create",
+    });
+    if (!canCreate) throw new ConvexError(clientErrors.permissionDenied);
+
     if (!args.name.trim()) throw new ConvexError(clientErrors.nameRequired);
     if (!args.identificationNumber.trim())
       throw new ConvexError(clientErrors.identificationRequired);
@@ -267,6 +275,14 @@ export const update = mutation({
     const member = await populateMember(ctx, userId, client.companyId);
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
 
+    const canEdit = await checkPermission({
+      ctx,
+      userId,
+      companyId: client.companyId,
+      permission: "clients_edit",
+    });
+    if (!canEdit) throw new ConvexError(clientErrors.permissionDenied);
+
     if (!args.name.trim()) throw new ConvexError(clientErrors.nameRequired);
     if (!args.identificationNumber.trim())
       throw new ConvexError(clientErrors.identificationRequired);
@@ -310,6 +326,14 @@ export const remove = mutation({
     const member = await populateMember(ctx, userId, client.companyId);
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
 
+    const canDelete = await checkPermission({
+      ctx,
+      userId,
+      companyId: client.companyId,
+      permission: "clients_delete",
+    });
+    if (!canDelete) throw new ConvexError(clientErrors.permissionDenied);
+
     // Clean up file/image fields stored in Convex storage
     const template = client.templateId
       ? await ctx.db.get(client.templateId)
@@ -348,6 +372,14 @@ export const getByCompany = query({
 
     const member = await populateMember(ctx, userId, args.companyId);
     if (!member) return { page: [], isDone: true, continueCursor: "" };
+
+    const canView = await checkPermission({
+      ctx,
+      userId,
+      companyId: args.companyId,
+      permission: "clients_view",
+    });
+    if (!canView) return { page: [], isDone: true, continueCursor: "" };
 
     // If search term provided, use search indexes
     if (args.search && args.search.trim()) {
@@ -400,6 +432,14 @@ export const getById = query({
 
     const member = await populateMember(ctx, userId, client.companyId);
     if (!member) return null;
+
+    const canView = await checkPermission({
+      ctx,
+      userId,
+      companyId: client.companyId,
+      permission: "clients_view",
+    });
+    if (!canView) return null;
 
     // Resolve file/image URLs from storage
     const template = client.templateId

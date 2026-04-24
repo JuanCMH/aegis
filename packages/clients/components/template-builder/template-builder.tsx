@@ -25,6 +25,7 @@ import { FieldConfigPanel } from "./field-config-panel";
 import { TemplateCanvas } from "./template-canvas";
 import { SectionTabs } from "./section-tabs";
 import { TemplateAiModal, type ReviewSuggestion } from "./template-ai-modal";
+import { RoleGate } from "@/packages/roles/components/role-gate";
 import type {
   TemplateSection,
   TemplateField,
@@ -396,24 +397,28 @@ export function TemplateBuilder() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setAiModalOpen(true)}
-            className="gap-1.5 border-border/40"
-          >
-            <Sparkles className="size-3.5" />
-            Asistente IA
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleSave}
-            disabled={isSaving}
-            className="gap-1.5"
-          >
-            <Save className="size-3.5" />
-            Guardar
-          </Button>
+          <RoleGate permission="clients_useAI">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setAiModalOpen(true)}
+              className="gap-1.5 border-border/40"
+            >
+              <Sparkles className="size-3.5" />
+              Asistente IA
+            </Button>
+          </RoleGate>
+          <RoleGate permission="clientTemplates_edit">
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="gap-1.5"
+            >
+              <Save className="size-3.5" />
+              Guardar
+            </Button>
+          </RoleGate>
         </div>
       </div>
       <Separator className="opacity-40" />

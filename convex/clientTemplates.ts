@@ -1,7 +1,7 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { populateMember } from "./roles";
+import { checkPermission, populateMember } from "./roles";
 import { clientErrors } from "./errors/clients";
 
 const fieldConfigValidator = v.object({
@@ -69,6 +69,14 @@ export const getByCompany = query({
     const member = await populateMember(ctx, userId, args.companyId);
     if (!member) return null;
 
+    const canView = await checkPermission({
+      ctx,
+      userId,
+      companyId: args.companyId,
+      permission: "clientTemplates_view",
+    });
+    if (!canView) return null;
+
     return await ctx.db
       .query("clientTemplates")
       .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
@@ -87,6 +95,14 @@ export const save = mutation({
 
     const member = await populateMember(ctx, userId, args.companyId);
     if (!member) throw new ConvexError(clientErrors.permissionDenied);
+
+    const canEdit = await checkPermission({
+      ctx,
+      userId,
+      companyId: args.companyId,
+      permission: "clientTemplates_edit",
+    });
+    if (!canEdit) throw new ConvexError(clientErrors.permissionDenied);
 
     // Validate that canonical fixed fields exist in the template.
     const allFields = args.sections.flatMap((s) => s.fields);

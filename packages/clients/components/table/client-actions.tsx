@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { RoleGate } from "@/packages/roles/components/role-gate";
 
 interface ClientActionsProps {
   id: string;
@@ -71,25 +72,29 @@ export function ClientActions({ id, children }: ClientActionsProps) {
             <Eye className="size-3.5 mr-2" />
             Ver
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEdit();
-            }}
-          >
-            <Pencil className="size-3.5 mr-2" />
-            Editar
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-destructive focus:text-destructive"
-            onClick={(e) => {
-              e.stopPropagation();
-              void handleDelete();
-            }}
-          >
-            <Trash2 className="size-3.5 mr-2" />
-            Eliminar
-          </DropdownMenuItem>
+          <RoleGate permission="clients_edit">
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit();
+              }}
+            >
+              <Pencil className="size-3.5 mr-2" />
+              Editar
+            </DropdownMenuItem>
+          </RoleGate>
+          <RoleGate permission="clients_delete">
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                void handleDelete();
+              }}
+            >
+              <Trash2 className="size-3.5 mr-2" />
+              Eliminar
+            </DropdownMenuItem>
+          </RoleGate>
         </DropdownMenuContent>
       </DropdownMenu>
     </>
