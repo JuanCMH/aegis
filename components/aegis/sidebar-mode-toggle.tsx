@@ -5,9 +5,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { RiMoonFill, RiSunFill } from "@remixicon/react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { SidebarMenuButton, useSidebar } from "./ui/sidebar";
+import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 
 interface ModeToggleProps {
   align?: "center" | "end" | "start";
@@ -38,8 +38,8 @@ export const SidebarModeToggle = ({ align = "center" }: ModeToggleProps) => {
             Tema
           </span>
           <span className="relative flex items-center justify-center">
-            <RiSunFill className="size-4 rotate-0 scale-100 transition-all duration-700 dark:-rotate-90 dark:scale-0 origin-left" />
-            <RiMoonFill className="absolute size-4 rotate-90 scale-0 transition-all duration-700 dark:rotate-0 dark:scale-100 origin-right" />
+            <Sun className="size-4 rotate-0 scale-100 transition-all duration-700 dark:-rotate-90 dark:scale-0 origin-left" />
+            <Moon className="absolute size-4 rotate-90 scale-0 transition-all duration-700 dark:rotate-0 dark:scale-100 origin-right" />
           </span>
         </SidebarMenuButton>
       </DropdownMenuTrigger>

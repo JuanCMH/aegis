@@ -4,8 +4,8 @@ import {
   SelectValue,
   SelectContent,
   SelectTrigger,
-} from "./ui/select";
-import { Input } from "./ui/input";
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 interface PolicyStatusPickerProps {
   value?: string;

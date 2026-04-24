@@ -1,6 +1,6 @@
 "use client";
 
-import { CreateWorkspaceModal } from "@/packages/workspaces/components/modals/create-workspace-modal";
+import { CreateCompanyModal } from "@/packages/companies/components/modals/create-company-modal";
 import { useEffect, useState } from "react";
 
 export const ModalProvider = () => {
@@ -14,7 +14,7 @@ export const ModalProvider = () => {
 
   return (
     <>
-      <CreateWorkspaceModal />
+      <CreateCompanyModal />
     </>
   );
 };

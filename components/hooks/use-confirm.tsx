@@ -8,11 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import {
-  RiAlertLine,
-  RiErrorWarningLine,
-  RiInformationLine,
-} from "@remixicon/react";
+import { Info, OctagonAlert, TriangleAlert } from "lucide-react";
 import { JSX, useState } from "react";
 
 interface UseConfirmProps {
@@ -74,20 +70,18 @@ export const useConfirm = ({
             <div
               className={
                 type === "critical"
-                  ? "flex size-9 items-center justify-center rounded-lg border border-red-500/10 bg-red-500/10 text-red-500"
+                  ? "flex size-9 items-center justify-center rounded-lg border border-destructive/10 bg-destructive/10 text-destructive"
                   : type === "warning"
-                    ? "flex size-9 items-center justify-center rounded-lg border border-yellow-500/10 bg-yellow-500/10 text-yellow-500"
-                    : "flex size-9 items-center justify-center rounded-lg border border-h-indigo/10 bg-h-indigo/10 text-h-indigo"
+                    ? "flex size-9 items-center justify-center rounded-lg border border-aegis-amber/10 bg-aegis-amber/10 text-aegis-amber"
+                    : "flex size-9 items-center justify-center rounded-lg border border-aegis-sapphire/10 bg-aegis-sapphire/10 text-aegis-sapphire"
               }
             >
-              {type === "info" && (
-                <RiInformationLine className="size-4 shrink-0" />
-              )}
+              {type === "info" && <Info className="size-4 shrink-0" />}
               {type === "warning" && (
-                <RiAlertLine className="size-4 shrink-0" />
+                <TriangleAlert className="size-4 shrink-0" />
               )}
               {type === "critical" && (
-                <RiErrorWarningLine className="size-4 shrink-0" />
+                <OctagonAlert className="size-4 shrink-0" />
               )}
             </div>
             <div className="space-y-1">

@@ -1,6 +1,6 @@
 import { Toaster } from "sonner";
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Outfit, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { JotaiProvider } from "@/components/providers/jotai-provider";
 import { ModalProvider } from "@/components/providers/modal-provider";
@@ -13,6 +13,21 @@ import "./globals.css";
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  style: ["italic"],
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -40,7 +55,9 @@ export default function RootLayout({
   return (
     <ConvexAuthNextjsServerProvider>
       <html lang="es" suppressHydrationWarning>
-        <body className={`${outfit.variable} antialiased`}>
+        <body
+          className={`${outfit.variable} ${cormorant.variable} ${jetbrainsMono.variable} font-sans antialiased`}
+        >
           <NuqsAdapter>
             <ThemeProvider
               attribute="class"

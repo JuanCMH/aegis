@@ -1,7 +1,7 @@
 import { Hint } from "./hint";
 import { cn } from "@/lib/utils";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ComponentProps } from "react";
 
 interface FieldProps extends Omit<ComponentProps<"input">, "onChange"> {

@@ -5,7 +5,7 @@ import {
   SelectValue,
   SelectContent,
   SelectTrigger,
-} from "./ui/select";
+} from "@/components/ui/select";
 import { bgCustomColors, CustomColor, customColors } from "@/lib/custom-colors";
 
 interface ColorPickerProps {

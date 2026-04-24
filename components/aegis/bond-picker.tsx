@@ -4,7 +4,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "@/components/ui/select";
 import { Dispatch, SetStateAction } from "react";
 import { Id } from "@/convex/_generated/dataModel";
 import { BondDataType } from "@/packages/bonds/types";

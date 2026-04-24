@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Input } from "./ui/input";
+import { Input } from "@/components/ui/input";
 import { Hint } from "./hint";
 import { formatCop } from "@/lib/format-cop";
 import { cn } from "@/lib/utils";

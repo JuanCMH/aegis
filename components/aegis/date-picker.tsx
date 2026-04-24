@@ -8,11 +8,11 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Hint } from "@/components/hint";
+import { Hint } from "@/components/aegis/hint";
 import { PropsSingle } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { RiArrowDownSLine } from "@remixicon/react";
+import { ChevronDown } from "lucide-react";
 
 interface DatePickerProps {
   date?: Date;
@@ -52,7 +52,7 @@ export function DatePicker({
           >
             <span className="truncate">{dateText}</span>
             {!readOnly && (
-              <RiArrowDownSLine className="ml-auto h-4 w-4 shrink-0" />
+              <ChevronDown className="ml-auto h-4 w-4 shrink-0" />
             )}
           </Button>
         </PopoverTrigger>

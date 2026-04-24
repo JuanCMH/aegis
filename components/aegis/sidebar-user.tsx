@@ -18,7 +18,7 @@ import {
 import { useCurrentUser } from "@/packages/auth/api";
 import { ProfileModal } from "@/packages/users/components/modals/profile-modal";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { RiCloseFill, RiExpandUpDownLine, RiUser3Line } from "@remixicon/react";
+import { X, ChevronsUpDown, User } from "lucide-react";
 import { useState } from "react";
 
 export function SidebarUser() {
@@ -43,7 +43,7 @@ export function SidebarUser() {
               >
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.userImage} alt={user.name} />
-                  <AvatarFallback className="rounded-lg bg-rose-500 text-white font-bold">
+                  <AvatarFallback className="rounded-lg bg-aegis-sapphire/10 text-aegis-sapphire font-semibold">
                     {avatarFallback}
                   </AvatarFallback>
                 </Avatar>
@@ -51,7 +51,7 @@ export function SidebarUser() {
                   <span className="truncate font-semibold">{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>
-                <RiExpandUpDownLine className="ml-auto size-4" />
+                <ChevronsUpDown className="ml-auto size-4" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -64,7 +64,7 @@ export function SidebarUser() {
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src={user.userImage} alt={user.name} />
-                    <AvatarFallback className="rounded-lg bg-rose-500">
+                    <AvatarFallback className="rounded-lg bg-aegis-sapphire/10 text-aegis-sapphire font-semibold">
                       {avatarFallback}
                     </AvatarFallback>
                   </Avatar>
@@ -80,14 +80,14 @@ export function SidebarUser() {
                 className="flex items-center justify-between gap-2 cursor-pointer"
               >
                 Perfil
-                <RiUser3Line className="size-4 ml-2" />
+                <User className="size-4 ml-2" />
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => signOut()}
                 className="flex items-center justify-between gap-2 cursor-pointer"
               >
                 Cerrar sesión
-                <RiCloseFill className="size-4 ml-2" />
+                <X className="size-4 ml-2" />
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
