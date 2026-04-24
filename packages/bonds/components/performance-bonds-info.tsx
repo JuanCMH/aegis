@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BondsModal } from "@/packages/bonds/components/modals/bonds-modal";
+import { AmparosPickerModal } from "@/packages/bonds/components/modals/amparos-picker-modal";
 import { Id } from "@/convex/_generated/dataModel";
 import { BondDataType } from "@/packages/bonds/types";
 import Bond from "./bond";
@@ -220,7 +220,7 @@ const PerformanceBondsInfo = ({
           setCalculateExpensesTaxes={setCalculateExpensesTaxes}
         />
       </div>
-      <BondsModal
+      <AmparosPickerModal
         open={bodsModalOpen}
         setOpen={setBondsModalOpen}
         contractData={contractData}

@@ -144,16 +144,24 @@ Específicas:
 
 ## 8. Interacciones cross-módulo
 
-- **Quotes**: el picker `BondPicker` (`components/aegis/bond-picker.tsx`)
-  alimenta el flujo de cotización. Debe ofrecer sólo amparos activos
-  (`getByCompany({ includeInactive: false })`).
-- **Quotes nuevas**: `defaultRate` del amparo debería precargarse en
-  `quoteBonds[n].rate` al seleccionarlo (pendiente wiring completo).
-- **QuoteBonds** (tabla): guarda `bondId` opcional — eliminar un amparo
-  **no** rompe la historia (es FK opcional y se guarda `name` inline).
+- **Quotes** (consumidor, no gestor): dentro del flujo de cotización el
+  catálogo se consume a través de `AmparosPickerModal`
+  (`packages/bonds/components/modals/amparos-picker-modal.tsx`). Este
+  modal **solo lee** `getByCompany({ includeInactive: false })` y permite
+  marcar amparos con checkbox para añadirlos a `performanceBondsData`.
+  **No expone CRUD**: para crear / editar / archivar amparos hay un link
+  "Gestionar catálogo →" que navega a `/companies/[id]/settings/bonds`
+  (solo visible con `bonds_manage`).
+- **Precarga de tasa**: al marcar un amparo en el picker, su
+  `defaultRate` se copia como `rate` inicial en la instancia
+  `quoteBond`; el usuario puede ajustarla por cotización.
+- **QuoteBonds** (tabla): guarda `bondId` opcional + snapshot de `name`
+  y `rate`. Eliminar un amparo del catálogo **no** rompe históricos.
 - **Policies**: si en el futuro se relacionan pólizas con amparos,
   aplicar el mismo patrón de snapshot.
 - **Insurers / Lines of Business**: catálogos independientes, sin FK
   cruzadas.
-- **Roles**: permisos `bonds_view` / `bonds_manage`.
+- **Roles**: permisos `bonds_view` / `bonds_manage`. Un usuario con
+  `bonds_view` puede seleccionar amparos en cotizaciones pero no ve
+  el link "Gestionar catálogo".
 - **Logs** (futuro): `bond_created`, `_updated`, `_archived`, `_deleted`.
