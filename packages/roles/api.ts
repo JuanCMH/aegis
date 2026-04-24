@@ -25,3 +25,17 @@ export const useHasPermission = (args: {
   companyId: Id<"companies">;
   permission: PermissionKey;
 }) => useFetch(route.hasPermission, args);
+
+/**
+ * Batch variant — returns a reactive map of `{ [permission]: boolean }`.
+ */
+export const useHasPermissions = (args: {
+  companyId: Id<"companies">;
+  permissions: PermissionKey[];
+}) => {
+  const { data, isLoading } = useFetch(route.hasPermissions, args);
+  return {
+    permissions: data as Record<PermissionKey, boolean> | undefined,
+    isLoading,
+  };
+};
