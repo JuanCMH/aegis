@@ -27,12 +27,14 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+import { useMembersSheet } from "@/packages/members/store/use-members-sheet";
 import { useCompanyId } from "../store/use-company-id";
 import { CompanyMenu } from "./company-menu";
 import { CompanySwitcher } from "./company-switcher";
 
 export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const companyId = useCompanyId();
+  const [, setMembersSheetOpen] = useMembersSheet();
 
   const data = [
     {
@@ -110,7 +112,7 @@ export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         },
         {
           title: "Miembros",
-          url: `/companies/${companyId}/settings/members`,
+          onClick: () => setMembersSheetOpen(true),
           icon: UserPlus,
         },
         {

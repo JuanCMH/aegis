@@ -130,7 +130,7 @@ Precondiciones específicas:
 |---|---------------------------------------------------------------------|-----------------------------------------------------------------------|
 | 1 | Card "Asesor" → menú → "Eliminar"                                   | Dialogo avisa: "Este rol está asignado a 1 miembro. Volverá a..."     |
 | 2 | Confirmar                                                           | Rol eliminado + `asesor@aegis.test` queda con `customRoleId: null`    |
-| 3 | Ir a `/companies/[demo]/settings/members`                           | Fila `asesor@aegis.test` muestra badge "Miembro" (literal default)    |
+| 3 | Abrir sidebar › Agencia › **Miembros** (sheet lateral)              | Fila `asesor@aegis.test` muestra badge "Miembro" (literal default)    |
 | 4 | Sesión en `asesor@aegis.test`                                       | No puede crear cotizaciones (pierde `quotes_create`)                  |
 
 ## 5. Escenarios de error / edge cases

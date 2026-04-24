@@ -6,8 +6,9 @@ Gestión del equipo de una agencia: listar miembros, cambiar sus roles
 (literal admin/member o rol custom), expulsarlos, salir voluntariamente,
 y invitar gente nueva por email con un enlace firmado que expira en 7 días.
 
-Aplica a `/companies/[companyId]/settings/members` y al flujo
-`/auth?invitation=<token>`.
+Se abre como **sheet lateral** desde el item "Miembros" en la sección
+"Agencia" del sidebar (contexto: `/companies/[companyId]/...`), y
+el flujo de invitación vive en `/auth?invitation=<token>`.
 
 ## 2. Precondiciones
 
@@ -24,13 +25,15 @@ Específicas de este módulo:
 
 ## 3. Mapa de rutas y componentes
 
-| Ruta                                              | Archivo                                                            |
+| Ruta / Entrada                                    | Archivo                                                            |
 |---------------------------------------------------|--------------------------------------------------------------------|
-| `/companies/[id]/settings/members`                | `app/(app)/companies/[companyId]/settings/members/page.tsx`        |
+| Sidebar › Agencia › Miembros (abre sheet)          | `packages/members/components/members-sheet.tsx`                    |
 | `/auth?invitation=<token>`                        | `app/auth/page.tsx` + `packages/auth/components/auth-screen.tsx`   |
 
 | Componente                  | Archivo                                                      |
 |-----------------------------|--------------------------------------------------------------|
+| `MembersSheet`              | `packages/members/components/members-sheet.tsx`              |
+| `useMembersSheet` (jotai)   | `packages/members/store/use-members-sheet.ts`                |
 | `MembersTable`              | `packages/members/components/members-table.tsx`              |
 | `MemberRow`                 | `packages/members/components/member-row.tsx`                 |
 | `RoleBadge`                 | `packages/members/components/role-badge.tsx`                 |
@@ -47,11 +50,11 @@ Backend: `convex/members.ts`, `convex/invitations.ts`,
 ### 4.1 Ver listado de miembros (admin)
 
 **Cuenta**: `admin@aegis.test`
-**Ruta**: `/companies/[demo]/settings/members`
+**Entrada**: Sidebar › Agencia › **Miembros** (abre sheet lateral)
 
 | # | Acción                                        | Resultado esperado                                                        |
 |---|-----------------------------------------------|---------------------------------------------------------------------------|
-| 1 | Navegar a la ruta                             | Header con breadcrumb "Dashboard › Miembros"                              |
+| 1 | Click en "Miembros" del sidebar               | Se abre sheet lateral derecho con overlay; el sidebar se colapsa          |
 | 2 | Observar título                               | "Miembros de la agencia" + subtítulo "Gestiona quién tiene acceso…"       |
 | 3 | Observar tabla                                | Orden: Owner primero, luego admins, luego miembros alfabético             |
 | 4 | Chip del owner                                | Amber con icon `Crown` y label "Propietario"                              |
@@ -197,7 +200,7 @@ Acceso y acciones visibles/ejecutables por rol. Leyenda: ✅ visible+funcional �
 
 | Acción / UI                              | Owner | Admin | Member default | Asesor (custom) | Lector (custom) | Outsider |
 |------------------------------------------|-------|-------|----------------|-----------------|-----------------|----------|
-| Ver página `/settings/members`           | ✅    | ✅    | ❌ (vacío)     | ❌              | ❌              | ❌ (404) |
+| Abrir sheet "Miembros" (sidebar)         | ✅    | ✅    | ❌ (vacío)     | ❌              | ❌              | ❌ (sin sidebar) |
 | Ver tabla de miembros                    | ✅    | ✅    | ❌             | ❌              | ❌              | ❌       |
 | Ver panel "Invitaciones pendientes"      | ✅    | ✅    | ❌             | ❌              | ❌              | ❌       |
 | Botón "Invitar miembro"                  | ✅    | ✅    | ❌             | ❌              | ❌              | ❌       |

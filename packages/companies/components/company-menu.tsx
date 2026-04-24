@@ -16,15 +16,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-export function CompanyMenu({
-  data,
-}: {
-  data: {
-    title: string;
-    icon: LucideIcon;
-    items: { title: string; url: string; icon: LucideIcon }[];
-  }[];
-}) {
+export type CompanyMenuItem = {
+  title: string;
+  icon: LucideIcon;
+  url?: string;
+  onClick?: () => void;
+};
+
+export type CompanyMenuSection = {
+  title: string;
+  icon: LucideIcon;
+  items: CompanyMenuItem[];
+};
+
+export function CompanyMenu({ data }: { data: CompanyMenuSection[] }) {
   const pathname = usePathname();
   const previousPathname = useRef(pathname);
   const { isMobile, open, setOpen, state } = useSidebar();
@@ -42,7 +47,10 @@ export function CompanyMenu({
 
   const showExpandedMenu = isMobile || state === "expanded";
 
-  const isItemActive = (url: string) => {
+  const isItemActive = (url?: string) => {
+    if (!url) {
+      return false;
+    }
     if (pathname === url) {
       return true;
     }
@@ -59,9 +67,14 @@ export function CompanyMenu({
     return nestedPath.length > 0 && nestedPath !== "new";
   };
 
-  const isSectionActive = (
-    items: { title: string; url: string; icon: LucideIcon }[],
-  ) => items.some((item) => isItemActive(item.url) || pathname === item.url);
+  const isSectionActive = (items: CompanyMenuItem[]) =>
+    items.some((item) => isItemActive(item.url));
+
+  const collapseIfNeeded = () => {
+    if (!isMobile && open) {
+      setOpen(false);
+    }
+  };
 
   if (!showExpandedMenu) {
     return (
@@ -107,6 +120,31 @@ export function CompanyMenu({
               {section.items.map((item) => {
                 const isActive = isItemActive(item.url);
 
+                if (item.onClick) {
+                  return (
+                    <SidebarMenuSubItem key={item.title}>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={isActive}
+                        size="md"
+                        className="cursor-pointer rounded-md px-2"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            item.onClick?.();
+                            collapseIfNeeded();
+                          }}
+                          className="w-full text-left"
+                        >
+                          <item.icon className="size-4" />
+                          <span>{item.title}</span>
+                        </button>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  );
+                }
+
                 return (
                   <SidebarMenuSubItem key={item.title}>
                     <SidebarMenuSubButton
@@ -115,14 +153,7 @@ export function CompanyMenu({
                       size="md"
                       className="cursor-pointer rounded-md px-2"
                     >
-                      <Link
-                        href={item.url}
-                        onClick={() => {
-                          if (!isMobile && open) {
-                            setOpen(false);
-                          }
-                        }}
-                      >
+                      <Link href={item.url ?? "#"} onClick={collapseIfNeeded}>
                         <item.icon className="size-4" />
                         <span>{item.title}</span>
                       </Link>
