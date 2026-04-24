@@ -20,6 +20,9 @@ export const permissionsSchema = {
   members_expel: v.boolean(),
   members_assignRole: v.boolean(),
 
+  // Invitations
+  invitations_revoke: v.boolean(),
+
   // Roles
   roles_view: v.boolean(),
   roles_create: v.boolean(),
@@ -95,6 +98,8 @@ export const memberPermissionDefaults: Record<PermissionKey, boolean> = {
   members_invite: false,
   members_expel: false,
   members_assignRole: false,
+
+  invitations_revoke: false,
 
   roles_view: false,
   roles_create: false,

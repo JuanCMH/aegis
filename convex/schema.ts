@@ -120,6 +120,31 @@ const schema = defineSchema({
     companyId: v.id("companies"),
     ...permissionsSchema,
   }).index("companyId", ["companyId"]),
+  invitations: defineTable({
+    companyId: v.id("companies"),
+    email: v.string(),
+    roleType: v.union(
+      v.literal("admin"),
+      v.literal("member"),
+      v.literal("custom"),
+    ),
+    customRoleId: v.optional(v.id("roles")),
+    token: v.string(),
+    invitedBy: v.id("users"),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("accepted"),
+      v.literal("revoked"),
+      v.literal("expired"),
+    ),
+    expiresAt: v.number(),
+    acceptedAt: v.optional(v.number()),
+    acceptedBy: v.optional(v.id("users")),
+  })
+    .index("token", ["token"])
+    .index("companyId", ["companyId"])
+    .index("companyId_email", ["companyId", "email"])
+    .index("companyId_status", ["companyId", "status"]),
   clientTemplates: defineTable({
     companyId: v.id("companies"),
     sections: v.array(templateSection),
