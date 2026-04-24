@@ -35,7 +35,7 @@ Precondiciones específicas:
 
 | Ruta                                       | Archivo                                                         |
 |--------------------------------------------|-----------------------------------------------------------------|
-| `/companies/[id]/settings/roles`           | `app/(app)/companies/[companyId]/settings/roles/page.tsx`       |
+| Sidebar › Agencia › Roles (sheet)         | `packages/roles/components/roles-sheet.tsx`                     |
 
 | Componente clave           | Archivo                                                              | Rol                                       |
 |----------------------------|----------------------------------------------------------------------|-------------------------------------------|
@@ -64,7 +64,7 @@ Precondiciones específicas:
 ### 4.2 Crear rol desde plantilla "Sólo lectura"
 
 **Cuenta**: `owner@aegis.test`
-**Ruta inicial**: `/companies/[demo]/settings/roles`
+**Entrada**: Sidebar › Agencia › **Roles** (sheet lateral)
 
 | # | Acción                                                              | Resultado esperado                                                    |
 |---|---------------------------------------------------------------------|-----------------------------------------------------------------------|
@@ -151,14 +151,14 @@ Precondiciones específicas:
 | 5.12| Sesión expira durante edición                                      | Mutation falla con `unauthorized`; toast mostrado vía `getErrorMessage`|
 | 5.13| Crear rol con nombre duplicado                                      | **Permitido** (no hay uniqueness) — los nombres pueden repetirse      |
 | 5.14| Eliminar último rol personalizado                                   | Grid vuelve a estado empty con icon `ShieldCheck` + CTA               |
-| 5.15| Navegar a `/settings/roles` sin companyId válido                    | `useCompanyId` redirige o devuelve "skip" (no crashea)                |
+| 5.15| Abrir sheet sin companyId válido                                   | `useCompanyId` redirige o devuelve "skip" (no crashea)                |
 | 5.16| Abrir modal, aplicar plantilla, cerrar, reabrir                     | Estado plantilla no persiste; vuelve a defaults                       |
 
 ## 6. Matriz de permisos
 
 | Acción / UI                      | Owner | Admin | Member | Asesor | Lector | Outsider |
 |----------------------------------|-------|-------|--------|--------|--------|----------|
-| Ver página `/settings/roles`     | ✅    | ✅    | ❌ (404/vacío) | ❌ (*) | ❌ (*) | ❌ (404) |
+| Abrir sheet "Roles" (sidebar)    | ✅    | ✅    | ❌ (vacío)    | ❌ (*) | ❌ (*) | ❌ (sin sidebar) |
 | Botón "Nuevo rol"                | ✅    | ✅    | ❌     | ❌     | ❌     | ❌       |
 | Menú "Editar" en card            | ✅    | ✅    | ❌     | ❌     | ❌     | ❌       |
 | Menú "Eliminar" en card          | ✅    | ✅    | ❌     | ❌     | ❌     | ❌       |

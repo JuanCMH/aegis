@@ -28,6 +28,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import { useMembersSheet } from "@/packages/members/store/use-members-sheet";
+import { useRolesSheet } from "@/packages/roles/store/use-roles-sheet";
 import { useCompanyId } from "../store/use-company-id";
 import { CompanyMenu } from "./company-menu";
 import { CompanySwitcher } from "./company-switcher";
@@ -35,6 +36,7 @@ import { CompanySwitcher } from "./company-switcher";
 export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const companyId = useCompanyId();
   const [, setMembersSheetOpen] = useMembersSheet();
+  const [, setRolesSheetOpen] = useRolesSheet();
 
   const data = [
     {
@@ -117,7 +119,7 @@ export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         },
         {
           title: "Roles",
-          url: `/companies/${companyId}/settings/roles`,
+          onClick: () => setRolesSheetOpen(true),
           icon: ShieldCheck,
         },
         {
