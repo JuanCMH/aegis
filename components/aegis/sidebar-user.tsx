@@ -9,30 +9,81 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useConfirm } from "@/components/hooks/use-confirm";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import type { Id } from "@/convex/_generated/dataModel";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { useCurrentUser } from "@/packages/auth/api";
+import {
+  useGetCurrentMember,
+  useLeaveCompany,
+} from "@/packages/members/api";
 import { ProfileModal } from "@/packages/users/components/modals/profile-modal";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { X, ChevronsUpDown, User } from "lucide-react";
+import {
+  ChevronsUpDown,
+  LogOut,
+  User,
+  X,
+} from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export function SidebarUser() {
   const { isMobile } = useSidebar();
   const { signOut } = useAuthActions();
+  const router = useRouter();
   const { data: user } = useCurrentUser();
   const [profileOpen, setProfileOpen] = useState(false);
+
+  // Route context — present only inside a company route.
+  const params = useParams<{ companyId?: Id<"companies"> }>();
+  const companyId = params?.companyId;
+
+  const { data: currentMember } = useGetCurrentMember(
+    companyId ? { companyId } : { companyId: undefined as unknown as Id<"companies"> },
+  );
+  const { mutate: leave, isPending: isLeaving } = useLeaveCompany();
+
+  const [LeaveConfirm, confirmLeave] = useConfirm({
+    title: "Salir de la agencia",
+    message:
+      "¿Seguro que quieres salir de esta agencia? Perderás el acceso a sus clientes, pólizas y cotizaciones inmediatamente.",
+    type: "critical",
+    confirmText: "Salir de la agencia",
+  });
 
   if (!user) return null;
 
   const avatarFallback = user.name!.charAt(0).toUpperCase();
+  const canLeave =
+    Boolean(companyId) && currentMember && !currentMember.isOwner;
+
+  const handleLeave = async () => {
+    if (!companyId) return;
+    const ok = await confirmLeave();
+    if (!ok) return;
+    await leave(
+      { companyId },
+      {
+        onSuccess: () => {
+          toast.success("Has salido de la agencia");
+          router.push("/companies");
+        },
+        onError: (err) => toast.error(getErrorMessage(err)),
+      },
+    );
+  };
 
   return (
     <>
+      <LeaveConfirm />
       <SidebarMenu>
         <SidebarMenuItem>
           <DropdownMenu>
@@ -82,6 +133,16 @@ export function SidebarUser() {
                 Perfil
                 <User className="size-4 ml-2" />
               </DropdownMenuItem>
+              {canLeave && (
+                <DropdownMenuItem
+                  onClick={handleLeave}
+                  disabled={isLeaving}
+                  className="flex items-center justify-between gap-2 cursor-pointer text-destructive focus:text-destructive"
+                >
+                  Salir de la agencia
+                  <LogOut className="size-4 ml-2" />
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onClick={() => signOut()}
                 className="flex items-center justify-between gap-2 cursor-pointer"

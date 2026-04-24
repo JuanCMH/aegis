@@ -1,9 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useConvexAuth } from "convex/react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { AegisLogo } from "@/components/aegis/aegis-logo";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getErrorMessage } from "@/lib/get-error-message";
+import { useCurrentUser } from "../api";
+import {
+  useAcceptInvitation,
+  useGetInvitationByToken,
+} from "@/packages/invitations/api";
+import { InvitationAcceptCard } from "@/packages/invitations/components/invitation-accept-card";
 import type { SignInFlow } from "../types";
 import { ResetCard } from "./reset-card";
 import { SignInCard } from "./sign-in-card";
@@ -11,6 +21,51 @@ import { SignUpCard } from "./sign-up-card";
 
 export const AuthScreen = () => {
   const [state, setState] = useState<SignInFlow>("signIn");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const invitationToken = searchParams.get("invitation");
+
+  const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
+  const { data: currentUser } = useCurrentUser();
+  const { data: invitation } = useGetInvitationByToken(
+    invitationToken ? { token: invitationToken } : { token: "" },
+  );
+  const { mutate: accept } = useAcceptInvitation();
+
+  // Auto-accept: once user is authenticated with matching email, accept.
+  const acceptedRef = useRef(false);
+  useEffect(() => {
+    if (acceptedRef.current) return;
+    if (!invitationToken || !invitation) return;
+    if (invitation.status !== "pending" || invitation.isExpired) return;
+    if (isAuthLoading || !isAuthenticated) return;
+    if (!currentUser?.email) return;
+    if (currentUser.email.toLowerCase() !== invitation.email.toLowerCase())
+      return;
+
+    acceptedRef.current = true;
+    accept(
+      { token: invitationToken },
+      {
+        onSuccess: (companyId) => {
+          toast.success(`Te uniste a ${invitation.company.name}`);
+          router.push(`/companies/${companyId}`);
+        },
+        onError: (err) => {
+          acceptedRef.current = false;
+          toast.error(getErrorMessage(err));
+        },
+      },
+    );
+  }, [
+    accept,
+    currentUser?.email,
+    invitation,
+    invitationToken,
+    isAuthLoading,
+    isAuthenticated,
+    router,
+  ]);
 
   return (
     <div className="grid min-h-svh w-full grid-cols-1 md:grid-cols-2">
@@ -22,6 +77,12 @@ export const AuthScreen = () => {
               Aegis
             </span>
           </div>
+
+          {invitationToken && (
+            <div className="mb-6">
+              <InvitationAcceptCard token={invitationToken} />
+            </div>
+          )}
 
           {state === "reset" ? (
             <ResetCard setState={setState} />
