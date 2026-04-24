@@ -224,6 +224,20 @@ const schema = defineSchema({
       searchField: "name",
       filterFields: ["companyId"],
     }),
+  linesOfBusiness: defineTable({
+    name: v.string(),
+    code: v.optional(v.string()),
+    description: v.optional(v.string()),
+    /** Default commission percentage applied to new policies in this line. */
+    defaultCommission: v.optional(v.number()),
+    isActive: v.boolean(),
+    companyId: v.id("companies"),
+  })
+    .index("companyId", ["companyId"])
+    .searchIndex("search_name", {
+      searchField: "name",
+      filterFields: ["companyId"],
+    }),
   quotes: defineTable({
     contractor: v.string(),
     contractorId: v.string(),

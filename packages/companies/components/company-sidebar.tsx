@@ -12,6 +12,7 @@ import {
   List,
   Settings2,
   ShieldCheck,
+  Tag,
   UserCircle,
   UserPlus,
   Users,
@@ -120,6 +121,11 @@ export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
           title: "Aseguradoras",
           url: `/companies/${companyId}/settings/insurers`,
           icon: Building2,
+        },
+        {
+          title: "Ramos",
+          url: `/companies/${companyId}/settings/lines-of-business`,
+          icon: Tag,
         },
         {
           title: "Permisos",
