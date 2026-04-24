@@ -104,7 +104,7 @@ export const QuoteAgentModal = ({
     const prompt = `${metadata}\n\n---DOCUMENT START---\n${text}\n---DOCUMENT END---`;
 
     getQuote(
-      { prompt },
+      { companyId, prompt },
       {
         onSuccess: (quoteResponse) => {
           const data = string2Object(quoteResponse, quoteType);

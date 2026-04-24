@@ -15,6 +15,7 @@ import QuoteInfo from "@/packages/quotes/components/quote-info";
 import ContractInfo from "@/packages/quotes/components/contract-info";
 import { QuoteAgentModal } from "@/packages/quotes/components/modals/quote-agent-modal";
 import { Hint } from "@/components/aegis/hint";
+import { RoleGate } from "@/packages/roles/components/role-gate";
 
 const NewQuotePage = () => {
   const [agentModalOpen, setAgentModalOpen] = useState(false);
@@ -102,14 +103,16 @@ const NewQuotePage = () => {
                   </Button>
                 </Hint>
               )}
-              <Button
-                type="button"
-                size="icon-sm"
-                className="cursor-pointer"
-                onClick={() => setAgentModalOpen(true)}
-              >
-                <Sparkles />
-              </Button>
+              <RoleGate permission="quotes_useAI">
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  className="cursor-pointer"
+                  onClick={() => setAgentModalOpen(true)}
+                >
+                  <Sparkles />
+                </Button>
+              </RoleGate>
             </div>
           </div>
         </header>

@@ -36,6 +36,7 @@ import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import PerformanceBondsInfo from "@/packages/bonds/components/performance-bonds-info";
 import { useGetCompany } from "@/packages/companies/api";
 import { AegisLogo } from "@/components/aegis/aegis-logo";
+import { RoleGate } from "@/packages/roles/components/role-gate";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -266,15 +267,17 @@ const QuoteIdPage = () => {
                   Volver
                 </Button>
               </Hint>
-              <Toggle
-                size="sm"
-                variant="outline"
-                pressed={editMode}
-                onPressedChange={setEditMode}
-                className="cursor-pointer  data-[state=on]:*:[svg]:fill-sky-500 data-[state=on]:*:[svg]:stroke-sky-500"
-              >
-                <Pencil />
-              </Toggle>
+              <RoleGate permission="quotes_edit">
+                <Toggle
+                  size="sm"
+                  variant="outline"
+                  pressed={editMode}
+                  onPressedChange={setEditMode}
+                  className="cursor-pointer  data-[state=on]:*:[svg]:fill-sky-500 data-[state=on]:*:[svg]:stroke-sky-500"
+                >
+                  <Pencil />
+                </Toggle>
+              </RoleGate>
             </div>
           </div>
         </header>

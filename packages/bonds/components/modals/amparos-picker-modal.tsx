@@ -75,7 +75,10 @@ export const AmparosPickerModal = ({
           rate: defaultRate ?? 0,
           // `days` / `months` no son parte del tipo canónico, se derivan.
           ...(Number.isFinite(days)
-            ? ({ days, months: Number((days / 30).toFixed(2)) } as unknown as object)
+            ? ({
+                days,
+                months: Number((days / 30).toFixed(2)),
+              } as unknown as object)
             : {}),
         } as BondDataType,
       ]);
@@ -163,7 +166,12 @@ export const AmparosPickerModal = ({
                       id={`amparo-${bond._id}`}
                       checked={isSelected}
                       onCheckedChange={(c) =>
-                        toggle(bond._id, bond.name, bond.defaultRate, c === true)
+                        toggle(
+                          bond._id,
+                          bond.name,
+                          bond.defaultRate,
+                          c === true,
+                        )
                       }
                       className="mt-0.5"
                     />

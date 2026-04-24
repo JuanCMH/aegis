@@ -10,6 +10,7 @@ import { useGetQuotesByCompany } from "@/packages/quotes/api";
 import { columns } from "@/packages/quotes/components/table/quote-column";
 import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import { QuoteDataTable } from "@/packages/quotes/components/table/quote-data-table";
+import { RoleGate } from "@/packages/roles/components/role-gate";
 
 const QuotePage = () => {
   const router = useRouter();
@@ -44,16 +45,18 @@ const QuotePage = () => {
             />
             <h1 className="text-base font-medium">Lista de Cotizaciones</h1>
             <div className="ml-auto flex items-center gap-2">
-              <Button
-                size="sm"
-                type="button"
-                variant="outline"
-                onClick={onNewQuoteClick}
-                className="cursor-pointer"
-              >
-                <Plus />
-                Nueva Cotización
-              </Button>
+              <RoleGate permission="quotes_create">
+                <Button
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                  onClick={onNewQuoteClick}
+                  className="cursor-pointer"
+                >
+                  <Plus />
+                  Nueva Cotización
+                </Button>
+              </RoleGate>
             </div>
           </div>
         </header>

@@ -1,16 +1,26 @@
 import { ConvexError, v } from "convex/values";
 import quoteAgent from "./agents";
-import { populateMember } from "./roles";
+import { api } from "./_generated/api";
+import { checkPermission, populateMember } from "./roles";
 import { action } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { quoteErrors } from "./errors/quotes";
 
 export const getQuoteFromDoc = action({
-  args: { prompt: v.string() },
+  args: {
+    companyId: v.id("companies"),
+    prompt: v.string(),
+  },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new ConvexError(quoteErrors.unauthorized);
+
+    const allowed = await ctx.runQuery(api.roles.hasPermission, {
+      companyId: args.companyId,
+      permission: "quotes_useAI",
+    });
+    if (!allowed) throw new ConvexError(quoteErrors.permissionDenied);
 
     const { thread } = await quoteAgent.createThread(ctx);
     const result = await thread.generateText({ prompt: args.prompt });
@@ -64,6 +74,14 @@ export const update = mutation({
 
     const member = await populateMember(ctx, userId, quote.companyId);
     if (!member) throw new ConvexError(quoteErrors.permissionDenied);
+
+    const canEdit = await checkPermission({
+      ctx,
+      userId,
+      companyId: quote.companyId,
+      permission: "quotes_edit",
+    });
+    if (!canEdit) throw new ConvexError(quoteErrors.permissionDenied);
 
     // Only update documentId if explicitly provided; clean up old file if replacing
     if (args.documentId !== undefined && args.documentId !== quote.documentId) {
@@ -130,6 +148,14 @@ export const remove = mutation({
     const member = await populateMember(ctx, userId, quote.companyId);
     if (!member) throw new ConvexError(quoteErrors.permissionDenied);
 
+    const canDelete = await checkPermission({
+      ctx,
+      userId,
+      companyId: quote.companyId,
+      permission: "quotes_delete",
+    });
+    if (!canDelete) throw new ConvexError(quoteErrors.permissionDenied);
+
     const quoteBonds = await ctx.db
       .query("quoteBonds")
       .withIndex("quoteId", (q) => q.eq("quoteId", args.id))
@@ -188,6 +214,14 @@ export const create = mutation({
     const member = await populateMember(ctx, userId, args.companyId);
     if (!member) throw new ConvexError(quoteErrors.permissionDenied);
 
+    const canCreate = await checkPermission({
+      ctx,
+      userId,
+      companyId: args.companyId,
+      permission: "quotes_create",
+    });
+    if (!canCreate) throw new ConvexError(quoteErrors.permissionDenied);
+
     if (args.contractValue <= 0)
       throw new ConvexError(quoteErrors.invalidContractValue);
     if (args.contractStart >= args.contractEnd)
@@ -243,6 +277,14 @@ export const getByCompany = query({
     const member = await populateMember(ctx, userId, args.companyId);
     if (!member) return [];
 
+    const canView = await checkPermission({
+      ctx,
+      userId,
+      companyId: args.companyId,
+      permission: "quotes_view",
+    });
+    if (!canView) return [];
+
     const [year, month] = args.month.split("-").map(Number);
 
     const monthStart = Date.UTC(year, month - 1, 1);
@@ -285,6 +327,14 @@ export const getById = query({
 
     const member = await populateMember(ctx, userId, quote.companyId);
     if (!member) return null;
+
+    const canView = await checkPermission({
+      ctx,
+      userId,
+      companyId: quote.companyId,
+      permission: "quotes_view",
+    });
+    if (!canView) return null;
 
     const quoteBonds = await ctx.db
       .query("quoteBonds")

@@ -91,9 +91,7 @@ export function BondCatalogFormModal({
     e.preventDefault();
     if (!canSubmit) return;
 
-    const rate = form.defaultRate.trim()
-      ? Number(form.defaultRate)
-      : undefined;
+    const rate = form.defaultRate.trim() ? Number(form.defaultRate) : undefined;
 
     const payload = {
       name: form.name.trim(),
@@ -188,7 +186,10 @@ export function BondCatalogFormModal({
               </p>
             )}
             <div className="sm:col-span-2">
-              <Label htmlFor="bond-description" className="text-xs line-clamp-1">
+              <Label
+                htmlFor="bond-description"
+                className="text-xs line-clamp-1"
+              >
                 Descripción
               </Label>
               <Textarea

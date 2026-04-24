@@ -10,6 +10,7 @@ import { useRemoveQuote } from "../../api";
 import { useRouter } from "next/navigation";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { useConfirm } from "@/components/hooks/use-confirm";
+import { RoleGate } from "@/packages/roles/components/role-gate";
 import {
   X,
   Eye,
@@ -76,15 +77,17 @@ export const QuoteActions = ({ id, quote, children }: QuoteActionsProps) => {
             </>
           )}
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            variant="destructive"
-            disabled={isRemovingQuote}
-            onClick={handleRemoveTask}
-            className="cursor-pointer"
-          >
-            Eliminar Cotización
-            <X className="size-4 ml-auto" />
-          </DropdownMenuItem>
+          <RoleGate permission="quotes_delete">
+            <DropdownMenuItem
+              variant="destructive"
+              disabled={isRemovingQuote}
+              onClick={handleRemoveTask}
+              className="cursor-pointer"
+            >
+              Eliminar Cotización
+              <X className="size-4 ml-auto" />
+            </DropdownMenuItem>
+          </RoleGate>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
