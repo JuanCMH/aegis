@@ -12,8 +12,10 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Spinner } from "@/components/ui/spinner";
-import { Save, LayoutGrid, Sparkles } from "lucide-react";
+import { Save, Sparkles } from "lucide-react";
 import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import {
   useGetClientTemplate,
@@ -397,47 +399,45 @@ export function TemplateBuilder() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-muted/10">
-      {/* Header */}
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-border/40 bg-card px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-xl border border-aegis-sapphire/15 bg-aegis-sapphire/10 text-aegis-sapphire">
-            <LayoutGrid className="size-5" />
+      {/* Header — alineado al patrón de la app (h-12 + SidebarTrigger) */}
+      <header className="flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
+        <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+          <SidebarTrigger className="-ml-1" />
+          <Separator
+            orientation="vertical"
+            className="mx-2 data-[orientation=vertical]:h-4"
+          />
+          <h1 className="text-base font-medium">Plantilla de Clientes</h1>
+          <span className="text-xs text-muted-foreground">
+            {totalFields} {totalFields === 1 ? "campo" : "campos"} ·{" "}
+            {sections.length} {sections.length === 1 ? "sección" : "secciones"}
+          </span>
+          <div className="ml-auto flex items-center gap-2">
+            <RoleGate permission="clients_useAI">
+              <Button
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() => setAiModalOpen(true)}
+                className="cursor-pointer"
+              >
+                <Sparkles />
+                Asistente IA
+              </Button>
+            </RoleGate>
+            <RoleGate permission="clientTemplates_edit">
+              <Button
+                size="sm"
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="cursor-pointer"
+              >
+                <Save />
+                Guardar
+              </Button>
+            </RoleGate>
           </div>
-          <div>
-            <h1 className="text-base font-semibold tracking-tight text-aegis-graphite">
-              Plantilla de Clientes
-            </h1>
-            <p className="text-xs text-aegis-steel">
-              Diseña el formulario que usarás para registrar clientes ·{" "}
-              {totalFields} {totalFields === 1 ? "campo" : "campos"} en{" "}
-              {sections.length}{" "}
-              {sections.length === 1 ? "sección" : "secciones"}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <RoleGate permission="clients_useAI">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setAiModalOpen(true)}
-              className="gap-1.5 border-border/50"
-            >
-              <Sparkles className="size-3.5" />
-              Asistente IA
-            </Button>
-          </RoleGate>
-          <RoleGate permission="clientTemplates_edit">
-            <Button
-              size="sm"
-              onClick={handleSave}
-              disabled={isSaving}
-              className="gap-1.5"
-            >
-              <Save className="size-3.5" />
-              Guardar
-            </Button>
-          </RoleGate>
         </div>
       </header>
 
