@@ -99,7 +99,7 @@ function DroppableTab({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex items-center gap-1 group",
+        "flex shrink-0 items-center gap-1 group",
         isOver && !isActive && "ring-1 ring-primary/40 rounded-md",
       )}
     >
@@ -107,7 +107,7 @@ function DroppableTab({
         type="button"
         onClick={onSelect}
         className={cn(
-          "px-3 py-1.5 text-xs font-medium rounded-md transition-colors",
+          "shrink-0 whitespace-nowrap px-3 py-1.5 text-xs font-medium rounded-md transition-colors",
           isActive
             ? "bg-primary text-primary-foreground"
             : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
@@ -163,27 +163,42 @@ export function SectionTabs({
   const sortedSections = [...sections].sort((a, b) => a.order - b.order);
 
   return (
-    <div className="flex shrink-0 items-center gap-1 px-4 py-2 border-b border-border/40">
-      {sortedSections.map((section) => (
-        <DroppableTab
-          key={section.id}
-          section={section}
-          isActive={section.id === activeSectionId}
-          onSelect={() => onSelectSection(section.id)}
-          onRename={(label) => onRenameSection(section.id, label)}
-          onDelete={() => onDeleteSection(section.id)}
-          canDelete={sections.length > 1}
-        />
-      ))}
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="size-6 p-0 text-muted-foreground hover:text-foreground"
-        onClick={onAddSection}
-      >
-        <Plus className="size-3.5" />
-      </Button>
+    <div className="flex shrink-0 items-center border-b border-border/40">
+      {/* Scroll horizontal con fade en bordes — todos los tabs siguen
+          siendo droppables, no escondemos ninguno en un menú. */}
+      <div className="relative min-w-0 flex-1">
+        <div
+          className="flex items-center gap-1 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          aria-label="Secciones del formulario"
+        >
+          {sortedSections.map((section) => (
+            <DroppableTab
+              key={section.id}
+              section={section}
+              isActive={section.id === activeSectionId}
+              onSelect={() => onSelectSection(section.id)}
+              onRename={(label) => onRenameSection(section.id, label)}
+              onDelete={() => onDeleteSection(section.id)}
+              canDelete={sections.length > 1}
+            />
+          ))}
+        </div>
+        {/* Fade gradients to hint the scroll */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-linear-to-r from-background to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-linear-to-l from-background to-transparent" />
+      </div>
+      <div className="flex shrink-0 items-center pr-4 pl-1">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="size-6 p-0 text-muted-foreground hover:text-foreground"
+          onClick={onAddSection}
+          aria-label="Agregar sección"
+        >
+          <Plus className="size-3.5" />
+        </Button>
+      </div>
     </div>
   );
 }
