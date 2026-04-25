@@ -12,7 +12,6 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { Save, LayoutGrid, Sparkles } from "lucide-react";
 import { useCompanyId } from "@/packages/companies/store/use-company-id";
@@ -379,20 +378,25 @@ export function TemplateBuilder() {
     );
   }
 
+  const totalFields = sections.reduce((acc, s) => acc + s.fields.length, 0);
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col bg-muted/10">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3">
+      <header className="flex items-center justify-between gap-4 border-b border-border/40 bg-card px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center size-9 rounded-xl bg-aegis-sapphire/10 border border-aegis-sapphire/10 text-aegis-sapphire">
-            <LayoutGrid className="size-4" />
+          <div className="flex size-11 items-center justify-center rounded-xl border border-aegis-sapphire/15 bg-aegis-sapphire/10 text-aegis-sapphire">
+            <LayoutGrid className="size-5" />
           </div>
           <div>
-            <h1 className="text-sm font-semibold tracking-tight">
+            <h1 className="text-base font-semibold tracking-tight text-aegis-graphite">
               Plantilla de Clientes
             </h1>
-            <p className="text-xs text-muted-foreground/70">
-              Diseña el formulario que usarás para registrar clientes
+            <p className="text-xs text-aegis-steel">
+              Diseña el formulario que usarás para registrar clientes ·{" "}
+              {totalFields} {totalFields === 1 ? "campo" : "campos"} en{" "}
+              {sections.length}{" "}
+              {sections.length === 1 ? "sección" : "secciones"}
             </p>
           </div>
         </div>
@@ -402,7 +406,7 @@ export function TemplateBuilder() {
               size="sm"
               variant="outline"
               onClick={() => setAiModalOpen(true)}
-              className="gap-1.5 border-border/40"
+              className="gap-1.5 border-border/50"
             >
               <Sparkles className="size-3.5" />
               Asistente IA
@@ -420,8 +424,7 @@ export function TemplateBuilder() {
             </Button>
           </RoleGate>
         </div>
-      </div>
-      <Separator className="opacity-40" />
+      </header>
 
       {/* Body */}
       <DndContext
@@ -429,14 +432,9 @@ export function TemplateBuilder() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex flex-1 min-h-0">
-          {/* Palette sidebar */}
-          <div className="w-56 border-r border-border/40 shrink-0">
-            <FieldPalette />
-          </div>
-
-          {/* Canvas area */}
-          <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex min-h-0 flex-1">
+          {/* Canvas area (izquierda, ocupa el resto) */}
+          <div className="flex min-w-0 flex-1 flex-col">
             <SectionTabs
               sections={sections}
               activeSectionId={activeSectionId}
@@ -445,16 +443,23 @@ export function TemplateBuilder() {
               onRenameSection={handleRenameSection}
               onDeleteSection={handleDeleteSection}
             />
-            <div className="flex-1 overflow-auto p-4">
-              {activeSection && (
-                <TemplateCanvas
-                  sectionId={activeSection.id}
-                  fields={activeSection.fields}
-                  onFieldClick={handleFieldClick}
-                />
-              )}
+            <div className="flex-1 overflow-auto">
+              <div className="mx-auto max-w-6xl px-8 py-8">
+                {activeSection && (
+                  <TemplateCanvas
+                    sectionId={activeSection.id}
+                    fields={activeSection.fields}
+                    onFieldClick={handleFieldClick}
+                  />
+                )}
+              </div>
             </div>
           </div>
+
+          {/* Palette (derecha) */}
+          <aside className="w-72 shrink-0 border-l border-border/40 bg-card">
+            <FieldPalette />
+          </aside>
         </div>
 
         <DragOverlay dropAnimation={null}>{renderDragOverlay()}</DragOverlay>

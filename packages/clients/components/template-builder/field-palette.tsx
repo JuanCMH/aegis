@@ -54,15 +54,17 @@ function DraggableFieldItem({ config }: { config: FieldTypeConfig }) {
       {...listeners}
       {...attributes}
       className={cn(
-        "flex items-center gap-2.5 px-3 py-2 rounded-lg border border-border/40 cursor-grab active:cursor-grabbing",
-        "hover:border-border/60 hover:bg-accent/30 transition-all select-none",
+        "flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-border/50 bg-card cursor-grab active:cursor-grabbing",
+        "hover:border-aegis-sapphire/40 hover:bg-aegis-sapphire/5 transition-all select-none",
         isDragging && "opacity-40",
       )}
     >
-      <div className="flex items-center justify-center size-7 rounded-lg bg-muted/50 shrink-0">
-        <Icon className="size-3.5 text-muted-foreground" />
+      <div className="flex items-center justify-center size-8 rounded-lg bg-muted/60 shrink-0">
+        <Icon className="size-4 text-aegis-steel" />
       </div>
-      <span className="text-sm text-muted-foreground">{config.label}</span>
+      <span className="text-sm font-medium text-aegis-graphite">
+        {config.label}
+      </span>
     </div>
   );
 }
@@ -70,13 +72,16 @@ function DraggableFieldItem({ config }: { config: FieldTypeConfig }) {
 export function FieldPalette() {
   return (
     <div className="flex flex-col h-full">
-      <div className="px-3 py-3">
-        <h3 className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">
-          Campos
+      <div className="px-4 py-4 border-b border-border/40">
+        <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-aegis-steel">
+          Campos disponibles
         </h3>
+        <p className="mt-1 text-[11px] text-aegis-steel/80">
+          Arrastra al canvas para agregar
+        </p>
       </div>
-      <ScrollArea className="flex-1 px-2">
-        <div className="flex flex-col gap-1.5 pb-4">
+      <ScrollArea className="flex-1 px-3">
+        <div className="flex flex-col gap-2 py-3">
           {FIELD_TYPE_CONFIG.map((config) => (
             <DraggableFieldItem key={config.type} config={config} />
           ))}
