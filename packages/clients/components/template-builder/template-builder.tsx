@@ -185,6 +185,21 @@ export function TemplateBuilder() {
     setSelectedField(null);
   }, []);
 
+  const handleFieldResize = useCallback(
+    (fieldId: string, size: TemplateField["size"]) => {
+      setSections((prev) =>
+        prev.map((s) => ({
+          ...s,
+          fields: s.fields.map((f) => (f.id === fieldId ? { ...f, size } : f)),
+        })),
+      );
+      setSelectedField((current) =>
+        current?.id === fieldId ? { ...current, size } : current,
+      );
+    },
+    [],
+  );
+
   // DnD handlers
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -451,6 +466,7 @@ export function TemplateBuilder() {
                     fields={activeSection.fields}
                     selectedFieldId={selectedField?.id ?? null}
                     onFieldClick={handleFieldClick}
+                    onFieldResize={handleFieldResize}
                   />
                 )}
               </div>
