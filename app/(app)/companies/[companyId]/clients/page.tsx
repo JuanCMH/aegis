@@ -44,9 +44,9 @@ export default function ClientsPage() {
     [results],
   );
 
-  const columns = useMemo(() => {
+  const visibleFields = useMemo<TemplateField[]>(() => {
     const sections = template.data?.sections as TemplateSection[] | undefined;
-    const visibleFields: TemplateField[] = (sections ?? [])
+    return (sections ?? [])
       .slice()
       .sort((a, b) => a.order - b.order)
       .flatMap((section) => section.fields)
@@ -56,10 +56,14 @@ export default function ClientsPage() {
           field.id !== "field_name" &&
           field.id !== "field_identificationNumber",
       );
-
-    return createClientColumns(visibleFields);
   }, [template.data]);
 
+  const columns = useMemo(
+    () => createClientColumns(visibleFields),
+    [visibleFields],
+  );
+
+  const hasTemplate = Boolean(template.data?.sections?.length);
   const isLoading = status === "LoadingFirstPage";
   const isDone = status !== "CanLoadMore";
 
@@ -94,11 +98,13 @@ export default function ClientsPage() {
       <ClientDataTable
         data={rows}
         columns={columns}
+        fields={visibleFields}
         isLoading={isLoading}
         search={search}
         onSearchChange={setSearch}
         isDone={isDone}
         onLoadMore={() => loadMore(25)}
+        hasTemplate={hasTemplate}
       />
     </main>
   );
