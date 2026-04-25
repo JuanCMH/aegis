@@ -4,6 +4,7 @@ import {
   ColumnDef,
   flexRender,
   SortingState,
+  VisibilityState,
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
@@ -16,24 +17,49 @@ import {
   TableHead,
   TableHeader,
 } from "@/components/ui/table";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import { Search, X, Users, Plus, ChevronRight, Settings2 } from "lucide-react";
+import {
+  Search,
+  X,
+  Users,
+  Plus,
+  ChevronRight,
+  Settings2,
+  SlidersHorizontal,
+  Check,
+} from "lucide-react";
 import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuCheckboxItem,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import { RoleGate } from "@/packages/roles/components/role-gate";
 import { fullDateTime } from "@/lib/date-formats";
-import type { TemplateField } from "@/packages/clients/types";
+import { validateClientData } from "@/packages/clients/lib/validate-client-data";
+import type { TemplateField, TemplateSection } from "@/packages/clients/types";
 import type { ClientRow } from "./client-columns";
+
+type Completeness = "all" | "complete" | "incomplete";
+
+const columnsStorageKey = (companyId: string) =>
+  `aegis:clients:columns:${companyId}`;
 
 interface ClientDataTableProps {
   data: ClientRow[];
   columns: ColumnDef<ClientRow>[];
   fields: TemplateField[];
+  sections: TemplateSection[];
   isLoading: boolean;
   search: string;
   onSearchChange: (value: string) => void;
@@ -63,6 +89,7 @@ export function ClientDataTable({
   data,
   columns,
   fields,
+  sections,
   isLoading,
   search,
   onSearchChange,
@@ -73,25 +100,88 @@ export function ClientDataTable({
   const router = useRouter();
   const companyId = useCompanyId();
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [completeness, setCompleteness] = useState<Completeness>("all");
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    () => {
+      if (typeof window === "undefined") return {};
+      try {
+        const raw = window.localStorage.getItem(columnsStorageKey(companyId));
+        return raw ? (JSON.parse(raw) as VisibilityState) : {};
+      } catch {
+        return {};
+      }
+    },
+  );
+
+  // Persist column visibility per company
+  useEffect(() => {
+    if (typeof window === "undefined" || !companyId) return;
+    try {
+      window.localStorage.setItem(
+        columnsStorageKey(companyId),
+        JSON.stringify(columnVisibility),
+      );
+    } catch {
+      // ignore
+    }
+  }, [columnVisibility, companyId]);
+
+  // Apply client-side completeness filter
+  const filteredData = useMemo(() => {
+    if (completeness === "all" || sections.length === 0) return data;
+    return data.filter((row) => {
+      const values = {
+        ...row.data,
+        field_name: row.name,
+        field_identificationNumber: row.identificationNumber,
+      };
+      const { valid } = validateClientData(sections, values);
+      return completeness === "complete" ? valid : !valid;
+    });
+  }, [data, sections, completeness]);
 
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    state: { sorting },
+    onColumnVisibilityChange: setColumnVisibility,
+    state: { sorting, columnVisibility },
   });
 
   const cardFields = useMemo(() => fields.slice(0, 2), [fields]);
-  const isEmpty = !isLoading && data.length === 0;
+  const isEmpty = !isLoading && filteredData.length === 0;
   const hasSearch = search.trim().length > 0;
+  const hasFilter = completeness !== "all";
+
+  // Auto-load on scroll via IntersectionObserver
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || isDone || isLoading) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) onLoadMore();
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [isDone, isLoading, onLoadMore]);
+
+  // Toggleable dynamic columns (everything that has an explicit id from the
+  // template — we exclude name/identification/_creationTime/actions which
+  // don't carry an id matching template field ids).
+  const toggleableColumns = table
+    .getAllLeafColumns()
+    .filter((col) => fields.some((f) => f.id === col.id));
 
   return (
     <div className="flex flex-1 min-h-0 flex-col px-4 py-4 lg:px-6">
       {/* Toolbar */}
-      <div className="flex flex-col gap-2 pb-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:max-w-sm">
+      <div className="flex flex-col gap-2 pb-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative w-full lg:max-w-sm">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Buscar por nombre o identificación…"
@@ -110,18 +200,96 @@ export function ClientDataTable({
             </button>
           )}
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          {isLoading ? (
-            <span className="inline-flex items-center gap-1.5">
-              <Spinner className="size-3" />
-              Cargando…
-            </span>
-          ) : (
-            <span className="tabular-nums">
-              {data.length} {data.length === 1 ? "cliente" : "clientes"}
-              {!isDone ? "+" : ""}
-            </span>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Completeness segmented control */}
+          <div className="inline-flex items-center rounded-md border border-border/60 bg-card p-0.5">
+            {(
+              [
+                { id: "all", label: "Todos" },
+                { id: "complete", label: "Completos" },
+                { id: "incomplete", label: "Incompletos" },
+              ] as { id: Completeness; label: string }[]
+            ).map((opt) => {
+              const active = completeness === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setCompleteness(opt.id)}
+                  className={`cursor-pointer rounded-sm px-2.5 py-1 text-xs font-medium transition ${
+                    active
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          {/* Columns dropdown (desktop only) */}
+          {toggleableColumns.length > 0 && (
+            <div className="hidden md:block">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                    className="cursor-pointer"
+                  >
+                    <SlidersHorizontal />
+                    Columnas
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Mostrar columnas</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {toggleableColumns.map((col) => {
+                    const field = fields.find((f) => f.id === col.id);
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={col.id}
+                        checked={col.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          col.toggleVisibility(!!value)
+                        }
+                        onSelect={(e) => e.preventDefault()}
+                      >
+                        {field?.label ?? col.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onSelect={() => setColumnVisibility({})}
+                    className="text-xs"
+                  >
+                    <Check className="size-3.5" />
+                    Restablecer
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           )}
+          <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground lg:ml-2">
+            {isLoading ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Spinner className="size-3" />
+                Cargando…
+              </span>
+            ) : (
+              <span className="tabular-nums">
+                {filteredData.length}{" "}
+                {filteredData.length === 1 ? "cliente" : "clientes"}
+                {hasFilter && data.length !== filteredData.length
+                  ? ` de ${data.length}`
+                  : !isDone
+                    ? "+"
+                    : ""}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -145,13 +313,17 @@ export function ClientDataTable({
         ) : isEmpty ? (
           <EmptyState
             hasSearch={hasSearch}
+            hasFilter={hasFilter}
             hasTemplate={hasTemplate}
             companyId={companyId}
-            onClear={() => onSearchChange("")}
+            onClear={() => {
+              onSearchChange("");
+              setCompleteness("all");
+            }}
           />
         ) : (
           <ul className="space-y-2">
-            {data.map((row) => (
+            {filteredData.map((row) => (
               <li key={row._id}>
                 <button
                   type="button"
@@ -267,9 +439,13 @@ export function ClientDataTable({
                   <TableCell colSpan={columns.length} className="p-0">
                     <EmptyState
                       hasSearch={hasSearch}
+                      hasFilter={hasFilter}
                       hasTemplate={hasTemplate}
                       companyId={companyId}
-                      onClear={() => onSearchChange("")}
+                      onClear={() => {
+                        onSearchChange("");
+                        setCompleteness("all");
+                      }}
                     />
                   </TableCell>
                 </TableRow>
@@ -279,17 +455,23 @@ export function ClientDataTable({
         </div>
       </div>
 
+      {/* Auto-load sentinel + manual fallback */}
       {!isDone && !isLoading && data.length > 0 && (
-        <div className="flex items-center justify-center pt-3">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onLoadMore}
-            className="cursor-pointer"
-          >
-            Cargar más
-          </Button>
-        </div>
+        <>
+          <div ref={sentinelRef} aria-hidden className="h-px w-full" />
+          <div className="flex items-center justify-center gap-2 pt-3 text-xs text-muted-foreground">
+            <Spinner className="size-3" />
+            <span>Cargando más clientes…</span>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onLoadMore}
+              className="cursor-pointer"
+            >
+              Cargar más
+            </Button>
+          </div>
+        </>
       )}
     </div>
   );
@@ -297,16 +479,18 @@ export function ClientDataTable({
 
 function EmptyState({
   hasSearch,
+  hasFilter,
   hasTemplate,
   companyId,
   onClear,
 }: {
   hasSearch: boolean;
+  hasFilter: boolean;
   hasTemplate: boolean;
   companyId: string;
   onClear: () => void;
 }) {
-  if (hasSearch) {
+  if (hasSearch || hasFilter) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 px-6 py-14 text-center">
         <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
@@ -315,7 +499,9 @@ function EmptyState({
         <div className="space-y-1">
           <p className="text-sm font-medium">Sin resultados</p>
           <p className="text-xs text-muted-foreground">
-            No encontramos clientes que coincidan con tu búsqueda.
+            {hasSearch
+              ? "No encontramos clientes que coincidan con tu búsqueda."
+              : "Ningún cliente coincide con el filtro actual."}
           </p>
         </div>
         <Button
@@ -324,7 +510,7 @@ function EmptyState({
           onClick={onClear}
           className="cursor-pointer"
         >
-          Limpiar búsqueda
+          Limpiar filtros
         </Button>
       </div>
     );

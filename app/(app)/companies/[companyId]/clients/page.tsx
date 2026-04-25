@@ -44,26 +44,30 @@ export default function ClientsPage() {
     [results],
   );
 
-  const visibleFields = useMemo<TemplateField[]>(() => {
-    const sections = template.data?.sections as TemplateSection[] | undefined;
-    return (sections ?? [])
-      .slice()
-      .sort((a, b) => a.order - b.order)
-      .flatMap((section) => section.fields)
-      .filter(
-        (field) =>
-          field.showInTable &&
-          field.id !== "field_name" &&
-          field.id !== "field_identificationNumber",
-      );
+  const sections = useMemo<TemplateSection[]>(() => {
+    const raw = template.data?.sections as TemplateSection[] | undefined;
+    return (raw ?? []).slice().sort((a, b) => a.order - b.order);
   }, [template.data]);
+
+  const visibleFields = useMemo<TemplateField[]>(
+    () =>
+      sections
+        .flatMap((section) => section.fields)
+        .filter(
+          (field) =>
+            field.showInTable &&
+            field.id !== "field_name" &&
+            field.id !== "field_identificationNumber",
+        ),
+    [sections],
+  );
 
   const columns = useMemo(
     () => createClientColumns(visibleFields),
     [visibleFields],
   );
 
-  const hasTemplate = Boolean(template.data?.sections?.length);
+  const hasTemplate = sections.length > 0;
   const isLoading = status === "LoadingFirstPage";
   const isDone = status !== "CanLoadMore";
 
@@ -99,6 +103,7 @@ export default function ClientsPage() {
         data={rows}
         columns={columns}
         fields={visibleFields}
+        sections={sections}
         isLoading={isLoading}
         search={search}
         onSearchChange={setSearch}
