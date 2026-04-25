@@ -1,6 +1,9 @@
 "use client";
 
+import { Settings2, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { FIELD_GRID_CLASSES } from "@/packages/clients/lib/grid";
 import type { TemplateSection } from "@/packages/clients/types";
@@ -15,6 +18,10 @@ interface ClientStepperProps {
   resolvedFiles?: Record<string, string>;
   aiFields?: Set<string>;
   errors?: Record<string, string>;
+  /** When true, the active section overlays a soft "Extrayendo con IA…". */
+  isAiExtracting?: boolean;
+  /** companyId — used to link to the template builder from empty states. */
+  companyId?: string;
 }
 
 export function ClientStepper({
@@ -26,6 +33,8 @@ export function ClientStepper({
   resolvedFiles,
   aiFields,
   errors,
+  isAiExtracting,
+  companyId,
 }: ClientStepperProps) {
   const sorted = useMemo(
     () => [...sections].sort((a, b) => a.order - b.order),
@@ -133,25 +142,53 @@ export function ClientStepper({
 
       {/* Fields grid */}
       {activeSection && (
-        <div className={FIELD_GRID_CLASSES}>
-          {activeSection.fields.map((field) => (
-            <DynamicField
-              key={field.id}
-              field={field}
-              value={values[field.id]}
-              onChange={onChange}
-              readOnly={readOnly}
-              onFileUpload={onFileUpload}
-              resolvedFileUrl={resolvedFiles?.[field.id]}
-              isAiFilled={aiFields?.has(field.id)}
-              error={errors?.[field.id]}
-            />
-          ))}
-          {activeSection.fields.length === 0 && (
-            <div className="col-span-full flex flex-col items-center justify-center rounded-lg border border-dashed border-border/40 p-8 text-center">
-              <p className="text-sm text-muted-foreground">
-                Esta sección no tiene campos
-              </p>
+        <div className="relative">
+          <div
+            className={cn(
+              FIELD_GRID_CLASSES,
+              isAiExtracting && "pointer-events-none opacity-60",
+            )}
+          >
+            {activeSection.fields.map((field) => (
+              <DynamicField
+                key={field.id}
+                field={field}
+                value={values[field.id]}
+                onChange={onChange}
+                readOnly={readOnly}
+                onFileUpload={onFileUpload}
+                resolvedFileUrl={resolvedFiles?.[field.id]}
+                isAiFilled={aiFields?.has(field.id)}
+                error={errors?.[field.id]}
+              />
+            ))}
+            {activeSection.fields.length === 0 && (
+              <div className="col-span-full flex flex-col items-center justify-center rounded-lg border border-dashed border-border/40 p-8 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Esta sección no tiene campos
+                </p>
+                {companyId && (
+                  <Link
+                    href={`/companies/${companyId}/settings/client-template`}
+                    className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+                  >
+                    <Settings2 className="size-3.5" />
+                    Configurar plantilla
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* AI extracting overlay — covers only the field grid so the
+              section tabs and header stay reachable. */}
+          {isAiExtracting && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div className="flex items-center gap-2 rounded-full border border-aegis-sapphire/30 bg-aegis-sapphire/10 px-3 py-1.5 text-xs font-medium text-aegis-sapphire shadow-sm backdrop-blur-sm">
+                <Sparkles className="size-3.5" />
+                <Spinner className="size-3" />
+                Extrayendo datos con IA…
+              </div>
             </div>
           )}
         </div>

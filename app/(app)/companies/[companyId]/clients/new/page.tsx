@@ -256,12 +256,6 @@ const NewClientPage = () => {
           />
           <h1 className="text-base font-medium">Nuevo Cliente</h1>
           <div className="ml-auto flex items-center gap-2">
-            {isExtracting && (
-              <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <Spinner className="size-3" />
-                Extrayendo con IA...
-              </span>
-            )}
             <Button
               size="sm"
               type="button"
@@ -284,6 +278,8 @@ const NewClientPage = () => {
             onFileUpload={handleFileUpload}
             aiFields={aiFields}
             errors={fieldErrors}
+            isAiExtracting={isExtracting}
+            companyId={companyId}
           />
         </div>
       </div>
