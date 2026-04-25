@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { DynamicField } from "./dynamic-field";
+import { FIELD_GRID_CLASSES } from "@/packages/clients/lib/grid";
 import type { TemplateSection } from "@/packages/clients/types";
 import { useState } from "react";
 
@@ -62,7 +63,7 @@ export function ClientStepper({
 
       {/* Fields grid */}
       {activeSection && (
-        <div className="grid grid-cols-4 gap-3">
+        <div className={FIELD_GRID_CLASSES}>
           {activeSection.fields.map((field) => (
             <DynamicField
               key={field.id}
@@ -77,7 +78,7 @@ export function ClientStepper({
             />
           ))}
           {activeSection.fields.length === 0 && (
-            <div className="col-span-4 flex flex-col items-center justify-center border border-dashed border-border/40 rounded-lg p-8 text-center">
+            <div className="col-span-full flex flex-col items-center justify-center border border-dashed border-border/40 rounded-lg p-8 text-center">
               <p className="text-sm text-muted-foreground">
                 Esta sección no tiene campos
               </p>

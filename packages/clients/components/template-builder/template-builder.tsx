@@ -449,6 +449,7 @@ export function TemplateBuilder() {
                   <TemplateCanvas
                     sectionId={activeSection.id}
                     fields={activeSection.fields}
+                    selectedFieldId={selectedField?.id ?? null}
                     onFieldClick={handleFieldClick}
                   />
                 )}

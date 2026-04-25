@@ -17,14 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Upload, FileText, Image } from "lucide-react";
-import type { TemplateField, FieldSize } from "@/packages/clients/types";
-
-const SIZE_COL_MAP: Record<FieldSize, string> = {
-  small: "col-span-4 sm:col-span-1",
-  medium: "col-span-4 sm:col-span-2",
-  large: "col-span-4 sm:col-span-3",
-  full: "col-span-4",
-};
+import { FIELD_SIZE_SPAN } from "@/packages/clients/lib/grid";
+import type { TemplateField } from "@/packages/clients/types";
 
 interface DynamicFieldProps {
   field: TemplateField;
@@ -236,7 +230,7 @@ export function DynamicField({
   };
 
   return (
-    <div className={cn(SIZE_COL_MAP[field.size], "space-y-1.5")}>
+    <div className={cn(FIELD_SIZE_SPAN[field.size], "space-y-1.5")}>
       {field.type !== "switch" ? (
         <Label className="text-xs text-muted-foreground/70 font-medium flex items-center gap-1">
           {field.label}

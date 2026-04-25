@@ -4,28 +4,25 @@ import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
   useSortable,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, Lock, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Lock, GripVertical } from "lucide-react";
-import { FIELD_TYPE_CONFIG } from "./field-palette";
-import type { TemplateField, FieldSize } from "@/packages/clients/types";
+import { DynamicField } from "@/packages/clients/components/dynamic-field";
+import {
+  FIELD_GRID_CLASSES,
+  FIELD_SIZE_SPAN,
+} from "@/packages/clients/lib/grid";
+import type { TemplateField } from "@/packages/clients/types";
 
-const SIZE_MAP: Record<FieldSize, string> = {
-  small: "col-span-1",
-  medium: "col-span-2",
-  large: "col-span-3",
-  full: "col-span-4",
-};
-
-function SortableField({
-  field,
-  onClick,
-}: {
+interface SortableFieldProps {
   field: TemplateField;
+  isSelected: boolean;
   onClick: () => void;
-}) {
+}
+
+function SortableField({ field, isSelected, onClick }: SortableFieldProps) {
   const {
     attributes,
     listeners,
@@ -43,52 +40,85 @@ function SortableField({
     transition,
   };
 
-  const config = FIELD_TYPE_CONFIG.find((c) => c.type === field.type);
-  const Icon = config?.icon;
-
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        SIZE_MAP[field.size],
-        "group relative flex items-center gap-2 px-3 py-2.5 rounded-lg border border-border/40",
-        "hover:border-border/60 hover:bg-accent/20 transition-all cursor-pointer select-none",
-        isDragging && "opacity-40 z-50",
-        field.isFixed && "border-dashed",
+        FIELD_SIZE_SPAN[field.size],
+        "group relative",
+        isDragging && "z-50 opacity-50",
       )}
-      onClick={onClick}
     >
-      {/* Drag handle */}
+      {/* WYSIWYG container — same render as the real form */}
       <div
-        {...attributes}
-        {...listeners}
-        className="absolute -left-0.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+        className={cn(
+          "rounded-xl border-2 bg-card/50 px-3 pt-3 pb-2 transition-all",
+          isSelected
+            ? "border-aegis-sapphire/70 bg-aegis-sapphire/5 shadow-[0_0_0_4px_rgba(56,113,224,0.08)]"
+            : "border-transparent hover:border-aegis-sapphire/30 hover:bg-card",
+        )}
       >
-        <GripVertical className="size-3.5 text-muted-foreground/50" />
+        {/* Real field render in disabled mode. We override the size span
+            since the wrapper above already controls layout. */}
+        <div className="[&>div]:col-span-1! [&>div]:w-full!">
+          <DynamicField
+            field={field}
+            value={undefined}
+            onChange={() => {
+              /* noop in builder */
+            }}
+            readOnly
+          />
+        </div>
       </div>
 
-      {Icon && (
-        <div className="flex items-center justify-center size-6 rounded-md bg-muted/50 shrink-0">
-          <Icon className="size-3 text-muted-foreground" />
+      {/* Click capture overlay — selects the field and prevents the user
+          from interacting with the underlying disabled inputs. */}
+      <button
+        type="button"
+        aria-label={`Configurar ${field.label}`}
+        onClick={onClick}
+        className="absolute inset-0 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aegis-sapphire/50 focus-visible:ring-offset-2"
+      />
+
+      {/* Hover toolbar */}
+      <div
+        className={cn(
+          "absolute -top-3 right-3 z-20 flex items-center gap-0.5 rounded-md border border-border/60 bg-card px-1 py-0.5 shadow-sm",
+          "opacity-0 transition-opacity group-hover:opacity-100",
+          isSelected && "opacity-100",
+        )}
+      >
+        <button
+          type="button"
+          aria-label="Mover campo"
+          {...attributes}
+          {...listeners}
+          className="flex size-6 cursor-grab items-center justify-center rounded text-aegis-steel hover:bg-muted active:cursor-grabbing"
+        >
+          <GripVertical className="size-3.5" />
+        </button>
+        <button
+          type="button"
+          aria-label="Configurar campo"
+          onClick={onClick}
+          className="flex size-6 cursor-pointer items-center justify-center rounded text-aegis-steel hover:bg-muted"
+        >
+          <Settings2 className="size-3.5" />
+        </button>
+      </div>
+
+      {/* Fixed indicator — system-required field */}
+      {field.isFixed && (
+        <div
+          className="absolute -top-2.5 left-3 z-20 flex items-center gap-1 rounded-md border border-aegis-amber/40 bg-aegis-amber/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-aegis-amber"
+          title="Campo requerido por el sistema. Puedes personalizar la etiqueta o moverlo, pero no se puede eliminar."
+        >
+          <Lock className="size-2.5" />
+          Requerido
         </div>
       )}
-
-      <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium truncate">{field.label}</p>
-        {field.placeholder && (
-          <p className="text-[10px] text-muted-foreground/60 truncate">
-            {field.placeholder}
-          </p>
-        )}
-      </div>
-
-      <div className="flex items-center gap-1 shrink-0">
-        {field.required && (
-          <span className="text-[10px] text-destructive/80">*</span>
-        )}
-        {field.isFixed && <Lock className="size-3 text-muted-foreground/40" />}
-      </div>
     </div>
   );
 }
@@ -96,12 +126,14 @@ function SortableField({
 interface TemplateCanvasProps {
   sectionId: string;
   fields: TemplateField[];
+  selectedFieldId: string | null;
   onFieldClick: (field: TemplateField) => void;
 }
 
 export function TemplateCanvas({
   sectionId,
   fields,
+  selectedFieldId,
   onFieldClick,
 }: TemplateCanvasProps) {
   const { setNodeRef, isOver } = useDroppable({
@@ -112,22 +144,26 @@ export function TemplateCanvas({
   return (
     <SortableContext
       items={fields.map((f) => f.id)}
-      strategy={verticalListSortingStrategy}
+      strategy={rectSortingStrategy}
     >
       <div
         ref={setNodeRef}
         className={cn(
-          "grid grid-cols-4 gap-2 p-4 min-h-[200px] rounded-lg border border-dashed border-border/40 transition-colors",
-          isOver && "border-primary/40 bg-primary/5",
+          "min-h-[280px] rounded-xl border-2 border-dashed border-border/40 bg-background/40 p-6 transition-colors",
+          FIELD_GRID_CLASSES,
+          isOver && "border-aegis-sapphire/50 bg-aegis-sapphire/5",
         )}
       >
         {fields.length === 0 && (
-          <div className="col-span-4 flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-sm text-muted-foreground">
-              Arrastra campos aquí para comenzar
+          <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-muted/60">
+              <GripVertical className="size-5 text-muted-foreground/60" />
+            </div>
+            <p className="text-sm font-medium text-aegis-graphite">
+              Arrastra campos desde el panel de la derecha
             </p>
-            <p className="text-xs text-muted-foreground/60 mt-1">
-              Los campos aparecerán en el formulario del cliente
+            <p className="mt-1 text-xs text-aegis-steel">
+              Aparecerán aquí tal cual los verán tus usuarios
             </p>
           </div>
         )}
@@ -135,6 +171,7 @@ export function TemplateCanvas({
           <SortableField
             key={field.id}
             field={field}
+            isSelected={selectedFieldId === field.id}
             onClick={() => onFieldClick(field)}
           />
         ))}
