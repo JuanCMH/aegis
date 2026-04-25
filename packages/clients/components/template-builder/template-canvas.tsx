@@ -7,7 +7,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Lock, Settings2 } from "lucide-react";
+import { GripVertical, Lock, Settings2, Sparkles } from "lucide-react";
 import {
   type PointerEvent as ReactPointerEvent,
   useRef,
@@ -294,19 +294,34 @@ export function TemplateCanvas({
       <div
         ref={setRefs}
         className={cn(
-          "auto-rows-min content-start rounded-xl border-2 border-dashed border-border/40 bg-background/40 p-6 transition-colors",
+          "auto-rows-min content-start rounded-xl border-2 border-dashed border-border/40 bg-background/40 p-6 transition-all duration-200",
           FIELD_GRID_CLASSES,
           fields.length === 0 && "min-h-[280px]",
-          isOver && "border-aegis-sapphire/50 bg-aegis-sapphire/5",
+          isOver &&
+            "border-aegis-sapphire/60 bg-aegis-sapphire/5 shadow-[inset_0_0_0_1px_rgba(56,113,224,0.15)]",
         )}
       >
         {fields.length === 0 && (
-          <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
-            <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-muted/60">
-              <GripVertical className="size-5 text-muted-foreground/60" />
+          <div
+            className={cn(
+              "col-span-full flex flex-col items-center justify-center py-16 text-center transition-transform duration-200",
+              isOver && "scale-[1.02]",
+            )}
+          >
+            <div
+              className={cn(
+                "mb-3 flex size-14 items-center justify-center rounded-full transition-colors",
+                isOver
+                  ? "bg-aegis-sapphire/15 text-aegis-sapphire"
+                  : "bg-muted/60 text-muted-foreground/60",
+              )}
+            >
+              <Sparkles className="size-6" />
             </div>
             <p className="text-sm font-medium text-aegis-graphite">
-              Arrastra campos desde el panel de la derecha
+              {isOver
+                ? "Suelta para agregar el campo"
+                : "Arrastra campos desde la derecha"}
             </p>
             <p className="mt-1 text-xs text-aegis-steel">
               Aparecerán aquí tal cual los verán tus usuarios
