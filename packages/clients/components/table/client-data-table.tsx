@@ -157,6 +157,29 @@ export function ClientDataTable({
 
   // Auto-load on scroll via IntersectionObserver
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  // "/" focuses the search input (Linear / GitHub style)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (
+        target?.isContentEditable ||
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT"
+      ) {
+        return;
+      }
+      e.preventDefault();
+      searchInputRef.current?.focus();
+      searchInputRef.current?.select();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
   useEffect(() => {
     const node = sentinelRef.current;
     if (!node || isDone || isLoading) return;
@@ -184,12 +207,13 @@ export function ClientDataTable({
         <div className="relative w-full lg:max-w-sm">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            ref={searchInputRef}
             placeholder="Buscar por nombre o identificación…"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-8 pr-8"
+            className="pl-8 pr-12"
           />
-          {hasSearch && (
+          {hasSearch ? (
             <button
               type="button"
               onClick={() => onSearchChange("")}
@@ -198,6 +222,10 @@ export function ClientDataTable({
             >
               <X className="size-3.5" />
             </button>
+          ) : (
+            <kbd className="pointer-events-none absolute right-2 top-1/2 hidden h-5 -translate-y-1/2 select-none items-center rounded border border-border/60 bg-muted/40 px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:inline-flex">
+              /
+            </kbd>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
