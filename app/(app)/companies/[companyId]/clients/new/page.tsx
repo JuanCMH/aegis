@@ -16,6 +16,7 @@ import {
 } from "@/packages/clients/api";
 import { useGenerateUploadUrl } from "@/components/hooks/use-generate-upload-url";
 import { ClientStepper } from "@/packages/clients/components/client-stepper";
+import { FIELD_GRID_CLASSES } from "@/packages/clients/lib/grid";
 import { getPdfContent } from "@/lib/extract-pdf";
 import { normalizePdfText } from "@/lib/normalize-pdf-text";
 import type { TemplateSection } from "@/packages/clients/types";
@@ -196,39 +197,47 @@ const NewClientPage = () => {
             <div className="ml-auto flex items-center gap-2">
               <Button
                 size="sm"
+                type="button"
                 onClick={handleSave}
                 disabled={isCreating}
-                className="gap-1.5"
+                className="cursor-pointer"
               >
-                <Save className="size-3.5" />
+                <Save />
                 Guardar
               </Button>
             </div>
           </div>
         </header>
-        <div className="flex-1 overflow-auto p-4">
-          <div className="grid grid-cols-4 gap-3 max-w-2xl">
-            <div className="col-span-2 space-y-1.5">
-              <Label htmlFor="basic-name" className="text-xs font-medium">
-                Nombre <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="basic-name"
-                placeholder="Nombre del cliente"
-                value={basicName}
-                onChange={(e) => setBasicName(e.target.value)}
-              />
+        <div className="flex-1 overflow-auto">
+          <div className="mx-auto max-w-6xl space-y-4 px-8 py-6">
+            <div className="rounded-lg border border-border/50 bg-muted/30 p-4 text-sm text-muted-foreground">
+              Esta empresa aún no tiene una plantilla configurada. Solo se
+              guardarán los campos básicos. Configura una plantilla para
+              capturar más información.
             </div>
-            <div className="col-span-2 space-y-1.5">
-              <Label htmlFor="basic-id" className="text-xs font-medium">
-                Identificación <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="basic-id"
-                placeholder="Número de identificación"
-                value={basicId}
-                onChange={(e) => setBasicId(e.target.value)}
-              />
+            <div className={FIELD_GRID_CLASSES}>
+              <div className="col-span-1 sm:col-span-3 lg:col-span-6 space-y-1.5">
+                <Label htmlFor="basic-name" className="text-xs font-medium">
+                  Nombre <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="basic-name"
+                  placeholder="Nombre del cliente"
+                  value={basicName}
+                  onChange={(e) => setBasicName(e.target.value)}
+                />
+              </div>
+              <div className="col-span-1 sm:col-span-3 lg:col-span-6 space-y-1.5">
+                <Label htmlFor="basic-id" className="text-xs font-medium">
+                  Identificación <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="basic-id"
+                  placeholder="Número de identificación"
+                  value={basicId}
+                  onChange={(e) => setBasicId(e.target.value)}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -255,25 +264,28 @@ const NewClientPage = () => {
             )}
             <Button
               size="sm"
+              type="button"
               onClick={handleSave}
               disabled={isCreating || isExtracting}
-              className="gap-1.5"
+              className="cursor-pointer"
             >
-              <Save className="size-3.5" />
+              <Save />
               Guardar
             </Button>
           </div>
         </div>
       </header>
-      <div className="flex-1 overflow-auto p-4">
-        <ClientStepper
-          sections={sections}
-          values={values}
-          onChange={handleChange}
-          onFileUpload={handleFileUpload}
-          aiFields={aiFields}
-          errors={fieldErrors}
-        />
+      <div className="flex-1 overflow-auto">
+        <div className="mx-auto max-w-6xl px-8 py-6">
+          <ClientStepper
+            sections={sections}
+            values={values}
+            onChange={handleChange}
+            onFileUpload={handleFileUpload}
+            aiFields={aiFields}
+            errors={fieldErrors}
+          />
+        </div>
       </div>
     </main>
   );
