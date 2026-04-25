@@ -396,7 +396,7 @@ export function TemplateBuilder() {
   const totalFields = sections.reduce((acc, s) => acc + s.fields.length, 0);
 
   return (
-    <div className="flex h-svh flex-col overflow-hidden bg-muted/10">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-muted/10">
       {/* Header */}
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-border/40 bg-card px-6 py-4">
         <div className="flex items-center gap-3">
