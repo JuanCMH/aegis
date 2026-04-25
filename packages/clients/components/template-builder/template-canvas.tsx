@@ -294,8 +294,9 @@ export function TemplateCanvas({
       <div
         ref={setRefs}
         className={cn(
-          "min-h-[280px] rounded-xl border-2 border-dashed border-border/40 bg-background/40 p-6 transition-colors",
+          "auto-rows-min content-start rounded-xl border-2 border-dashed border-border/40 bg-background/40 p-6 transition-colors",
           FIELD_GRID_CLASSES,
+          fields.length === 0 && "min-h-[280px]",
           isOver && "border-aegis-sapphire/50 bg-aegis-sapphire/5",
         )}
       >

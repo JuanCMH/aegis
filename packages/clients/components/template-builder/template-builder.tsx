@@ -396,9 +396,9 @@ export function TemplateBuilder() {
   const totalFields = sections.reduce((acc, s) => acc + s.fields.length, 0);
 
   return (
-    <div className="flex h-full flex-col bg-muted/10">
+    <div className="flex h-svh flex-col overflow-hidden bg-muted/10">
       {/* Header */}
-      <header className="flex items-center justify-between gap-4 border-b border-border/40 bg-card px-6 py-4">
+      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-border/40 bg-card px-6 py-4">
         <div className="flex items-center gap-3">
           <div className="flex size-11 items-center justify-center rounded-xl border border-aegis-sapphire/15 bg-aegis-sapphire/10 text-aegis-sapphire">
             <LayoutGrid className="size-5" />
