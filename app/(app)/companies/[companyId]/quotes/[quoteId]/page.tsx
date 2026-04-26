@@ -13,6 +13,7 @@ import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import { QuoteForm } from "@/packages/quotes/components/quote-form";
 import { QuoteActionsBar } from "@/packages/quotes/components/quote-actions-bar";
 import { QuoteStatusBadge } from "@/packages/quotes/components/quote-status-badge";
+import { QuoteConvertModal } from "@/packages/quotes/components/modals/quote-convert-modal";
 
 const QuoteIdPage = () => {
   const router = useRouter();
@@ -96,8 +97,11 @@ const QuoteIdPage = () => {
 
       <QuoteForm mode="edit" initial={quote} readOnly={readOnly} />
 
-      {/* Phase 5 will mount the convert-to-policy modal here. */}
-      {convertOpen && null}
+      <QuoteConvertModal
+        open={convertOpen}
+        onOpenChange={setConvertOpen}
+        quote={quote}
+      />
     </main>
   );
 };

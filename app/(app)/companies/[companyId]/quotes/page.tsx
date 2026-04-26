@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Plus, X } from "lucide-react";
@@ -27,11 +26,14 @@ import {
   countActiveQuoteFilters,
 } from "@/packages/quotes/components/quote-advanced-filters";
 import { QuotePeriodSummary } from "@/packages/quotes/components/quote-period-summary";
+import { QuoteConvertModal } from "@/packages/quotes/components/modals/quote-convert-modal";
 import type {
   QuoteAdvancedFilterState,
   QuoteSearchField,
   QuoteStatus,
 } from "@/packages/quotes/types";
+import type { Doc } from "@/convex/_generated/dataModel";
+import Link from "next/link";
 
 const EMPTY_FILTERS: QuoteAdvancedFilterState = { periodMode: "all" };
 
@@ -54,13 +56,13 @@ const periodLabel = (state: QuoteAdvancedFilterState): string | undefined => {
 };
 
 export default function QuotesPage() {
-  const router = useRouter();
   const companyId = useCompanyId();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [searchField, setSearchField] = useState<QuoteSearchField>("contractor");
   const [status, setStatus] = useState<QuoteStatus | undefined>(undefined);
   const [filters, setFilters] = useState<QuoteAdvancedFilterState>(EMPTY_FILTERS);
+  const [convertQuote, setConvertQuote] = useState<Doc<"quotes"> | null>(null);
 
   const queryArgs = useMemo(() => {
     const adv = advancedFiltersToQueryArgs(filters);
@@ -99,12 +101,9 @@ export default function QuotesPage() {
   const columns = useMemo(
     () =>
       createQuoteColumns({
-        onConvertToPolicy: (quote) => {
-          // Phase 5 wires the modal here. For now, route to the detail page.
-          router.push(`/companies/${quote.companyId}/quotes/${quote._id}`);
-        },
+        onConvertToPolicy: (quote) => setConvertQuote(quote),
       }),
-    [router],
+    [],
   );
 
   const isLoading = pagStatus === "LoadingFirstPage";
@@ -138,14 +137,16 @@ export default function QuotesPage() {
           <div className="ml-auto flex items-center gap-2">
             <RoleGate permission="quotes_create">
               <Button
+                asChild
                 size="sm"
                 type="button"
                 variant="outline"
-                onClick={() => router.push(`/companies/${companyId}/quotes/new`)}
                 className="cursor-pointer"
               >
-                <Plus />
-                Nueva cotización
+                <Link href={`/companies/${companyId}/quotes/new`}>
+                  <Plus />
+                  Nueva cotización
+                </Link>
               </Button>
             </RoleGate>
           </div>
@@ -247,6 +248,15 @@ export default function QuotesPage() {
         hasActiveFilters={hasActiveFilters}
         onClearFilters={clearAll}
       />
+      {convertQuote && (
+        <QuoteConvertModal
+          open={!!convertQuote}
+          onOpenChange={(open) => {
+            if (!open) setConvertQuote(null);
+          }}
+          quote={convertQuote}
+        />
+      )}
     </main>
   );
 }
