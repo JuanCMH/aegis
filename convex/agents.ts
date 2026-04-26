@@ -93,4 +93,25 @@ export const clientAgent = new Agent(components.agent, {
   maxSteps: 1,
 });
 
+export const policyAgent = new Agent(components.agent, {
+  name: "Policy Agent",
+  languageModel: google("gemini-2.5-flash"),
+  instructions: `
+    GLOBAL OUTPUT FORMAT (MANDATORY)
+    - Output MUST be ONLY a valid JSON object.
+    - The response MUST start with "{" and end with "}".
+    - Do NOT use Markdown (no \`\`\`), no labels, no explanations, no extra text.
+    - Root MUST be a JSON object (never an array).
+    - If something is missing, use null (do not infer).
+
+    You will receive either:
+    A) A document to extract policy data from, along with a template definition.
+    B) A template definition to review and suggest improvements for.
+    C) A document to analyze and generate a policy template from.
+
+    Respond with the appropriate JSON format based on the task type provided in the prompt.
+  `,
+  maxSteps: 1,
+});
+
 export default quoteAgent;
