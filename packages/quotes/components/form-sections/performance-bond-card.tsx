@@ -71,6 +71,7 @@ export function PerformanceBondCard({
     <div
       className={cn(
         "rounded-xl border border-border/40 bg-card/80",
+        "animate-in fade-in-0 slide-in-from-top-2 duration-300",
         className,
       )}
     >

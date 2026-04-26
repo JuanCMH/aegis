@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useConfirm } from "@/components/hooks/use-confirm";
+import { useDebouncedEffect } from "@/components/hooks/use-debounced-effect";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { getBondTotals } from "@/lib/get-bond-totals";
 import { getQuoteTotals } from "@/lib/get-quote-totals";
@@ -41,6 +42,7 @@ import ResultsCard from "./results-card";
 import { QuoteTypeToggle } from "./quote-type-toggle";
 import { ClientLinkPicker } from "./client-link-picker";
 import { QuoteProgressStepper } from "./quote-progress-stepper";
+import { SavedIndicator } from "./saved-indicator";
 import { PartiesSection } from "./form-sections/parties-section";
 import { ContractSection } from "./form-sections/contract-section";
 import { BondsSection } from "./form-sections/bonds-section";
@@ -168,6 +170,16 @@ export function QuoteForm({
   );
   const [notes, setNotes] = useState<string>(initial?.notes ?? "");
   const [activeStep, setActiveStep] = useState<QuoteCompletionStepId>("tipo");
+
+  // Autosave state
+  const [autosaveQuoteId, setAutosaveQuoteId] = useState<
+    Id<"quotes"> | undefined
+  >(initial?._id);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(
+    initial?._creationTime ?? null,
+  );
+  const promotingRef = useRef(false);
+  const currentStatus = initial?.status ?? "draft";
 
   const { mutate: createQuote, isPending: isCreating } = useCreateQuote();
   const { mutate: updateQuote, isPending: isUpdating } = useUpdateQuote();
@@ -358,13 +370,16 @@ export function QuoteForm({
       { ...buildPayload(), companyId, status },
       {
         onSuccess: (id) => {
+          const newId = id as Id<"quotes">;
+          setAutosaveQuoteId(newId);
+          setLastSavedAt(Date.now());
           toast.success(
             status === "draft"
               ? "Borrador guardado"
               : "Cotización creada",
           );
           if (onCreated) {
-            onCreated(id as Id<"quotes">);
+            onCreated(newId);
           } else {
             router.push(`/companies/${companyId}/quotes/${id}`);
           }
@@ -384,11 +399,72 @@ export function QuoteForm({
     updateQuote(
       { id: initial._id, ...buildPayload() },
       {
-        onSuccess: () => toast.success("Cotización actualizada"),
+        onSuccess: () => {
+          setLastSavedAt(Date.now());
+          toast.success("Cotización actualizada");
+        },
         onError: (e) => toast.error(getErrorMessage(e)),
       },
     );
   };
+
+  // Silent autosave: promote new draft on first significant change
+  const hasMinimalAutosaveData =
+    contract.contractor.trim().length > 0 ||
+    contract.contractee.trim().length > 0 ||
+    contract.contractValue > 0;
+
+  useEffect(() => {
+    if (mode !== "create") return;
+    if (readOnly) return;
+    if (autosaveQuoteId) return;
+    if (promotingRef.current) return;
+    if (!hasMinimalAutosaveData) return;
+    promotingRef.current = true;
+    createQuote(
+      { ...buildPayload(), companyId, status: "draft" },
+      {
+        onSuccess: (id) => {
+          const newId = id as Id<"quotes">;
+          setAutosaveQuoteId(newId);
+          setLastSavedAt(Date.now());
+          // Silent URL replace so user doesn't see a navigation but next
+          // saves are debounced updates instead of creates.
+          if (onCreated) {
+            onCreated(newId);
+          } else {
+            router.replace(`/companies/${companyId}/quotes/${newId}`);
+          }
+        },
+        onError: (e) => {
+          promotingRef.current = false;
+          toast.error(getErrorMessage(e));
+        },
+      },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasMinimalAutosaveData, autosaveQuoteId, mode, readOnly]);
+
+  // Silent autosave: debounced updates while status === "draft"
+  useDebouncedEffect(
+    formValues,
+    1500,
+    () => {
+      if (!autosaveQuoteId) return;
+      if (currentStatus !== "draft") return;
+      if (validate()) return;
+      updateQuote(
+        { id: autosaveQuoteId, ...buildPayload() },
+        {
+          onSuccess: () => setLastSavedAt(Date.now()),
+          onError: () => {
+            // Stay silent; user can still hit "Guardar".
+          },
+        },
+      );
+    },
+    !readOnly && Boolean(autosaveQuoteId) && currentStatus === "draft",
+  );
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -422,9 +498,12 @@ export function QuoteForm({
           onStepClick={handleStepClick}
           className="flex-1"
         />
-        {headerExtras && (
-          <div className="flex items-center gap-2">{headerExtras}</div>
-        )}
+        <div className="flex items-center gap-3">
+          <SavedIndicator lastSavedAt={lastSavedAt} saving={isPending} />
+          {headerExtras && (
+            <div className="flex items-center gap-2">{headerExtras}</div>
+          )}
+        </div>
       </div>
 
       <div className="grid flex-1 gap-4 px-4 py-4 lg:grid-cols-3 lg:px-6">

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Hint } from "@/components/aegis/hint";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useGetQuoteById } from "@/packages/quotes/api";
 import { useQuoteId } from "@/packages/quotes/store/use-quote-id";
 import { useCompanyId } from "@/packages/companies/store/use-company-id";
@@ -39,7 +40,28 @@ const QuoteIdPage = () => {
             <h1 className="text-base font-medium">Cotización</h1>
           </div>
         </header>
-        <div className="p-6 text-sm text-muted-foreground">Cargando...</div>
+        <div className="grid gap-4 px-4 py-4 lg:grid-cols-3 lg:px-6">
+          <div className="space-y-4 lg:col-span-2">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="rounded-xl border border-border/40 bg-card/60 p-4"
+              >
+                <Skeleton className="mb-3 h-4 w-32" />
+                <Skeleton className="mb-2 h-9 w-full" />
+                <Skeleton className="h-9 w-2/3" />
+              </div>
+            ))}
+          </div>
+          <aside className="lg:col-span-1">
+            <div className="rounded-xl border border-border/40 bg-card/60 p-4">
+              <Skeleton className="mb-3 h-4 w-24" />
+              <Skeleton className="mb-2 h-6 w-full" />
+              <Skeleton className="mb-2 h-6 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          </aside>
+        </div>
       </main>
     );
   }
