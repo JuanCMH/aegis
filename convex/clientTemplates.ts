@@ -69,13 +69,19 @@ export const getByCompany = query({
     const member = await populateMember(ctx, userId, args.companyId);
     if (!member) return null;
 
-    const canView = await checkPermission({
+    const canViewTemplate = await checkPermission({
       ctx,
       userId,
       companyId: args.companyId,
       permission: "clientTemplates_view",
     });
-    if (!canView) return null;
+    const canViewClients = await checkPermission({
+      ctx,
+      userId,
+      companyId: args.companyId,
+      permission: "clients_view",
+    });
+    if (!canViewTemplate && !canViewClients) return null;
 
     return await ctx.db
       .query("clientTemplates")
