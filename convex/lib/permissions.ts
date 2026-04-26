@@ -51,6 +51,11 @@ export const permissionsSchema = {
   policies_viewCommissions: v.boolean(),
   policies_editCommissions: v.boolean(),
   policies_export: v.boolean(),
+  policies_useAI: v.boolean(),
+
+  // Policy templates
+  policyTemplates_view: v.boolean(),
+  policyTemplates_edit: v.boolean(),
 
   // Quotes
   quotes_view: v.boolean(),
@@ -125,6 +130,10 @@ export const memberPermissionDefaults: Record<PermissionKey, boolean> = {
   policies_viewCommissions: true,
   policies_editCommissions: false,
   policies_export: true,
+  policies_useAI: true,
+
+  policyTemplates_view: true,
+  policyTemplates_edit: false,
 
   quotes_view: true,
   quotes_create: true,

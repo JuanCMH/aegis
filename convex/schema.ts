@@ -165,45 +165,66 @@ const schema = defineSchema({
       searchField: "identificationNumber",
       filterFields: ["companyId"],
     }),
+  policyTemplates: defineTable({
+    companyId: v.id("companies"),
+    sections: v.array(templateSection),
+  }).index("companyId", ["companyId"]),
   policies: defineTable({
-    insuredName: v.string(),
-    insuredIdNumber: v.string(),
-    beneficiaryName: v.string(),
-    beneficiaryIdNumber: v.string(),
-    policyHolderName: v.string(),
-    policyHolderIdNumber: v.string(),
+    // --- Fixed top-level fields (always present going forward) ---
     policyNumber: v.string(),
-    policyType: v.string(),
-    riskDescription: v.string(),
-    issueDate: v.number(),
-    startDate: v.number(),
-    endDate: v.number(),
-    premiumAmount: v.number(),
-    issuanceExpenses: v.number(),
-    taxes: v.number(),
-    totalAmount: v.number(),
-    observations: v.string(),
-    agentName: v.string(),
-    clientId: v.id("clients"),
-    insurer: v.string(),
-    lineOfBusiness: v.string(),
     status: v.union(
       v.literal("active"),
       v.literal("expired"),
       v.literal("canceled"),
       v.literal("pending"),
     ),
-    isRenewal: v.boolean(),
-    isRenewable: v.boolean(),
-    commissionPercentage: v.number(),
-    participation: v.number(),
-    totalCommission: v.number(),
-
-    // not necesary for now
-    isParentPolicy: v.boolean(),
-    parentPolicyId: v.optional(v.id("policies")),
+    startDate: v.number(),
+    endDate: v.number(),
     companyId: v.id("companies"),
-  }).index("clientId", ["clientId"]),
+
+    // --- Template-driven extensible payload ---
+    templateId: v.optional(v.id("policyTemplates")),
+    data: v.optional(v.any()),
+
+    // --- Optional relations ---
+    clientId: v.optional(v.id("clients")),
+    isParentPolicy: v.optional(v.boolean()),
+    parentPolicyId: v.optional(v.id("policies")),
+
+    // --- Legacy columns (kept optional for backward compatibility; superseded
+    // by the template-driven `data` payload). New code must not write these. ---
+    insuredName: v.optional(v.string()),
+    insuredIdNumber: v.optional(v.string()),
+    beneficiaryName: v.optional(v.string()),
+    beneficiaryIdNumber: v.optional(v.string()),
+    policyHolderName: v.optional(v.string()),
+    policyHolderIdNumber: v.optional(v.string()),
+    policyType: v.optional(v.string()),
+    riskDescription: v.optional(v.string()),
+    issueDate: v.optional(v.number()),
+    premiumAmount: v.optional(v.number()),
+    issuanceExpenses: v.optional(v.number()),
+    taxes: v.optional(v.number()),
+    totalAmount: v.optional(v.number()),
+    observations: v.optional(v.string()),
+    agentName: v.optional(v.string()),
+    insurer: v.optional(v.string()),
+    lineOfBusiness: v.optional(v.string()),
+    isRenewal: v.optional(v.boolean()),
+    isRenewable: v.optional(v.boolean()),
+    commissionPercentage: v.optional(v.number()),
+    participation: v.optional(v.number()),
+    totalCommission: v.optional(v.number()),
+  })
+    .index("companyId", ["companyId"])
+    .index("companyId_status", ["companyId", "status"])
+    .index("companyId_endDate", ["companyId", "endDate"])
+    .index("clientId", ["clientId"])
+    .index("parentPolicyId", ["parentPolicyId"])
+    .searchIndex("search_policyNumber", {
+      searchField: "policyNumber",
+      filterFields: ["companyId"],
+    }),
   bonds: defineTable({
     name: v.string(),
     code: v.optional(v.string()),

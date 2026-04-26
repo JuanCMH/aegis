@@ -82,6 +82,14 @@ Every action below is something a user can do today or will be able to do in the
 | 34 | Edit commission fields on a policy | Admin |
 | 35 | Export policies to Excel | Advisor / Admin |
 | 36 | Import policies from Excel (future) | Admin |
+| 36b | Use AI on policies (extract from doc, suggest fields) | Advisor / Admin |
+
+### 2.6.1 Policy templates
+
+| # | Action | Who typically does it |
+|---|---|---|
+| 36c | View the current policy template | Admin |
+| 36d | Edit the policy template (add/remove fields, reorder) | Admin |
 
 ### 2.7 Quotes
 
@@ -198,6 +206,11 @@ export const permissionsSchema = {
   "policies_viewCommissions":v.boolean(),
   "policies_editCommissions":v.boolean(),
   "policies_export":         v.boolean(),
+  "policies_useAI":          v.boolean(),
+
+  // Policy templates
+  "policyTemplates_view":    v.boolean(),
+  "policyTemplates_edit":    v.boolean(),
 
   // Quotes
   "quotes_view":             v.boolean(),
@@ -286,6 +299,10 @@ Every company starts with two system roles that cannot be edited or deleted. Use
   "policies_viewCommissions": true,   // own
   "policies_editCommissions": false,
   "policies_export":          true,
+  "policies_useAI":           true,
+
+  "policyTemplates_view":     true,
+  "policyTemplates_edit":     false,
 
   "quotes_view":              true,
   "quotes_create":            true,
