@@ -283,7 +283,44 @@ const schema = defineSchema({
     quoteType: v.union(v.literal("bidBond"), v.literal("performanceBonds")),
     documentId: v.optional(v.id("_storage")),
     companyId: v.id("companies"),
-  }).index("companyId", ["companyId"]),
+
+    // --- New (all optional for backward compatibility) ---
+    /** Lifecycle status. Legacy rows without this field are treated as "draft". */
+    status: v.optional(
+      v.union(
+        v.literal("draft"),
+        v.literal("sent"),
+        v.literal("accepted"),
+        v.literal("rejected"),
+        v.literal("expired"),
+        v.literal("converted"),
+      ),
+    ),
+    /** Auto-generated `COT-YYYY-NNNN`, editable by user. */
+    quoteNumber: v.optional(v.string()),
+    /** Optional client link. Standalone quotes leave this null. */
+    clientId: v.optional(v.id("clients")),
+    /** Filled when quote is converted to a policy. */
+    policyId: v.optional(v.id("policies")),
+    /** Free-form internal notes. */
+    notes: v.optional(v.string()),
+    sentAt: v.optional(v.number()),
+    acceptedAt: v.optional(v.number()),
+    rejectedAt: v.optional(v.number()),
+    convertedAt: v.optional(v.number()),
+  })
+    .index("companyId", ["companyId"])
+    .index("clientId", ["clientId"])
+    .index("policyId", ["policyId"])
+    .index("companyId_status", ["companyId", "status"])
+    .searchIndex("search_contractor", {
+      searchField: "contractor",
+      filterFields: ["companyId", "status"],
+    })
+    .searchIndex("search_contractee", {
+      searchField: "contractee",
+      filterFields: ["companyId", "status"],
+    }),
   quoteBonds: defineTable({
     name: v.string(),
     startDate: v.number(),

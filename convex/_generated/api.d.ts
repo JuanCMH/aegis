@@ -31,6 +31,7 @@ import type * as insurers from "../insurers.js";
 import type * as invitations from "../invitations.js";
 import type * as lib_colors from "../lib/colors.js";
 import type * as lib_permissions from "../lib/permissions.js";
+import type * as lib_quoteToPolicy from "../lib/quoteToPolicy.js";
 import type * as linesOfBusiness from "../linesOfBusiness.js";
 import type * as members from "../members.js";
 import type * as migrations from "../migrations.js";
@@ -73,6 +74,7 @@ declare const fullApi: ApiFromModules<{
   invitations: typeof invitations;
   "lib/colors": typeof lib_colors;
   "lib/permissions": typeof lib_permissions;
+  "lib/quoteToPolicy": typeof lib_quoteToPolicy;
   linesOfBusiness: typeof linesOfBusiness;
   members: typeof members;
   migrations: typeof migrations;
