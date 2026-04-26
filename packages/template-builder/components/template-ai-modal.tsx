@@ -18,14 +18,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { getPdfContent } from "@/lib/extract-pdf";
 import { normalizePdfText } from "@/lib/normalize-pdf-text";
 import { cn } from "@/lib/utils";
-import {
-  useGenerateTemplateFromDoc,
-  useReviewTemplate,
-} from "@/packages/clients/api";
-import type { TemplateField, TemplateSection } from "@/packages/clients/types";
-import { useCompanyId } from "@/packages/companies/store/use-company-id";
+import type {
+  TemplateField,
+  TemplateSection,
+} from "@/packages/template-builder/types";
 
-type ReviewSuggestion = {
+export type ReviewSuggestion = {
   type: "add" | "modify" | "remove";
   sectionId: string;
   sectionLabel: string;
@@ -39,26 +37,47 @@ interface TemplateAiModalProps {
   sections: TemplateSection[];
   onApplyGenerated: (sections: TemplateSection[]) => void;
   onApplySuggestions: (suggestions: ReviewSuggestion[]) => void;
+  /**
+   * Async generator: recibe el texto del PDF normalizado y devuelve el JSON
+   * crudo (sin parsear) emitido por el agente — el modal se encarga de
+   * limpiar fences y parsear `{ sections: [...] }`.
+   */
+  onGenerateFromText: (prompt: string) => Promise<string | null | undefined>;
+  /**
+   * Async revisor: recibe las secciones actuales + instrucción opcional,
+   * devuelve el JSON crudo del agente con `{ suggestions: [...] }`.
+   */
+  onReviewTemplate: (args: {
+    sections: TemplateSection[];
+    instruction?: string;
+  }) => Promise<string | null | undefined>;
+  isGenerating: boolean;
+  isReviewing: boolean;
+  /** Texto contextual para el header (ej. "plantilla de clientes"). */
+  entityLabel?: string;
 }
 
+/**
+ * Modal genérico de asistente IA para plantillas. No conoce de Convex ni de
+ * dominios — el consumidor le inyecta los handlers que disparan los actions.
+ */
 export function TemplateAiModal({
   open,
   onOpenChange,
   sections,
   onApplyGenerated,
   onApplySuggestions,
+  onGenerateFromText,
+  onReviewTemplate,
+  isGenerating,
+  isReviewing,
+  entityLabel,
 }: TemplateAiModalProps) {
-  const companyId = useCompanyId();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [tab, setTab] = useState<"generate" | "review">("generate");
   const [file, setFile] = useState<File | null>(null);
   const [instruction, setInstruction] = useState("");
-
-  const { execute: generateFromDoc, isPending: isGenerating } =
-    useGenerateTemplateFromDoc();
-  const { execute: reviewTemplate, isPending: isReviewing } =
-    useReviewTemplate();
   const [suggestions, setSuggestions] = useState<
     (ReviewSuggestion & { accepted: boolean })[]
   >([]);
@@ -91,7 +110,7 @@ export function TemplateAiModal({
         return;
       }
 
-      const response = await generateFromDoc({ companyId, prompt: text });
+      const response = await onGenerateFromText(text);
       if (!response) return;
 
       const cleaned = response.replace(/```json\n?|```/g, "").trim();
@@ -116,8 +135,7 @@ export function TemplateAiModal({
     e.preventDefault();
 
     try {
-      const response = await reviewTemplate({
-        companyId,
+      const response = await onReviewTemplate({
         sections,
         instruction: instruction.trim() || undefined,
       });
@@ -156,12 +174,16 @@ export function TemplateAiModal({
     );
   };
 
+  const description = entityLabel
+    ? `Genera una ${entityLabel} desde un documento o revisa la actual para obtener sugerencias de mejora.`
+    : "Genera una plantilla desde un documento o revisa la actual para obtener sugerencias de mejora.";
+
   return (
     <AegisModal open={open} onOpenChange={handleClose} maxWidth="sm:max-w-lg">
       <AegisModalHeader
         icon={Sparkles}
         title="Asistente de plantilla"
-        description="Genera una plantilla desde un documento o revisa la actual para obtener sugerencias de mejora."
+        description={description}
       />
 
       <AegisModalContent className="space-y-4">
@@ -373,5 +395,3 @@ export function TemplateAiModal({
     </AegisModal>
   );
 }
-
-export type { ReviewSuggestion };

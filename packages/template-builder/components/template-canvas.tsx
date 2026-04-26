@@ -14,12 +14,15 @@ import {
   useState,
 } from "react";
 import { cn } from "@/lib/utils";
-import { DynamicField } from "@/packages/clients/components/dynamic-field";
+import { DynamicField } from "@/packages/template-builder/components/dynamic-field";
 import {
   FIELD_GRID_CLASSES,
   FIELD_SIZE_SPAN,
-} from "@/packages/clients/lib/grid";
-import type { FieldSize, TemplateField } from "@/packages/clients/types";
+} from "@/packages/template-builder/lib/grid";
+import type {
+  FieldSize,
+  TemplateField,
+} from "@/packages/template-builder/types";
 
 /**
  * Mapping de cuántas columnas ocupa cada preset según el breakpoint actual.

@@ -17,12 +17,16 @@ import {
   Sheet,
   SheetClose,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Trash2, Plus, X } from "lucide-react";
 import { FIELD_TYPE_CONFIG } from "./field-palette";
-import type { TemplateField, FieldSize } from "@/packages/clients/types";
+import type {
+  FieldSize,
+  TemplateField,
+} from "@/packages/template-builder/types";
 
 interface FieldConfigPanelProps {
   field: TemplateField | null;
@@ -89,9 +93,10 @@ export function FieldConfigPanel({
             )}
             <div>
               <SheetTitle className="text-sm">Configurar campo</SheetTitle>
-              <p className="text-xs text-muted-foreground/80">
-                {fieldTypeConfig?.label}
-              </p>
+              <SheetDescription className="text-xs text-muted-foreground/80">
+                {fieldTypeConfig?.label ??
+                  "Ajusta las propiedades del campo seleccionado."}
+              </SheetDescription>
             </div>
           </div>
         </SheetHeader>

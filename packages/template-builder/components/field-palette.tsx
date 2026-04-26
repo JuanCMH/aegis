@@ -18,7 +18,7 @@ import {
 import { Hint } from "@/components/aegis/hint";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import type { FieldType } from "@/packages/clients/types";
+import type { FieldType } from "@/packages/template-builder/types";
 
 type FieldCategory = "text" | "numeric" | "date" | "choice" | "file";
 
