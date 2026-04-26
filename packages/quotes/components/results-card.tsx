@@ -1,55 +1,79 @@
-import { cn } from "@/lib/utils";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { CircleDollarSign } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { CircleDollarSign } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
 import { CurrencyInput } from "@/components/aegis/currency-input";
+import { Separator } from "@/components/ui/separator";
+import { formatCop } from "@/lib/format-cop";
+import { cn } from "@/lib/utils";
+
+export interface ResultsCardBondLine {
+  name: string;
+  premium: number;
+}
 
 interface ResultsCardProps {
   vat: number;
   total: number;
   premium: number;
+  /** Premium breakdown by bond (used for performance quotes). */
+  breakdown?: ResultsCardBondLine[];
   expenses?: number;
-  readOnly?: boolean;
-  setExpenses?: Dispatch<SetStateAction<number>>;
+  setExpenses?: (value: number) => void;
   calculateExpensesTaxes?: boolean;
-  setCalculateExpensesTaxes?: Dispatch<SetStateAction<boolean>>;
+  setCalculateExpensesTaxes?: (value: boolean) => void;
+  readOnly?: boolean;
+  /** Apply sticky position on desktop. */
+  sticky?: boolean;
+  className?: string;
 }
 
 const ResultsCard = ({
   vat,
   total,
   premium,
+  breakdown,
   expenses,
-  readOnly,
   setExpenses,
   calculateExpensesTaxes = false,
   setCalculateExpensesTaxes,
+  readOnly,
+  sticky,
+  className,
 }: ResultsCardProps) => {
   const withExpenses =
-    typeof expenses !== "undefined" && typeof setExpenses !== "undefined";
-
+    typeof expenses !== "undefined" && typeof setExpenses === "function";
   const withCalculateExpensesTaxes =
-    withExpenses &&
-    typeof calculateExpensesTaxes !== "undefined" &&
-    typeof setCalculateExpensesTaxes !== "undefined";
+    withExpenses && typeof setCalculateExpensesTaxes === "function";
 
+  const expensesValue = expenses ?? 0;
   const totalWithExpenses = calculateExpensesTaxes
-    ? total + (expenses || 0) + (expenses || 0) * 0.19
-    : total + (expenses || 0);
+    ? total + expensesValue + expensesValue * 0.19
+    : total + expensesValue;
 
-  const hasCalculatedValues =
-    vat > 0 || premium > 0 || totalWithExpenses > 0 || (expenses || 0) > 0;
-
-  const summaryInputClassName = cn(
-    "border-border/50 bg-background/80 text-foreground shadow-none",
-    "placeholder:text-muted-foreground/80 dark:bg-background/20 dark:text-foreground",
-    "read-only:text-foreground",
-  );
+  // Fade-highlight on total change.
+  const [flash, setFlash] = useState(false);
+  const prev = useRef<number | null>(null);
+  useEffect(() => {
+    if (prev.current !== null && prev.current !== totalWithExpenses) {
+      setFlash(true);
+      const t = setTimeout(() => setFlash(false), 600);
+      return () => clearTimeout(t);
+    }
+    prev.current = totalWithExpenses;
+  }, [totalWithExpenses]);
 
   return (
-    <section className="space-y-3">
-      <div className="flex items-center gap-3">
+    <section
+      className={cn(
+        "rounded-xl border border-border/40 bg-card/90 p-4 backdrop-blur-sm",
+        sticky && "lg:sticky lg:top-16",
+        className,
+      )}
+    >
+      <header className="mb-3 flex items-center gap-2">
         <div className="flex size-8 items-center justify-center rounded-lg border border-aegis-sapphire/10 bg-aegis-sapphire/10 text-aegis-sapphire">
           <CircleDollarSign className="size-4" />
         </div>
@@ -57,86 +81,72 @@ const ResultsCard = ({
           <p className="text-sm font-semibold tracking-tight">
             Resumen financiero
           </p>
-          <p className="text-xs text-muted-foreground/80">
-            {hasCalculatedValues
-              ? "Valores estimados de la cotizacion actual."
-              : "Completa la informacion del bono para ver los valores calculados."}
+          <p className="text-[11px] text-muted-foreground">
+            {total > 0
+              ? "Valores estimados de la cotización."
+              : "Completa los amparos para ver los valores."}
           </p>
         </div>
-      </div>
-      <div
-        className={cn(
-          "grid grid-cols-1 gap-2 md:grid-cols-2",
-          !withExpenses ? "lg:grid-cols-3" : "lg:grid-cols-4",
-        )}
-      >
-        {withExpenses && (
-          <div className="grid w-full items-center gap-1">
-            <Label htmlFor="bid-bond-expenses" className="text-xs">
-              GASTOS
-            </Label>
-            <CurrencyInput
-              placeholder="$0"
-              readOnly={readOnly}
-              value={expenses === 0 ? "" : expenses.toString()}
-              onChange={(value) => setExpenses(Number(value))}
-              inputClassName={summaryInputClassName}
-            />
-          </div>
-        )}
-        <div className="grid w-full items-center gap-1">
-          <Label
-            htmlFor="bid-bond-taxes"
-            className="text-[11px] uppercase tracking-[0.14em] text-foreground/80"
-          >
-            IVA (19%)
+      </header>
+
+      {breakdown && breakdown.length > 0 && (
+        <div className="mb-3 space-y-1 rounded-md bg-muted/30 p-2 text-xs">
+          {breakdown.map((b, i) => (
+            <div
+              key={`${b.name}-${i}`}
+              className="flex items-center justify-between gap-3"
+            >
+              <span className="truncate text-muted-foreground">{b.name}</span>
+              <span className="font-medium">{formatCop(b.premium)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {withExpenses && (
+        <div className="mb-3 grid w-full items-center gap-1">
+          <Label htmlFor="quote-expenses" className="text-xs">
+            GASTOS
           </Label>
           <CurrencyInput
-            readOnly
             placeholder="$0"
-            value={vat === 0 ? "" : vat.toString()}
-            inputClassName={summaryInputClassName}
+            readOnly={readOnly}
+            value={expensesValue === 0 ? "" : expensesValue.toString()}
+            onChange={(v) => setExpenses?.(Number(v))}
           />
         </div>
-        <div className="grid w-full items-center gap-1">
-          <Label
-            htmlFor="bid-bond-premium"
-            className="text-[11px] uppercase tracking-[0.14em] text-foreground/80"
-          >
-            PRIMA
-          </Label>
-          <CurrencyInput
-            placeholder="$0"
-            readOnly
-            value={premium === 0 ? "" : premium.toString()}
-            inputClassName={summaryInputClassName}
-          />
-        </div>
-        <div className="grid w-full items-center gap-1">
-          <Label
-            htmlFor="bid-bond-total"
-            className="text-[11px] uppercase tracking-[0.14em] text-foreground/80"
-          >
-            TOTAL
-          </Label>
-          <CurrencyInput
-            readOnly
-            placeholder="$0"
-            value={totalWithExpenses === 0 ? "" : totalWithExpenses.toString()}
-            inputClassName={cn(summaryInputClassName, "font-medium")}
-          />
+      )}
+
+      <div className="space-y-1.5 text-sm">
+        <Row label="Prima" value={premium} />
+        <Row label="IVA (19%)" value={vat} />
+        {withExpenses && expensesValue > 0 && (
+          <Row label="Gastos" value={expensesValue} />
+        )}
+        <Separator className="my-2 opacity-50" />
+        <div
+          className={cn(
+            "flex items-center justify-between rounded-md px-2 py-1 text-base font-semibold transition-colors",
+            flash
+              ? "bg-aegis-sapphire/10 text-aegis-sapphire"
+              : "text-foreground",
+          )}
+        >
+          <span>Total</span>
+          <span>{formatCop(totalWithExpenses)}</span>
         </div>
       </div>
+
       {withCalculateExpensesTaxes && (
         <div className="mt-3 flex items-center gap-2 border-t border-border/40 pt-3">
           <Switch
-            id="bid-bond-calculate-taxes"
+            id="quote-calc-expenses-taxes"
             checked={calculateExpensesTaxes}
             onCheckedChange={readOnly ? undefined : setCalculateExpensesTaxes}
             className="data-[state=checked]:bg-aegis-sapphire"
           />
           <Label
-            htmlFor="bid-bond-calculate-taxes"
+            htmlFor="quote-calc-expenses-taxes"
             className="text-xs text-foreground/80"
           >
             Calcular IVA de los gastos
@@ -146,5 +156,14 @@ const ResultsCard = ({
     </section>
   );
 };
+
+function Row({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between text-muted-foreground">
+      <span>{label}</span>
+      <span className="font-medium text-foreground">{formatCop(value)}</span>
+    </div>
+  );
+}
 
 export default ResultsCard;

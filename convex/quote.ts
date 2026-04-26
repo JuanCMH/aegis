@@ -750,51 +750,6 @@ export const getById = query({
   },
 });
 
-/**
- * @deprecated Temporary shim retained during Phase 1 so the existing list page
- * keeps working. Phase 4 replaces the page with `searchByCompany` and removes
- * this query.
- */
-export const getByCompany = query({
-  args: {
-    companyId: v.id("companies"),
-    month: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) return [];
-
-    const member = await populateMember(ctx, userId, args.companyId);
-    if (!member) return [];
-
-    const canView = await checkPermission({
-      ctx,
-      userId,
-      companyId: args.companyId,
-      permission: "quotes_view",
-    });
-    if (!canView) return [];
-
-    const [yearStr, monthStr] = args.month.split("-");
-    const year = Number(yearStr);
-    const month = Number(monthStr);
-    const start = Date.UTC(year, month - 1, 1);
-    const end = Date.UTC(year, month, 1);
-
-    const all = await ctx.db
-      .query("quotes")
-      .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
-      .order("desc")
-      .collect();
-
-    const inMonth = all.filter(
-      (q) => q._creationTime >= start && q._creationTime < end,
-    );
-
-    return Promise.all(inMonth.map((q) => attachDocumentUrl(ctx, q)));
-  },
-});
-
 export const getCompanyStats = query({
   args: {
     companyId: v.id("companies"),
