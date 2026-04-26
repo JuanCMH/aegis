@@ -1,203 +1,331 @@
 # QA · Quotes (Cotizaciones)
 
-> Plan de pruebas manuales y guiadas por IA para el módulo de
-> **cotizaciones** de pólizas de seriedad y cumplimiento.
+> Plan de pruebas manuales del módulo `quotes` tras el overhaul
+> 2026-04. Cubre permisos, listado, creación con autosave, edición,
+> transiciones de estado, conversión a póliza, eliminación y
+> regresión de cotizaciones legacy.
+>
+> Referencia: `docs/plans/2026-04-25-quotes-module-plan.md`.
 
-## 1. Contexto
+## 0 · Setup
 
-Una **cotización** (`quotes`) encapsula los datos del contrato
-(contratante / tomador, valor, fechas, tipo, anticipo, etc.) y un
-conjunto de **amparos cotizados** (`quoteBonds`) con tasa y valor
-asegurado. Cada cotización pertenece a una compañía y puede incluir
-un **documento de referencia** (PDF, Word, imagen).
-
-Elementos clave:
-
-- **Dos tipos de cotización** (`quoteType`):
-  - `bidBond` — Seriedad de la oferta (un único amparo).
-  - `performanceBonds` — Cumplimiento y anexos (varios amparos).
-- **Catálogo consumido**: los amparos se seleccionan desde el
-  catálogo de la compañía vía `AmparosPickerModal` (ver bonds.md §8).
-  Cada `quoteBond` guarda `bondId` opcional + snapshot de `name` y
-  `rate` para que los históricos sobrevivan a cambios del catálogo.
-- **Acción IA**: `quote.getQuoteFromDoc` extrae contratante,
-  tomador, valor y fechas de un PDF vía `quoteAgent`. Requiere
-  `quotes_useAI` y explícito `companyId`.
-- **Export**: desde el detalle se genera Excel y PDF propietarios
-  con branding de la compañía (`generateQuoteExcel`,
-  `generateQuotePDF`).
-- **Conversión a póliza**: permiso `quotes_convertToPolicy`
-  declarado, UI pendiente (se cableará con el módulo `policies`).
-- **Compartir**: permiso `quotes_share` declarado, UI pendiente.
-
-## 2. Precondiciones
-
-Ver `docs/qa/_shared.md`.
+Ver `docs/qa/_shared.md` para el seed estándar.
 
 Específicas:
 
-- `Agencia Demo` con amparos seed (ver bonds.md §2).
-- Al menos 2 cotizaciones seed distribuidas en el mes actual:
-  - Bid-bond a "ACME S.A.S." con un amparo de Seriedad 1%.
-  - Performance-bonds con 3 amparos (Cumplimiento, Manejo,
-    Salarios) a "Globex Corp".
+- Compañía `Agencia Demo` con:
+  - 2 miembros activos.
+  - 1 cliente (`Cliente Demo`).
+  - ≥ 2 amparos en catálogo (`Cumplimiento`, `Manejo`).
 - PDF de prueba `/public/qa/sample-contract.pdf`.
+- Cotizaciones seed (mezcla de estados):
+  - `COT-2026-0001` bidBond `draft`.
+  - `COT-2026-0002` performanceBonds `sent`.
+  - `COT-2026-0003` performanceBonds `accepted` sin `policyId`.
+  - `COT-2026-0004` legacy (sin `status` / `quoteNumber` /
+    `clientId`) — para regresión.
 
-## 3. Mapa de rutas y componentes
+Roles a probar:
 
-| Ruta                                               | Archivo                                                             |
-|----------------------------------------------------|---------------------------------------------------------------------|
-| `/companies/[id]/quotes`                           | `app/(app)/companies/[companyId]/quotes/page.tsx`                   |
-| `/companies/[id]/quotes/new`                       | `app/(app)/companies/[companyId]/quotes/new/page.tsx`               |
-| `/companies/[id]/quotes/[quoteId]`                 | `app/(app)/companies/[companyId]/quotes/[quoteId]/page.tsx`         |
+- **Owner** (todos los permisos).
+- **Admin** (todos).
+- **Member** (`quotes_view`, `_create`, `_edit`, `_delete`,
+  `_convertToPolicy`, `_useAI`, `policies_create`).
+- **Asesor** (todo menos `quotes_delete`).
+- **Lector** (`quotes_view` solamente).
+- **Outsider** (sin acceso a la compañía).
 
-| Componente clave       | Archivo                                                            |
-|------------------------|--------------------------------------------------------------------|
-| `QuoteDataTable`       | `packages/quotes/components/table/quote-data-table.tsx`            |
-| `QuoteActions`         | `packages/quotes/components/table/quote-actions.tsx`               |
-| `QuotePopover`         | `packages/quotes/components/table/quote-popover.tsx`               |
-| `ContractInfo`         | `packages/quotes/components/contract-info.tsx`                     |
-| `QuoteInfo`            | `packages/quotes/components/quote-info.tsx`                        |
-| `ResultsCard`          | `packages/quotes/components/results-card.tsx`                      |
-| `QuoteAgentModal`      | `packages/quotes/components/modals/quote-agent-modal.tsx`          |
-| `AmparosPickerModal`   | `packages/bonds/components/modals/amparos-picker-modal.tsx`        |
-| Handlers               | `convex/quote.ts`                                                  |
-| PDF/Excel export       | `packages/quotes/lib/export-quote-pdf.ts`, `export-quote-excel.ts` |
+---
 
-## 4. Escenarios happy-path
+## 1 · Permisos (matriz)
 
-### 4.1 Listar cotizaciones por mes
+| Acción                                       | Required key(s)                            | Owner | Admin | Member | Asesor | Lector | Outsider |
+| -------------------------------------------- | ------------------------------------------ | ----- | ----- | ------ | ------ | ------ | -------- |
+| Abrir `/quotes` (lista + detalle)            | `quotes_view`                              | ✅    | ✅    | ✅     | ✅     | ✅     | ❌       |
+| Botón "Nueva cotización"                     | `quotes_create`                            | ✅    | ✅    | ✅     | ✅     | ❌     | ❌       |
+| Edición + autosave + cambiar status          | `quotes_edit`                              | ✅    | ✅    | ✅     | ✅     | ❌     | ❌       |
+| Eliminar                                     | `quotes_delete`                            | ✅    | ✅    | ✅     | ❌     | ❌     | ❌       |
+| Convertir a póliza                           | `quotes_convertToPolicy` + `policies_create` | ✅  | ✅    | ✅     | ✅     | ❌     | ❌       |
+| AI extraction (Sparkles)                     | `quotes_useAI`                             | ✅    | ✅    | ✅     | ✅     | ❌     | ❌       |
+| Exportar PDF / Excel                         | `quotes_view`                              | ✅    | ✅    | ✅     | ✅     | ✅     | ❌       |
 
-**Cuenta**: `owner@aegis.test`
-**Ruta**: `/companies/[demo]/quotes`
+Casos puntuales:
 
-| # | Acción                             | Resultado esperado                                         |
-|---|------------------------------------|------------------------------------------------------------|
-| 1 | Navegar                            | Header "Lista de Cotizaciones", tabla con mes actual       |
-| 2 | Cambiar selector de mes            | `useDates` persiste, tabla refresca con query por mes      |
-| 3 | Mes vacío                          | Empty state                                                |
+- [ ] Lector ve lista y detalle pero **no** ve botones Crear / Editar
+      / Eliminar / Convertir / AI.
+- [ ] Asesor ve todo excepto Eliminar.
+- [ ] Member con `quotes_convertToPolicy` pero **sin**
+      `policies_create` → botón Convertir oculto.
+- [ ] Outsider sin `quotes_view` → 403 / fallback.
+- [ ] Mutaciones rechazadas en backend cuando el role no tiene la
+      permission (probar via devtools llamando la action directo).
 
-### 4.2 Crear cotización bidBond manual
+---
 
-| # | Acción                                                      | Resultado esperado                                        |
-|---|-------------------------------------------------------------|-----------------------------------------------------------|
-| 1 | Click "Nueva Cotización"                                    | Navega a `/quotes/new`                                    |
-| 2 | Rellenar `ContractInfo`                                     | Fechas, valor, contratante / tomador                      |
-| 3 | QuoteType = "Seriedad de la Oferta"                         | `QuoteInfo` muestra único bond                            |
-| 4 | Tasa 1%, porcentaje 10% del valor del contrato              | `ResultsCard` calcula prima + IVA                         |
-| 5 | Click "Guardar"                                             | Toast "Cotización creada", redirige a detalle             |
+## 2 · Lista `/companies/[id]/quotes`
 
-### 4.3 Crear cotización performanceBonds desde IA
+### 2.1 Búsqueda dual
 
-| # | Acción                                                      | Resultado esperado                                        |
-|---|-------------------------------------------------------------|-----------------------------------------------------------|
-| 1 | `/quotes/new` → click ✨ (Sparkles)                          | `QuoteAgentModal` abre                                    |
-| 2 | Adjuntar `sample-contract.pdf`                              | File picker acepta, preview del nombre                    |
-| 3 | Seleccionar "Cumplimiento"                                  | radio activo                                              |
-| 4 | Marcar amparos deseados (Cumplimiento, Manejo)              | Checkboxes en el picker                                   |
-| 5 | Click "Extraer datos"                                       | Loader, toast "Procesando…", llamada a `getQuoteFromDoc`  |
-| 6 | Respuesta IA                                                | `contractData` + amparos populados; modal cierra          |
-| 7 | Ajustar y guardar                                           | Cotización creada con `documentId` adjunto                |
+- [ ] Toggle `Contratista | Contratante` cambia el campo buscado.
+- [ ] Búsqueda parcial case-insensitive (≥ 2 chars).
+- [ ] Limpiar input restablece el listado.
+- [ ] Búsqueda combinada con filtros de período/status/tipo respeta
+      todos.
 
-### 4.4 Editar cotización
+### 2.2 Tabs de status
 
-| # | Acción                                                      | Resultado esperado                                        |
-|---|-------------------------------------------------------------|-----------------------------------------------------------|
-| 1 | Fila → click → detalle                                      | Modo read-only                                            |
-| 2 | Click toggle ✏ (Pencil)                                     | Inputs editables, toggle activo sky                       |
-| 3 | Modificar valor de contrato                                 | Recalcula totales en vivo                                 |
-| 4 | Aplicar cambios                                             | Mutation `update`; toast "Cotización actualizada"         |
-| 5 | Salir y volver                                              | Persistencia verificada                                   |
+- [ ] Tabs: Todos / Borrador / Enviada / Aceptada / Rechazada /
+      Expirada / Convertida.
+- [ ] Conteos por tab coinciden con datos reales.
+- [ ] Tab activo se conserva al recargar (URL state o local).
 
-### 4.5 Exportar
+### 2.3 Filtros avanzados (popover)
 
-| # | Acción                                                      | Resultado esperado                                        |
-|---|-------------------------------------------------------------|-----------------------------------------------------------|
-| 1 | Detalle → "Exportar" → "Excel"                              | Descarga `.xlsx` con logo de la compañía                  |
-| 2 | Detalle → "Exportar" → "PDF"                                | Descarga `.pdf` con branding                              |
-| 3 | "Ver Documento" (si hay `documentUrl`)                      | Abre PDF original en nueva pestaña                        |
+- [ ] **MonthPicker**: cambiar mes filtra por `_creationTime`.
+- [ ] **Cliente**: combobox filtra por `clientId`.
+- [ ] **Tipo**: bidBond / performanceBonds.
+- [ ] "Limpiar filtros" resetea todos los avanzados.
+- [ ] Badge en el botón Filtros muestra el número de filtros activos.
 
-### 4.6 Eliminar cotización
+### 2.4 Period summary card
 
-| # | Acción                                                      | Resultado esperado                                        |
-|---|-------------------------------------------------------------|-----------------------------------------------------------|
-| 1 | Fila → menú (⋯) → "Eliminar Cotización"                     | `useConfirm` modal                                        |
-| 2 | Confirmar                                                   | Toast "Cotización eliminada", `quoteBonds` + `documentId` removidos |
+- [ ] Aparece sólo cuando hay período activo.
+- [ ] Muestra: count, total `contractValue`, conversiones del
+      período.
+- [ ] Skeleton al cambiar período.
 
-## 5. Escenarios de error / edge cases
+### 2.5 Paginación cursor
 
-| #    | Acción                                                      | Resultado esperado                                        |
-|------|-------------------------------------------------------------|-----------------------------------------------------------|
-| 5.1  | Crear con `contractValue = 0`                               | Backend `quoteErrors.invalidContractValue`                |
-| 5.2  | `contractStart >= contractEnd`                              | Backend `invalidContractDates`                            |
-| 5.3  | `quoteBonds` vacío                                          | Backend `invalidBonds`                                    |
-| 5.4  | Adjuntar PDF > 10MB en IA modal                             | Toast "El archivo no puede superar los 10MB"              |
-| 5.5  | PDF sin texto extraíble                                     | Toast "No se pudo extraer información útil del documento" |
-| 5.6  | IA response con contractor/ee vacíos y contractValue 0      | Mensaje de error + modal permanece abierto                |
-| 5.7  | Usar AI sin `quotes_useAI`                                  | Backend `permissionDenied`; UI oculta botón ✨             |
-| 5.8  | Editar sin `quotes_edit`                                    | Toggle oculto; mutation rechazada                         |
-| 5.9  | Eliminar sin `quotes_delete`                                | Menú oculto; mutation rechazada                           |
-| 5.10 | Tasa de amparo = 0                                          | Prima = 0; sistema acepta (caso valid de cortesía)        |
-| 5.11 | Porcentaje > 100                                            | Validado en `BidBondInfo` / `PerformanceBondsInfo`        |
-| 5.12 | Reemplazar documentId                                       | Storage anterior eliminado server-side                    |
-| 5.13 | Doble click "Guardar"                                       | Botón disabled mientras `isPending`                       |
-| 5.14 | Amparo del catálogo eliminado tras cotizar                  | Cotización conserva snapshot `name` + `rate`              |
+- [ ] "Cargar más" agrega 25 filas y mantiene scroll.
+- [ ] Final del listado oculta el botón.
+- [ ] No hay duplicados al cambiar filtros mid-pagination.
 
-## 6. Matriz de permisos
+### 2.6 Mobile cards
 
-| Acción / UI                                  | Owner | Admin | Member | Asesor | Lector | Outsider |
-|----------------------------------------------|-------|-------|--------|--------|--------|----------|
-| Ver `/quotes` (lista + detalle)              | ✅    | ✅    | ✅     | ✅     | ✅     | ❌       |
-| Botón "Nueva Cotización"                     | ✅    | ✅    | ✅     | ✅     | ❌     | ❌       |
-| `quote.create` (API)                         | ✅    | ✅    | ✅     | ✅     | ❌     | ❌       |
-| Toggle ✏ editar en detalle                   | ✅    | ✅    | ✅     | ✅     | ❌     | ❌       |
-| `quote.update` (API)                         | ✅    | ✅    | ✅     | ✅     | ❌     | ❌       |
-| Menú fila → "Eliminar"                       | ✅    | ✅    | ✅     | ❌     | ❌     | ❌       |
-| `quote.remove` (API)                         | ✅    | ✅    | ✅     | ❌     | ❌     | ❌       |
-| Botón ✨ IA (`quote.getQuoteFromDoc`)         | ✅    | ✅    | ✅     | ✅     | ❌     | ❌       |
-| Exportar PDF / Excel                         | ✅    | ✅    | ✅     | ✅     | ✅     | ❌       |
-| Convertir a póliza (`quotes_convertToPolicy`)| ✅    | ✅    | ✅     | ✅     | ❌     | ❌       |
-| Compartir (`quotes_share`)                   | ✅    | ✅    | ✅     | ✅     | ❌     | ❌       |
+- [ ] En `<lg`, render como cards con número, status, contratista,
+      valor.
+- [ ] Tap navega al detalle.
 
-Las dos últimas filas enumeran permisos ya declarados en schema pero
-cuya UI será cableada con los módulos `policies` y `share` (pendientes).
+### 2.7 Columnas persistidas
 
-## 7. Verificaciones visuales (Aegis brand)
+- [ ] Toggle de columnas persiste por compañía.
+- [ ] Reordenar / ocultar columnas sobrevive al refresh.
 
-- [ ] Header detalle con icon `ShieldCheck` amber por amparo.
-- [ ] Toggle editar: off = neutral, on = fill sky-500.
-- [ ] `ResultsCard` con tokens aegis-emerald para totales positivos.
-- [ ] Badge ✨ (Sparkles aegis-gold) en datos populados por IA.
-- [ ] Modal IA header con `Sparkles` gold, loader claro
-      durante `isGettingQuote`.
-- [ ] Tabla de cotizaciones con columnas monetarias en `font-mono`
-      formateadas COP.
-- [ ] Selector de mes con icono `Calendar`, estados hover / active.
+---
+
+## 3 · Crear `/quotes/new`
+
+### 3.1 Standalone (sin cliente)
+
+- [ ] Llenar partes + contrato + amparo bidBond → "Cotizar" crea con
+      `status: "sent"`.
+- [ ] `quoteNumber` se genera server-side (`COT-YYYY-NNNN`).
+- [ ] Redirect a detalle.
+
+### 3.2 Con cliente vinculado
+
+- [ ] Seleccionar cliente prellena `contractor` + ID y muestra badge
+      "Desde cliente".
+- [ ] Cambiar cliente con datos editados pide confirmación.
+- [ ] Quitar vínculo deja datos como override manual.
+
+### 3.3 Draft sin amparos
+
+- [ ] Llenar partes + contrato → "Guardar borrador" crea con
+      `status: "draft"`.
+
+### 3.4 Draft con amparos parciales
+
+- [ ] Borrador con un performanceBond sin tasa → guarda OK.
+- [ ] Intentar `Marcar enviada` desde detalle → bloquea con error.
+
+### 3.5 AI extraction
+
+- [ ] Subir PDF (`sample-contract.pdf`) con `quotes_useAI` →
+      llena partes + contrato.
+- [ ] Sin `quotes_useAI` → botón AI oculto.
+- [ ] PDF > 10MB → toast "El archivo no puede superar los 10MB".
+- [ ] PDF sin texto extraíble → toast "No se pudo extraer
+      información útil del documento".
+
+### 3.6 Autosave + redirect inmediato (★)
+
+- [ ] Tipear contratista en `/quotes/new` → tras ~1.5s la URL cambia
+      silenciosamente a `/quotes/<id>` (sin pantalla intermedia,
+      sin toast).
+- [ ] Indicador `● Guardado hace Xs` aparece tras primer save y se
+      actualiza cada 30 s.
+- [ ] Cambios subsiguientes actualizan el draft sin toast.
+- [ ] Hover sobre el indicador muestra timestamp completo.
+- [ ] Refresh conserva el draft.
+- [ ] Validación inválida durante autosave → no rompe (silent
+      retry en próximo cambio).
+
+---
+
+## 4 · Form comfort
+
+- [ ] **Stepper** sticky con 5 pasos (Tipo, Cliente, Partes,
+      Contrato, Amparos). Click navega/scroll-to-section. Marca
+      completado en verde.
+- [ ] **Atajos**: `Cmd/Ctrl+S` guarda; `Cmd/Ctrl+Enter` cotiza si el
+      stepper está completo.
+- [ ] **Cambio de tipo de cotización** con datos sin guardar pide
+      `useConfirm`.
+- [ ] **Control % ↔ valor**: editar % recalcula `insuredValue` y
+      viceversa.
+- [ ] **Chip "Mismas fechas que el contrato"** sincroniza fechas del
+      bidBond con el contrato.
+- [ ] **Chips +12m / +36m / +60m** en performance bonds usan
+      defaults de `bond-period-defaults`.
+- [ ] **Sugerencia de tasa**: chip ⚡ con tasa default por bond.
+- [ ] **Prima inline** por amparo se actualiza al cambiar inputs.
+- [ ] **Sticky results** (lg+): se mantiene en viewport al
+      scrollear el form. Fade-highlight al cambiar el total.
+- [ ] **Animación**: nuevos performance bonds entran con
+      fade/slide-in.
+
+---
+
+## 5 · Editar `/quotes/[id]`
+
+- [ ] Cambiar contratista persiste vía autosave (status=`draft`) o
+      "Guardar cambios" (status≠`draft`).
+- [ ] Agregar performance bond → animación slide-in.
+- [ ] Eliminar performance bond pasa por `useConfirm`.
+- [ ] Cambiar cliente vinculado actualiza partes (con confirm si
+      hubo ediciones).
+- [ ] Quitar vínculo cliente → `clientId = undefined`.
+- [ ] Editar `quoteNumber` (override manual) persiste.
+- [ ] `status === "converted"` deja todo readonly y oculta footer
+      + delete + AI.
+
+---
+
+## 6 · Estados (transiciones)
+
+Matriz oficial (`quote-actions-bar.tsx · STATUS_ACTIONS`):
+
+| From      | Acciones disponibles                                |
+| --------- | --------------------------------------------------- |
+| draft     | Marcar enviada                                      |
+| sent      | Marcar aceptada · Marcar rechazada · Expirar        |
+| accepted  | Convertir a póliza · Volver a enviada               |
+| rejected  | Volver a enviada                                    |
+| expired   | Volver a enviada                                    |
+| converted | (ninguna — readonly + delete oculto)                |
+
+Casos:
+
+- [ ] Cada acción permitida actualiza el badge y los timestamps
+      (`sentAt`, `acceptedAt`, `rejectedAt`, `convertedAt`).
+- [ ] `useConfirm` aparece en transiciones críticas (rechazar,
+      expirar, volver a enviada).
+- [ ] Validación `isQuoteReadyToSend` al pasar `draft → sent`:
+      bloquea si faltan partes, contrato o amparos.
+- [ ] Backend rechaza transiciones inválidas (intentar
+      `draft → accepted` directo desde devtools).
+
+---
+
+## 7 · Convertir a póliza
+
+- [ ] Botón visible **solo** desde `accepted` y sin `policyId`
+      (con `quotes_convertToPolicy` + `policies_create`).
+- [ ] Modal `QuoteConvertModal` pre-llena `policyNumber` reemplazando
+      `COT` → `POL` en el número de cotización.
+- [ ] Muestra el template de póliza resuelto para la compañía
+      (`useGetPolicyTemplate`).
+- [ ] **Sin template** configurado → CTA "Configurar template"
+      lleva a `/settings/policy-template` y submit deshabilitado.
+- [ ] Submit crea póliza, marca quote `converted` con `policyId`
+      y redirige a `/companies/[id]/policies/[policyId]`.
+- [ ] Tras conversión, volver a `/quotes/[id]` muestra todo
+      readonly y badge `Convertida`.
+- [ ] Sin permiso `policies_create` → botón oculto aunque tenga
+      `quotes_convertToPolicy`.
+- [ ] Intentar convertir desde `draft`/`sent`/`rejected`/`expired`
+      → botón ausente.
+
+---
+
+## 8 · Eliminar
+
+- [ ] Con documento (`documentId`) → confirm `critical` + storage
+      delete + row delete.
+- [ ] Sin documento → confirm + row delete.
+- [ ] `status === "converted"` → acción oculta. Eliminar primero
+      la póliza desde `/policies/[id]`.
+- [ ] Tras eliminar, navega a la lista y la fila desaparece sin
+      refresh manual.
+
+---
+
+## 9 · Regresión legacy
+
+- [ ] `COT-2026-0004` (sin `status`) se renderiza como `Borrador`
+      (badge gris).
+- [ ] Sin `clientId` muestra "Sin cliente" en la lista.
+- [ ] Sin `quoteNumber` muestra fallback (`Cotización` o id corto).
+- [ ] Editar la legacy y guardar genera `quoteNumber` server-side y
+      asigna `status: "draft"`.
+- [ ] Cotizaciones legacy con amparos cuyo `bondId` ya no existe
+      mantienen el snapshot `name + rate` en el detalle.
+
+---
+
+## 10 · Visual / brand checks
+
+- [ ] Header detalle con icon `ShieldCheck` amber.
+- [ ] Tokens: `aegis-sapphire`, `aegis-emerald`, `aegis-amber`,
+      `aegis-gold`, `destructive`. **Sin** legacy
+      `h-indigo`, `bg-rose-500`, `text-rose-500`.
+- [ ] Stepper: pasos completados en `aegis-emerald`, activo en
+      `aegis-sapphire`.
+- [ ] Indicador autosave: dot `emerald-500`, texto
+      `text-muted-foreground`.
+- [ ] `ResultsCard` total positivo en `aegis-emerald` con
+      fade-highlight.
+- [ ] Skeletons al cargar el detalle (loop de 4 secciones + aside).
+- [ ] Empty state lista con icon en circle
+      `bg-aegis-sapphire/10`.
 - [ ] Confirm eliminación tipo `critical` (destructive).
-- [ ] Empty state lista con icon en circle `bg-aegis-sapphire/10`.
-- [ ] Export dropdown con icon `Download`, opciones Excel / PDF.
-- [ ] Sin tokens legacy (`h-indigo`, `bg-rose-500`, `text-rose-500`).
+- [ ] Modal AI header con `Sparkles` gold.
 
-## 8. Interacciones cross-módulo
+---
 
-- **Bonds** (catálogo): `AmparosPickerModal` selecciona amparos y
-  copia su `defaultRate` al `quoteBond`. Eliminar amparos del
-  catálogo no afecta históricos por el snapshot `name + rate`.
-- **Clients** (futuro): `contractor` + `contractorId` y
-  `contractee` + `contracteeId` serán pickers de `clients` con
-  snapshot. Hoy son campos libres.
-- **Companies**: `getQuotesByCompany` filtra por `companyId`; el
-  export usa `companies.logo` y `companies.name`.
-- **Policies** (futuro): convertir una cotización a póliza usará
-  `quotes_convertToPolicy`, copiando contract + amparos como base.
+## 11 · Smoke run end-to-end
+
+1. **Owner** crea cotización con cliente → autosave (URL salta a
+   `/quotes/<id>`) → completa amparos → `Cotizar` → `Marcar
+   aceptada` → `Convertir a póliza` → ver póliza en `/policies`.
+2. **Asesor**: confirmar que la acción Eliminar está oculta tanto
+   en la lista como en el detalle.
+3. **Lector**: lista y detalle visibles, sin botones de mutación.
+4. **Member**: filtrar lista por mes + cliente + status →
+   verificar period summary card y conteos.
+5. **Member**: subir `sample-contract.pdf` con AI → form
+   prellenado → guardar borrador.
+6. **Owner**: borrar la cotización del paso 5 (sin documento) y
+   verificar que desaparece sin refresh.
+
+---
+
+## 12 · Cross-módulo
+
+- **Bonds** (catálogo): `PerformanceBondPicker` consume
+  `useGetBondsByCompany`. Eliminar amparos del catálogo no afecta
+  cotizaciones existentes (snapshot `name + rate`).
+- **Clients**: `ClientLinkPicker` filtra por compañía y prellena
+  contratante / id; quitar vínculo conserva los valores como
+  override manual.
+- **Companies**: `getQuotes` filtra por `companyId`; export usa
+  `companies.logo` y `companies.name`.
+- **Policies**: conversión usa `useConvertQuoteToPolicy` +
+  template de póliza (`useGetPolicyTemplate`).
 - **Storage**: `documentId` en `_storage`; reemplazo explícito
   borra el archivo viejo en `update`.
-- **Roles**: 7 permisos declarados
-  (`quotes_view`, `_create`, `_edit`, `_delete`,
-  `_convertToPolicy`, `_share`, `_useAI`). Asesor no tiene
-  `_delete`; Lector solo `_view`.
-- **Agents** (`convex/agents.ts`): `quoteAgent.createThread` ejecuta
-  el prompt; el `companyId` se pasa a la action para enforce
-  aislamiento y permisos.
-- **Logs** (futuro): `quote_created`, `_updated`, `_deleted`,
-  `_ai_extract`, `_exported`, `_converted_to_policy`, `_shared`.
+- **Roles**: 7 keys (`quotes_view`, `_create`, `_edit`, `_delete`,
+  `_convertToPolicy`, `_share`, `_useAI`).
+- **Agents** (`convex/agents.ts`): `quoteAgent.createThread`
+  ejecuta el prompt; `companyId` se pasa a la action para enforce.

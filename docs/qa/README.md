@@ -171,7 +171,7 @@ edición fuera de esos paths es una violación de la Regla cero.
 | Lines of Business      | `lines-of-business.md`    | ✅ documentado   |
 | Bonds (Amparos)        | `bonds.md`                | ✅ documentado   |
 | Clients                | `clients.md`              | ✅ documentado   |
-| Quotes                 | `quotes.md`               | ⏳ pendiente     |
+| Quotes                 | `quotes.md`               | ✅ listo         |
 | Policies               | `policies.md`             | ✅ documentado   |
 | Dashboard              | `dashboard.md`            | ⏳ pendiente     |
 | Logs (Audit)           | `logs.md`                 | ⏳ pendiente     |
