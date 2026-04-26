@@ -39,14 +39,25 @@ Ver `docs/qa/_shared.md`.
 
 Específicas:
 
-- `Agencia Demo` con plantilla seed que contenga al menos:
-  - Sección "Identificación" con campos `field_name` (text),
-    `field_identificationNumber` (text).
-  - Sección "Contacto" con `field_email` (email), `field_phone` (phone).
-- Al menos 1 cliente seed:
-  - "ACME S.A.S.", NIT `900123456`, email `contacto@acme.test`.
-- Un PDF de prueba: `/public/qa/sample-contract.pdf` (contrato genérico
-  con nombre, NIT, email, dirección) — usado por las pruebas de IA.
+- Bootstrap real disponible en local:
+  - Cuenta: `qa-clients@aegis.test` / `Test1234!`.
+  - Agencia: `Agencia QA Clients`.
+  - URL base: `http://localhost:7077/companies/m974x1bva3mcnk0wprrh44w1yh85gm9k`.
+- Plantilla bootstrap ya guardada en la agencia:
+  - Sección única `Información Básica`.
+  - Campos fijos: `field_name` (text), `field_identificationNumber` (text).
+  - Campos adicionales reales: `Correo` (email), `Teléfono` (phone).
+  - Nota: los campos extra fueron creados desde el builder y no usan keys
+    canónicas estables; en el plan se referencian por su label visible.
+- Cliente seed ya creado:
+  - `ACME S.A.S.`, NIT `900123456`, email `contacto@acme.test`,
+    teléfono `+57 300 123 4567`.
+  - URL detalle:
+    `http://localhost:7077/companies/m974x1bva3mcnk0wprrh44w1yh85gm9k/clients/kx774286ntkxy277egnnfkanpn85g1j8`.
+- PDF de prueba disponible:
+  - `public/qa/sample-contract.pdf`.
+  - Contiene nombre, NIT, email, teléfono, dirección y representante
+    legal para las pruebas de extracción IA.
 
 ## 3. Mapa de rutas y componentes
 
@@ -69,53 +80,68 @@ Específicas:
 | `FieldPalette`               | `packages/clients/components/template-builder/field-palette.tsx`                  |
 | `SectionTabs`                | `packages/clients/components/template-builder/section-tabs.tsx`                   |
 | `TemplateAiModal`            | `packages/clients/components/template-builder/template-ai-modal.tsx`              |
-| Handlers + validación        | `convex/clients.ts`, `convex/clientTemplates.ts`                                  |
+| `FIELD_GRID_CLASSES` (12-col)| `packages/clients/lib/grid.ts`                                                    |
+| Validación cliente           | `packages/clients/lib/validate-client-data.ts`                                    |
+| Handlers + validación server | `convex/clients.ts`, `convex/clientTemplates.ts`                                  |
 | Acciones IA                  | `convex/clientActions.ts`                                                         |
+| Drag & drop builder          | `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities`                      |
 
 ## 4. Escenarios happy-path
 
-### 4.1 Listado y paginación
+### 4.1 Listado, toolbar y paginación
 
-**Cuenta**: `owner@aegis.test`
-**Ruta**: `/companies/[demo]/clients`
+**Cuenta**: `qa-clients@aegis.test`
+**Ruta**: `/companies/m974x1bva3mcnk0wprrh44w1yh85gm9k/clients`
 
-| # | Acción                                        | Resultado esperado                                                       |
-|---|-----------------------------------------------|--------------------------------------------------------------------------|
-| 1 | Navegar                                       | Header "Lista de Clientes", columnas = campos de la plantilla            |
-| 2 | Observar fila "ACME S.A.S."                   | Nombre + NIT + columnas dinámicas                                        |
-| 3 | Scroll al fondo                               | "Cargar más" dispara paginación (page size 25)                           |
-| 4 | Click en fila                                 | Navega a `/clients/[id]`                                                 |
+| #  | Acción                                                   | Resultado esperado                                                                              |
+|----|----------------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| 1  | Navegar                                                  | Header `h-12` con `SidebarTrigger`, breadcrumb / título; tabla con columnas = campos `showInTable` de la plantilla |
+| 2  | Observar fila "ACME S.A.S."                              | Fila seed visible con nombre + identificación; `Correo` y `Teléfono` existen en el detalle y pueden activarse en tabla en una pasada posterior |
+| 3  | Pulsar `/` en cualquier parte de la página               | Foco salta al input de búsqueda (kbd `/` visible cuando el campo está vacío)                    |
+| 4  | Escribir "acm"                                           | Debounce 300ms → resultados filtrados por `search_name` / `search_identificationNumber`         |
+| 5  | Click en `X` dentro del input                            | Limpia búsqueda, vuelve al listado completo                                                     |
+| 6  | Segmented control "Todos / Completos / Incompletos"      | Filtra client-side por validez de campos requeridos contra la plantilla activa                  |
+| 7  | Dropdown "Columnas" (≥md)                                | Permite alternar visibilidad de columnas dinámicas; se persiste por compañía (localStorage)      |
+| 8  | Scroll al fondo                                          | **Auto-load** dispara `loadMore` (page size 25); sin botón "Cargar más"                          |
+| 9  | Click en fila                                            | Navega a `/clients/[id]`                                                                        |
+| 10 | Sin resultados con filtros activos                       | Empty state con CTA "Limpiar filtros" que resetea búsqueda + completeness                       |
+| 11 | Compañía sin plantilla configurada                       | Empty state con CTA "Configurar plantilla" → `/settings/client-template`                         |
 
 ### 4.2 Crear cliente manual
 
-| # | Acción                                                      | Resultado esperado                                        |
-|---|-------------------------------------------------------------|-----------------------------------------------------------|
-| 1 | Click "Nuevo Cliente"                                       | Navega a `/clients/new`, stepper visible                  |
-| 2 | Rellenar nombre "Globex Corp"                               | Input acepta                                              |
-| 3 | Rellenar NIT "901987654"                                    | Input acepta                                              |
-| 4 | Avanzar secciones → rellenar email "hi@globex.test"         | Field email válido                                        |
-| 5 | Click "Guardar"                                             | Toast "Cliente creado", redirige a `/clients/[id]`        |
-| 6 | Volver al listado                                           | Nueva fila presente                                       |
+| # | Acción                                                      | Resultado esperado                                                                 |
+|---|-------------------------------------------------------------|------------------------------------------------------------------------------------|
+| 1 | Click "Nuevo Cliente"                                       | Navega a `/clients/new`; header `h-12` + `SidebarTrigger`; contenedor `max-w-6xl`  |
+| 2 | Empresa **con** plantilla → ver stepper                     | Tabs sticky con `backdrop-blur` y edge fades; tab activo se centra automáticamente |
+| 3 | Empresa **sin** plantilla                                   | Banner muted "…solo se guardarán campos básicos…"; solo Nombre + Identificación    |
+| 4 | Rellenar nombre "Globex Corp" + NIT "901987654"             | Inputs en grid 12-col (`FIELD_GRID_CLASSES`)                                       |
+| 5 | Avanzar secciones → rellenar email "hi@globex.test"         | Field email válido                                                                 |
+| 6 | Click "Guardar" con un email mal formado                    | Salto automático a la primera sección con errores; badge rojo con conteo en su tab |
+| 7 | Corregir + click "Guardar"                                  | Toast "Cliente creado", redirige a `/clients/[id]`                                 |
+| 8 | Volver al listado                                           | Nueva fila presente                                                                |
 
 ### 4.3 Crear cliente con IA (extract)
 
-| # | Acción                                                      | Resultado esperado                                        |
-|---|-------------------------------------------------------------|-----------------------------------------------------------|
-| 1 | `/clients/new` → clip 📎 "Adjuntar documento"               | File picker acepta PDF                                    |
-| 2 | Subir `sample-contract.pdf`                                 | Loader, toast "Procesando…"                               |
-| 3 | Respuesta IA                                                | Campos coincidentes se rellenan; toast "N campos extraídos"|
-| 4 | Campos rellenados por IA                                    | Marcados con badge ✨ `Sparkles` aegis-gold                |
-| 5 | Ajustar manualmente + Guardar                               | Cliente persistido                                        |
+| # | Acción                                                      | Resultado esperado                                                              |
+|---|-------------------------------------------------------------|---------------------------------------------------------------------------------|
+| 1 | `/clients/new` → clip 📎 "Adjuntar documento"               | File picker acepta PDF                                                          |
+| 2 | Subir `sample-contract.pdf`                                 | **Overlay de extracción IA** sobre el form (spinner + texto "Procesando…")      |
+| 3 | Respuesta IA                                                | Campos coincidentes se rellenan; toast "N campos extraídos"; overlay desaparece |
+| 4 | Campos rellenados por IA                                    | Marcados con badge ✨ `Sparkles` aegis-gold                                      |
+| 5 | Ajustar manualmente + Guardar                               | Cliente persistido                                                              |
+| 6 | Compañía sin plantilla → CTA en overlay                     | Botón "Configurar plantilla" → `/settings/client-template`                       |
 
 ### 4.4 Editar cliente
 
-| # | Acción                                                      | Resultado esperado                                        |
-|---|-------------------------------------------------------------|-----------------------------------------------------------|
-| 1 | `/clients/[id]`                                             | Stepper en modo read-only                                 |
-| 2 | Click "Editar"                                              | Inputs habilitados                                        |
-| 3 | Cambiar email                                               | Acepta                                                    |
-| 4 | Click "Guardar"                                             | Toast "Cliente actualizado", vuelve a read-only           |
-| 5 | Click "Cancelar" tras otro cambio                           | Revierte a valores del servidor                           |
+| # | Acción                                                      | Resultado esperado                                                                                   |
+|---|-------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| 1 | `/clients/[id]`                                             | Header `h-12` + `SidebarTrigger` + back arrow; contenedor `max-w-6xl`; stepper en read-only          |
+| 2 | Observar metadata                                           | Iconos `IdCard` (NIT) y `Calendar` (creado / actualizado, `shortDate` + tooltip `fullDateTime`)      |
+| 3 | Click "Editar"                                              | Inputs habilitados; stepper conserva tabs sticky                                                     |
+| 4 | Cambiar email                                               | Acepta                                                                                               |
+| 5 | Click "Guardar"                                             | Toast "Cliente actualizado", vuelve a read-only                                                      |
+| 6 | Click "Cancelar" tras otro cambio                           | Revierte a valores del servidor (re-sincroniza desde `client.data`)                                  |
+| 7 | Compañía sin plantilla → editar                             | Solo Nombre + Identificación editables (mismo `FIELD_GRID_CLASSES` que `/clients/new`)               |
 
 ### 4.5 Eliminar cliente
 
@@ -126,16 +152,20 @@ Específicas:
 
 ### 4.6 Template Builder · agregar sección y campos
 
-**Ruta**: `/companies/[demo]/settings/client-template`
+**Ruta**: `/companies/m974x1bva3mcnk0wprrh44w1yh85gm9k/settings/client-template`
 
-| # | Acción                                                      | Resultado esperado                                                |
-|---|-------------------------------------------------------------|-------------------------------------------------------------------|
-| 1 | Navegar                                                     | `TemplateBuilder` carga la plantilla actual                        |
-| 2 | Click "+ Sección" → "Financiero"                            | Tab nueva, canvas vacío                                           |
-| 3 | Arrastrar `Currency` desde paleta                           | Nuevo campo en canvas, panel lateral abre                         |
-| 4 | Label "Patrimonio", key auto-derivada `field_patrimonio`    | Key kebab/camel consistente; bloqueada si toca un fijo            |
-| 5 | Click "Guardar"                                             | Toast "Plantilla guardada", `useGetClientTemplate` invalida caché |
-| 6 | Volver a `/clients` y refrescar                             | Nueva columna "Patrimonio" (currency formateado COP)              |
+| #  | Acción                                                      | Resultado esperado                                                                                                  |
+|----|-------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| 1  | Navegar                                                     | Header `h-12` + `SidebarTrigger` (unificado con el resto de la app); `TemplateBuilder` carga la plantilla actual    |
+| 2  | Layout                                                      | Canvas WYSIWYG ocupa el ancho completo; paleta a la derecha; ambos con scroll aislado                              |
+| 3  | Tabs de secciones                                           | Strip horizontal con scroll; tab activo se centra; durante drag, los bordes auto-scroll                            |
+| 4  | Click "+ Sección" → "Financiero"                            | Tab nueva, canvas vacío con empty state refinado                                                                    |
+| 5  | Paleta categorizada                                         | Campos agrupados por categoría (Texto, Numérico, Fecha, Selección, Archivos, etc.) con icon Lucide + label          |
+| 6  | Arrastrar `Currency` desde paleta al canvas                 | (vía `@dnd-kit`) Nuevo campo en grid 12-col; panel lateral abre con configuración                                   |
+| 7  | Resize del campo en canvas                                  | Drag de bordes con snap al grid de 12 columnas; preview inmersivo durante el resize                                 |
+| 8  | Label "Patrimonio", key auto-derivada `field_patrimonio`    | Key consistente; bloqueada si toca un fijo                                                                          |
+| 9  | Click "Guardar"                                             | Toast "Plantilla guardada", `useGetClientTemplate` invalida caché                                                   |
+| 10 | Volver a `/clients` y refrescar                             | Nueva columna "Patrimonio" (currency formateado COP) — visible si `showInTable=true`                                |
 
 ### 4.7 Template Builder · IA generate
 
@@ -175,7 +205,7 @@ Específicas:
 | 5.5  | URL sin protocolo                                           | Error inline (debe empezar con http/https)                |
 | 5.6  | Number fuera de `min` / `max`                               | Error inline                                              |
 | 5.7  | Select con valor fuera de options                           | Error "Valor inválido"                                    |
-| 5.8  | File > 10MB                                                 | Toast "Archivo demasiado grande"                          |
+| 5.8  | File > 10MB (default si no hay `maxFileSize`)               | Toast "Archivo demasiado grande"; archivo no se sube      |
 | 5.9  | PDF sin texto extraíble (imagen escaneada)                  | Toast "No se pudo extraer texto del documento"            |
 | 5.10 | Plantilla sin `field_name`                                  | `clientTemplates.save` rechaza con `permissionDenied`/validación |
 | 5.11 | Plantilla con keys duplicadas                               | Validación: "Campo duplicado"                             |
@@ -204,21 +234,51 @@ Específicas:
 un rol custom lo habilita, la página carga en read-only y el botón
 "Guardar" se oculta a menos que también tenga `clientTemplates_edit`.
 
+(**) `clientTemplates.getByCompany` permite leer la plantilla cuando el
+usuario tiene `clientTemplates_view` **o** `clients_view`. Esto es lo
+que habilita que Asesor / Lector puedan renderizar el form dinámico de
+`/clients/new` y `/clients/[id]` aun sin acceso al builder.
+
 ## 7. Verificaciones visuales (Aegis brand)
 
-- [ ] Columnas dinámicas formatean por tipo: currency en COP (`$
-      1.000.000`), date en `dd MMM yyyy`, switch como badge on/off.
+### Header & layout (consistencia cross-página)
+- [ ] Header en lista, `/new`, detalle y builder = `h-12` con `SidebarTrigger` + `Separator` vertical.
+- [ ] Contenedor de contenido en `/new` y detalle = `mx-auto max-w-6xl px-8 py-6`.
+- [ ] Botones primarios usan `cursor-pointer`, sin tamaños hardcoded en iconos Lucide.
+
+### Lista
+- [ ] Toolbar responsive (search arriba, controles a la derecha en `lg`).
+- [ ] Atajo `/` enfoca búsqueda; kbd visible cuando el input está vacío.
+- [ ] Segmented control "Todos / Completos / Incompletos" con estado activo `bg-muted`.
+- [ ] Dropdown "Columnas" oculto en mobile; persiste por compañía.
+- [ ] Auto-load al hacer scroll (sin botón explícito de paginación).
+- [ ] Renderers tipados por columna: currency COP (`$ 1.000.000`), date `dd MMM yyyy`, switch como badge, file/image clickable.
 - [ ] Fila en hover con `bg-muted/40`.
-- [ ] Badge ✨ en campos rellenados por IA (`Sparkles` + `text-aegis-gold`).
-- [ ] Stepper con secciones como tabs (horizontal scroll en mobile).
-- [ ] Builder canvas con drop-zones `border-dashed border-aegis-slate/30`.
-- [ ] Paleta con tokens por tipo de campo (icon Lucide + label).
+- [ ] Empty states diferenciados: sin clientes, sin plantilla, sin resultados con filtros activos.
+
+### Stepper (`/new` y detalle)
+- [ ] Tabs en strip sticky `top-0` con `backdrop-blur` y edge fades laterales (linear gradient `from-background`).
+- [ ] Tab activo se centra automáticamente al cambiar de paso.
+- [ ] Badge de error rojo (`bg-destructive/15 text-destructive`) con conteo por sección al validar.
+- [ ] Al guardar con errores, salta a la primera sección que tiene errores.
+
+### Builder
+- [ ] Canvas WYSIWYG full-width; paleta a la derecha; scroll aislado.
+- [ ] Grid de 12 columnas visible; resize con snap; preview inmersivo durante drag.
+- [ ] Tabs de secciones con scroll horizontal, auto-scroll del activo y edge auto-scroll mientras se arrastra.
+- [ ] Paleta categorizada (Texto / Numérico / Fecha / Selección / Archivos / etc.) con icon Lucide.
+- [ ] Empty state del canvas refinado.
+
+### IA
+- [ ] Overlay de extracción cubre el form en `/clients/new` con spinner + "Procesando documento…".
 - [ ] Modal IA con header aegis-gold (`Sparkles`).
-- [ ] Loader durante extract/generate con spinner + texto "Procesando
-      documento…".
+- [ ] Badge ✨ en campos rellenados por IA (`Sparkles` + `text-aegis-gold`).
+
+### General
 - [ ] Confirm eliminación tipo `critical` (destructive).
 - [ ] Empty state lista con icon `Users` en circle `bg-aegis-sapphire/10`.
 - [ ] Sin tokens legacy (`h-indigo`, `bg-rose-500`, `text-rose-500`).
+- [ ] Sin imports de `@remixicon/react` (eliminado del proyecto).
 
 ## 8. Interacciones cross-módulo
 

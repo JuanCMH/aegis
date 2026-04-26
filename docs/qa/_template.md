@@ -2,6 +2,8 @@
 
 > Plantilla canónica. Copia a `docs/qa/<module>.md` y rellena cada sección.
 > No elimines secciones: marca como "N/A" si no aplica.
+> Cada ejecución real de esta guía debe generar además un reporte en
+> `docs/qa/reports/` usando `docs/qa/_report-template.md`.
 
 ## 1. Contexto
 

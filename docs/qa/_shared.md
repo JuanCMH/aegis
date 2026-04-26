@@ -1,7 +1,28 @@
 # QA · Setup compartido
 
-Seed data, cuentas, URLs y convenciones aplicables a todos los módulos.
+Bootstrap de QA, cuentas, URLs y convenciones aplicables a todos los módulos.
 Cada archivo `<module>.md` lo referencia desde §2 Precondiciones.
+
+## Bootstrap verificado en local
+
+Provisionado manualmente el `2026-04-25` durante el primer testeo guiado.
+
+| Recurso                     | Valor                                                                 |
+|----------------------------|-----------------------------------------------------------------------|
+| Cuenta reusable            | `qa-clients@aegis.test`                                               |
+| Contraseña                 | `Test1234!`                                                           |
+| Agencia bootstrap          | `Agencia QA Clients`                                                  |
+| Company ID                 | `m974x1bva3mcnk0wprrh44w1yh85gm9k`                                    |
+| URL base de la agencia     | `http://localhost:7077/companies/m974x1bva3mcnk0wprrh44w1yh85gm9k`    |
+| Cliente seed verificado    | `ACME S.A.S.` · NIT `900123456` · email `contacto@acme.test`          |
+| Client ID                  | `kx774286ntkxy277egnnfkanpn85g1j8`                                    |
+| PDF fixture local          | `public/qa/sample-contract.pdf`                                       |
+
+Notas:
+
+- Este es el único bootstrap verificado de punta a punta en local por ahora.
+- El login documentado `owner@aegis.test` falló localmente con `InvalidAccountId`.
+- Las cuentas multi-rol de abajo siguen siendo placeholders hasta que se siembren de verdad.
 
 ## Cuentas seed
 
@@ -33,7 +54,7 @@ Todas con contraseña `Test1234!` salvo indicación contraria.
 
 | Entorno  | URL                                  |
 |----------|--------------------------------------|
-| Local    | `http://localhost:3000`              |
+| Local    | `http://localhost:7077`              |
 | Staging  | `https://aegis-staging.n3xus.cloud`  |
 | Prod     | TBD                                  |
 
@@ -42,7 +63,7 @@ Todas con contraseña `Test1234!` salvo indicación contraria.
 | Variable                    | Valor local típico               | Efecto                                |
 |-----------------------------|----------------------------------|---------------------------------------|
 | `AEGIS_SEND_INVITATIONS`    | `false` (default) · `true` real  | Activa envío real de emails Resend    |
-| `AEGIS_SITE_URL`            | `http://localhost:3000`          | Base del link en emails               |
+| `AEGIS_SITE_URL`            | `http://localhost:7077`          | Base del link en emails               |
 | `AUTH_RESEND_KEY`           | `re_...`                         | API key de Resend                     |
 
 > En local con `AEGIS_SEND_INVITATIONS=false`: no se envía email, pero el
