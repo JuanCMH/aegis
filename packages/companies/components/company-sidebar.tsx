@@ -106,6 +106,11 @@ export function CompanySidebar({ ...props }: ComponentProps<typeof Sidebar>) {
           url: `/companies/${companyId}/policies/new`,
           icon: FileCheck2,
         },
+        {
+          title: "Plantilla",
+          url: `/companies/${companyId}/settings/policy-template`,
+          icon: ClipboardList,
+        },
       ],
     },
     {
