@@ -110,9 +110,7 @@ export function matchBondName(name: string): string | null {
   return null;
 }
 
-export function getBondPeriodDefault(
-  name: string,
-): BondPeriodDefault | null {
+export function getBondPeriodDefault(name: string): BondPeriodDefault | null {
   const key = matchBondName(name);
   if (!key) return null;
   return PERIOD_DEFAULTS[key] ?? null;

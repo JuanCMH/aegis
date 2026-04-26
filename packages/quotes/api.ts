@@ -2,6 +2,9 @@ import { api } from "@/convex/_generated/api";
 import { useFetch } from "@/components/hooks/use-fetch";
 import { useMutate } from "@/components/hooks/use-mutate";
 import { useExecute } from "@/components/hooks/use-execute";
+import { usePaginatedQuery } from "convex/react";
+import type { Id } from "@/convex/_generated/dataModel";
+import type { QuoteSearchField, QuoteStatus, QuoteType } from "./types";
 
 const route = api.quote;
 
@@ -29,9 +32,34 @@ export const useGetQuoteCompanyStats = (
   data: typeof route.getCompanyStats._args,
 ) => useFetch(route.getCompanyStats, data);
 
+interface PaginatedQuotesArgs {
+  companyId: Id<"companies">;
+  searchTerm?: string;
+  searchField?: QuoteSearchField;
+  status?: QuoteStatus;
+  clientId?: Id<"clients">;
+  quoteType?: QuoteType;
+  dateFrom?: number;
+  dateTo?: number;
+}
+
 /**
- * @deprecated Temporary shim until Phase 4 of the quotes overhaul. Use
- * `useSearchQuotes` instead.
+ * Cursor-paginated wrapper around `quote.searchByCompany`. Used by the list
+ * page to drive the data table and IntersectionObserver auto-load.
  */
-export const useGetQuotesByCompany = (data: typeof route.getByCompany._args) =>
-  useFetch(route.getByCompany, data);
+export const usePaginatedQuotes = (args: PaginatedQuotesArgs) => {
+  return usePaginatedQuery(
+    route.searchByCompany,
+    {
+      companyId: args.companyId,
+      searchTerm: args.searchTerm,
+      searchField: args.searchField,
+      status: args.status,
+      clientId: args.clientId,
+      quoteType: args.quoteType,
+      dateFrom: args.dateFrom,
+      dateTo: args.dateTo,
+    },
+    { initialNumItems: 25 },
+  );
+};

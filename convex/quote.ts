@@ -56,12 +56,14 @@ type QuoteStatus =
 // Helpers
 // ---------------------------------------------------------------------------
 
-const getStatus = (quote: Doc<"quotes">): QuoteStatus => quote.status ?? "draft";
+const getStatus = (quote: Doc<"quotes">): QuoteStatus =>
+  quote.status ?? "draft";
 
-const isBondReadyForSending = (
-  bond: { percentage: number; insuredValue: number; rate: number },
-): boolean =>
-  bond.percentage > 0 && bond.insuredValue > 0 && bond.rate > 0;
+const isBondReadyForSending = (bond: {
+  percentage: number;
+  insuredValue: number;
+  rate: number;
+}): boolean => bond.percentage > 0 && bond.insuredValue > 0 && bond.rate > 0;
 
 const assertBondsReadyToSend = (
   bonds: ReadonlyArray<{
@@ -263,8 +265,7 @@ export const create = mutation({
     }
 
     const quoteNumber =
-      args.quoteNumber ??
-      (await generateQuoteNumber(ctx.db, args.companyId));
+      args.quoteNumber ?? (await generateQuoteNumber(ctx.db, args.companyId));
 
     const now = Date.now();
     const quoteId = await ctx.db.insert("quotes", {
@@ -500,12 +501,10 @@ export const convertToPolicy = mutation({
     // Resolve template (provided id or company's first template).
     const template = args.templateId
       ? await ctx.db.get(args.templateId)
-      : (
-          await ctx.db
-            .query("policyTemplates")
-            .withIndex("companyId", (q) => q.eq("companyId", quote.companyId))
-            .first()
-        );
+      : await ctx.db
+          .query("policyTemplates")
+          .withIndex("companyId", (q) => q.eq("companyId", quote.companyId))
+          .first();
 
     if (!template || template.companyId !== quote.companyId) {
       throw new ConvexError(quoteErrors.policyTemplateMissing);
@@ -577,7 +576,11 @@ export const remove = mutation({
 // Queries: searchByCompany / getByClient / getById / getCompanyStats
 // ---------------------------------------------------------------------------
 
-const EMPTY_PAGE = { page: [], isDone: true, continueCursor: "" } as const;
+const emptyPage = () => ({
+  page: [] as Array<Doc<"quotes"> & { documentUrl: string | null }>,
+  isDone: true,
+  continueCursor: "",
+});
 
 export const searchByCompany = query({
   args: {
@@ -595,10 +598,10 @@ export const searchByCompany = query({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return EMPTY_PAGE;
+    if (userId === null) return emptyPage();
 
     const member = await populateMember(ctx, userId, args.companyId);
-    if (!member) return EMPTY_PAGE;
+    if (!member) return emptyPage();
 
     const canView = await checkPermission({
       ctx,
@@ -606,7 +609,7 @@ export const searchByCompany = query({
       companyId: args.companyId,
       permission: "quotes_view",
     });
-    if (!canView) return EMPTY_PAGE;
+    if (!canView) return emptyPage();
 
     const term = args.searchTerm?.trim();
 
@@ -677,13 +680,13 @@ export const getByClient = query({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) return EMPTY_PAGE;
+    if (userId === null) return emptyPage();
 
     const client = await ctx.db.get(args.clientId);
-    if (!client) return EMPTY_PAGE;
+    if (!client) return emptyPage();
 
     const member = await populateMember(ctx, userId, client.companyId);
-    if (!member) return EMPTY_PAGE;
+    if (!member) return emptyPage();
 
     const canView = await checkPermission({
       ctx,
@@ -691,7 +694,7 @@ export const getByClient = query({
       companyId: client.companyId,
       permission: "quotes_view",
     });
-    if (!canView) return EMPTY_PAGE;
+    if (!canView) return emptyPage();
 
     const result = await ctx.db
       .query("quotes")

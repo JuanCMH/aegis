@@ -2,10 +2,7 @@
 
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type {
-  QuoteCompletionStep,
-  QuoteCompletionStepId,
-} from "../types";
+import type { QuoteCompletionStep, QuoteCompletionStepId } from "../types";
 
 interface QuoteProgressStepperProps {
   steps: QuoteCompletionStep[];

@@ -72,12 +72,7 @@ export function QuoteAdvancedFilters({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9 gap-2"
-        >
+        <Button type="button" variant="outline" size="sm" className="h-9 gap-2">
           <Filter className="size-3.5" />
           Filtros
           {activeCount > 0 && (
@@ -134,7 +129,10 @@ export function QuoteAdvancedFilters({
                   onChange={(month) => setDraft((d) => ({ ...d, month }))}
                 />
               </TabsContent>
-              <TabsContent value="range" className="mt-2 grid grid-cols-2 gap-2">
+              <TabsContent
+                value="range"
+                className="mt-2 grid grid-cols-2 gap-2"
+              >
                 <DatePicker
                   date={
                     draft.rangeFrom !== undefined

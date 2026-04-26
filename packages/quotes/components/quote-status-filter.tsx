@@ -3,7 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { QuoteStatus } from "../types";
-import { QUOTE_STATUS_ORDER, getQuoteStatusMeta } from "../lib/quote-status-meta";
+import {
+  QUOTE_STATUS_ORDER,
+  getQuoteStatusMeta,
+} from "../lib/quote-status-meta";
 
 interface QuoteStatusFilterProps {
   /** Selected status, or `undefined` for "Todas". */

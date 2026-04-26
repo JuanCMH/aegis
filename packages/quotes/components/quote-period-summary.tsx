@@ -64,9 +64,7 @@ export function QuotePeriodSummary({
         <Stat
           icon={Banknote}
           label="Valor contratado"
-          value={
-            isLoading ? null : formatCop(stats?.totalContractValue ?? 0)
-          }
+          value={isLoading ? null : formatCop(stats?.totalContractValue ?? 0)}
         />
         <Stat
           icon={CheckCircle2}
