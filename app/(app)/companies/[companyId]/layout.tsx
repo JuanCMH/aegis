@@ -2,7 +2,9 @@
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { BondsSheet } from "@/packages/bonds/components/bonds-sheet";
+import { CompanyCommandPalette } from "@/packages/companies/components/company-command-palette";
 import { CompanySidebar } from "@/packages/companies/components/company-sidebar";
+import { CompanySettingsSheet } from "@/packages/companies/components/settings/company-settings-sheet";
 import { InsurersSheet } from "@/packages/insurers/components/insurers-sheet";
 import { LinesOfBusinessSheet } from "@/packages/linesOfBusiness/components/lines-of-business-sheet";
 import { MembersSheet } from "@/packages/members/components/members-sheet";
@@ -17,11 +19,13 @@ const CompanyLayout = ({ children }: CompanyLayoutProps) => {
     <SidebarProvider defaultOpen={false}>
       <CompanySidebar />
       <SidebarInset>{children}</SidebarInset>
+      <CompanyCommandPalette />
       <MembersSheet />
       <RolesSheet />
       <InsurersSheet />
       <LinesOfBusinessSheet />
       <BondsSheet />
+      <CompanySettingsSheet />
     </SidebarProvider>
   );
 };

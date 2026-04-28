@@ -1,3 +1,10 @@
+"use client";
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -5,92 +12,71 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useCompanyId } from "../store/use-company-id";
+import { useGroupCollapseState } from "../store/use-sidebar-prefs";
+import type { NavGroup, NavItem, SheetKey } from "./company-navigation";
 
-export type CompanyMenuItem = {
-  title: string;
-  icon: LucideIcon;
-  url?: string;
-  onClick?: () => void;
-};
+interface CompanyMenuProps {
+  groups: NavGroup[];
+  sheetSetters: Record<SheetKey, (open: boolean) => void>;
+}
 
-export type CompanyMenuSection = {
-  title: string;
-  icon: LucideIcon;
-  items: CompanyMenuItem[];
-};
-
-export function CompanyMenu({ data }: { data: CompanyMenuSection[] }) {
+export function CompanyMenu({ groups, sheetSetters }: CompanyMenuProps) {
   const pathname = usePathname();
-  const previousPathname = useRef(pathname);
-  const { isMobile, open, setOpen, state } = useSidebar();
+  const { isMobile, state, setOpen } = useSidebar();
+  const companyId = useCompanyId();
+  const {
+    collapsed,
+    toggle: toggleGroup,
+    hydrated,
+  } = useGroupCollapseState(companyId);
 
-  useEffect(() => {
-    if (previousPathname.current === pathname) {
-      return;
-    }
+  const showExpanded = isMobile || state === "expanded";
 
-    previousPathname.current = pathname;
-    if (!isMobile && open) {
-      setOpen(false);
-    }
-  }, [pathname, isMobile, open, setOpen]);
-
-  const showExpandedMenu = isMobile || state === "expanded";
-
-  const isItemActive = (url?: string) => {
-    if (!url) {
-      return false;
-    }
-    if (pathname === url) {
-      return true;
-    }
-
-    if (url.endsWith("/new")) {
-      return false;
-    }
-
-    if (!pathname.startsWith(`${url}/`)) {
-      return false;
-    }
-
-    const nestedPath = pathname.slice(url.length + 1);
-    return nestedPath.length > 0 && nestedPath !== "new";
+  const isItemActive = (item: NavItem) => {
+    if (item.action.type !== "link") return false;
+    const url = item.action.url;
+    if (pathname === url) return true;
+    if (url.endsWith("/new")) return false;
+    if (!pathname.startsWith(`${url}/`)) return false;
+    const tail = pathname.slice(url.length + 1);
+    return tail.length > 0 && tail !== "new";
   };
 
-  const isSectionActive = (items: CompanyMenuItem[]) =>
-    items.some((item) => isItemActive(item.url));
+  const isGroupActive = (group: NavGroup) => group.items.some(isItemActive);
 
   const collapseIfNeeded = () => {
-    if (!isMobile && open) {
-      setOpen(false);
+    if (!isMobile && state === "expanded") setOpen(false);
+  };
+
+  const runItem = (item: NavItem) => {
+    if (item.action.type === "callback") {
+      sheetSetters[item.action.key as SheetKey]?.(true);
     }
   };
 
-  if (!showExpandedMenu) {
+  /* ------------------------------ Collapsed ----------------------------- */
+  if (!showExpanded) {
     return (
       <SidebarGroup>
         <SidebarMenu>
-          {data.map((section) => (
-            <SidebarMenuItem key={section.title}>
+          {groups.map((group) => (
+            <SidebarMenuItem key={group.title}>
               <SidebarMenuButton
                 type="button"
-                tooltip={section.title}
-                isActive={isSectionActive(section.items)}
+                tooltip={group.title}
+                isActive={isGroupActive(group)}
                 className="cursor-pointer justify-center"
                 onClick={() => setOpen(true)}
               >
-                <section.icon />
-                <span>{section.title}</span>
+                <group.icon />
+                <span>{group.title}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
@@ -99,72 +85,87 @@ export function CompanyMenu({ data }: { data: CompanyMenuSection[] }) {
     );
   }
 
+  /* ------------------------------ Expanded ------------------------------ */
   return (
-    <SidebarGroup className="gap-3">
-      <SidebarGroupLabel className="px-2 text-[11px] uppercase tracking-[0.18em] text-sidebar-foreground/50">
-        Navegacion
-      </SidebarGroupLabel>
-      <SidebarGroupContent className="space-y-3">
-        {data.map((section) => (
-          <div key={section.title} className="space-y-1">
-            <div
-              className={cn(
-                "flex items-center gap-2 px-2 text-xs font-medium tracking-tight text-sidebar-foreground/60",
-                isSectionActive(section.items) && "text-sidebar-foreground",
-              )}
-            >
-              <section.icon className="size-4" />
-              <span>{section.title}</span>
-            </div>
-            <SidebarMenuSub className="mx-0 py-0 pl-2 pr-0">
-              {section.items.map((item) => {
-                const isActive = isItemActive(item.url);
+    <>
+      {groups.map((group) => {
+        const groupActive = isGroupActive(group);
+        const isOpen = hydrated ? !collapsed[group.title] : true;
 
-                if (item.onClick) {
-                  return (
-                    <SidebarMenuSubItem key={item.title}>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={isActive}
-                        size="md"
-                        className="cursor-pointer rounded-md px-2"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => {
-                            item.onClick?.();
-                            collapseIfNeeded();
-                          }}
-                          className="w-full text-left"
-                        >
-                          <item.icon className="size-4" />
-                          <span>{item.title}</span>
-                        </button>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  );
-                }
+        return (
+          <Collapsible
+            key={group.title}
+            open={isOpen}
+            onOpenChange={() => toggleGroup(group.title)}
+            asChild
+          >
+            <SidebarGroup className="py-1">
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel
+                  className={cn(
+                    "group/label flex cursor-pointer items-center justify-between text-[11px] font-medium uppercase tracking-wider text-sidebar-foreground/60 transition-colors hover:text-sidebar-foreground",
+                    groupActive && "text-sidebar-foreground",
+                  )}
+                >
+                  <span>{group.title}</span>
+                  <ChevronRight
+                    className={cn(
+                      "size-3.5 transition-transform duration-200",
+                      isOpen && "rotate-90",
+                    )}
+                  />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {group.items.map((item) => {
+                      const active = isItemActive(item);
+                      const Icon = item.icon;
 
-                return (
-                  <SidebarMenuSubItem key={item.title}>
-                    <SidebarMenuSubButton
-                      asChild
-                      isActive={isActive}
-                      size="md"
-                      className="cursor-pointer rounded-md px-2"
-                    >
-                      <Link href={item.url ?? "#"} onClick={collapseIfNeeded}>
-                        <item.icon className="size-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                );
-              })}
-            </SidebarMenuSub>
-          </div>
-        ))}
-      </SidebarGroupContent>
-    </SidebarGroup>
+                      return (
+                        <SidebarMenuItem key={item.id}>
+                          <SidebarMenuButton
+                            asChild={item.action.type === "link"}
+                            isActive={active}
+                            tooltip={item.description ?? item.title}
+                            aria-current={active ? "page" : undefined}
+                            onClick={
+                              item.action.type === "callback"
+                                ? () => runItem(item)
+                                : undefined
+                            }
+                            className={cn(
+                              "cursor-pointer",
+                              active &&
+                                "relative font-medium before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:rounded-r-full before:bg-aegis-sapphire",
+                            )}
+                          >
+                            {item.action.type === "link" ? (
+                              <Link
+                                href={item.action.url}
+                                onClick={collapseIfNeeded}
+                              >
+                                <Icon className="size-4" />
+                                <span>{item.title}</span>
+                              </Link>
+                            ) : (
+                              <>
+                                <Icon className="size-4" />
+                                <span>{item.title}</span>
+                              </>
+                            )}
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+        );
+      })}
+    </>
   );
 }
