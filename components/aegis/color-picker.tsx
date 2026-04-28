@@ -26,8 +26,14 @@ export function ColorPicker({
   onChange,
   placeholder,
 }: ColorPickerProps) {
+  const normalizedValue = value ?? "";
+
   return (
-    <Select disabled={disabled} onValueChange={onChange} value={value}>
+    <Select
+      disabled={disabled}
+      onValueChange={onChange}
+      value={normalizedValue}
+    >
       <SelectTrigger className="w-full">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>

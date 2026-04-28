@@ -739,6 +739,41 @@ AegisModalFooter
 </div>
 ```
 
+#### Textarea sizing (mandatory)
+
+**Every `Textarea` in Aegis MUST have a fixed height and disable user resizing.** Free-resize handles break grid alignment, modal/sheet overflow contracts (`max-h-[90vh]`) and produce inconsistent cards.
+
+**Rules:**
+1. Always apply both `h-{value}` and `resize-none`. Never ship a `Textarea` without these two classes.
+2. Default height by purpose:
+   - Short notes / descriptions (≤ 300 chars): `h-20` (80px).
+   - Standard descriptions (≤ 500 chars): `h-24` (96px).
+   - Long-form content (≥ 1000 chars or rich notes): `h-32` (128px).
+3. **Do not use the `rows` prop** to size a `Textarea`. `rows` is browser-dependent and conflicts with `h-*`. Use Tailwind height classes only.
+4. Inside a grid row, the `Textarea`'s wrapper still uses `space-y-1.5` with the same label conventions as other fields (see 3.4).
+5. If the user genuinely needs more space, increase the fixed `h-*` class — never enable `resize`.
+
+**Pattern:**
+
+```tsx
+<div className="space-y-1.5 sm:col-span-2">
+  <Label htmlFor="description" className="text-xs text-muted-foreground/70 font-medium">
+    Descripción
+  </Label>
+  <Textarea
+    id="description"
+    maxLength={500}
+    placeholder="Breve descripción…"
+    value={value}
+    disabled={isPending}
+    onChange={(e) => onChange(e.target.value)}
+    className="h-24 resize-none"
+  />
+</div>
+```
+
+**Forbidden:** `rows={n}` as a sizing strategy, `resize-y`, `resize-x`, `resize` (the default), or `Textarea` with no height class.
+
 ### 3.5 Card + internal separator
 
 ```tsx
@@ -1088,6 +1123,7 @@ Before presenting any UI component, verify every item:
 □ Footer buttons: cancel via DialogClose, action on the right, destructive with mr-auto?
 □ Form fields use grid composition — no single-column stacking of all fields?
 □ Related form fields grouped on same row (grid-cols-2/3/5 with gap-3)?
+□ Every Textarea has a fixed `h-*` and `resize-none` (never `rows`, never resizable)?
 □ List item cards use standard structure (icon + text + badge, cursor-pointer)?
 □ Click-to-edit pattern — no inline edit/delete buttons?
 □ Aggregated totals in AegisSheetFooter, never inside AegisSheetContent?
