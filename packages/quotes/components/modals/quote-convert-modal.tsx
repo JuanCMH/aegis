@@ -39,9 +39,11 @@ export function QuoteConvertModal({
   onConverted,
 }: QuoteConvertModalProps) {
   const router = useRouter();
-  const { data: template, isLoading: isLoadingTemplate } = useGetPolicyTemplate({
-    companyId: quote.companyId,
-  });
+  const { data: template, isLoading: isLoadingTemplate } = useGetPolicyTemplate(
+    {
+      companyId: quote.companyId,
+    },
+  );
   const { mutate: convert, isPending } = useConvertQuoteToPolicy();
 
   const [policyNumber, setPolicyNumber] = useState(
@@ -76,9 +78,7 @@ export function QuoteConvertModal({
           if (onConverted) {
             onConverted(policyId as Id<"policies">);
           } else {
-            router.push(
-              `/companies/${quote.companyId}/policies/${policyId}`,
-            );
+            router.push(`/companies/${quote.companyId}/policies/${policyId}`);
           }
         },
         onError: (error) => toast.error(getErrorMessage(error)),
@@ -117,9 +117,8 @@ export function QuoteConvertModal({
               <p className="text-muted-foreground">Cargando plantilla...</p>
             ) : hasTemplate ? (
               <p className="text-muted-foreground">
-                Se usará la plantilla configurada de la empresa
-                {" "}
-                ({template?.sections?.length ?? 0} sección
+                Se usará la plantilla configurada de la empresa (
+                {template?.sections?.length ?? 0} sección
                 {(template?.sections?.length ?? 0) === 1 ? "" : "es"}).
               </p>
             ) : (
@@ -127,8 +126,8 @@ export function QuoteConvertModal({
                 <div className="flex items-start gap-2 text-aegis-amber">
                   <AlertTriangle className="size-4 shrink-0" />
                   <p>
-                    Tu empresa aún no tiene una plantilla de póliza
-                    configurada. Configúrala antes de convertir.
+                    Tu empresa aún no tiene una plantilla de póliza configurada.
+                    Configúrala antes de convertir.
                   </p>
                 </div>
                 <Button asChild variant="outline" size="sm" className="w-full">

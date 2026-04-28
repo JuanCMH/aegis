@@ -68,7 +68,7 @@ const ResultsCard = ({
   return (
     <section
       className={cn(
-        "rounded-xl border border-border/40 bg-card/90 p-4 backdrop-blur-sm",
+        "rounded-xl border border-border/60 bg-card/90 p-4 backdrop-blur-sm",
         sticky && "lg:sticky lg:top-16",
         className,
       )}

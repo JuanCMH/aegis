@@ -196,11 +196,11 @@ export function InsurerFormModal({
               <Textarea
                 id="insurer-notes"
                 maxLength={500}
-                rows={3}
                 placeholder="Referencias, horarios, comisiones estándar…"
                 value={form.notes}
                 disabled={isPending}
                 onChange={(e) => update("notes", e.target.value)}
+                className="h-24 resize-none"
               />
             </div>
           </div>

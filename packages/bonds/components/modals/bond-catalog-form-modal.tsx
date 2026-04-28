@@ -1,13 +1,7 @@
 "use client";
 
 import { ShieldCheck } from "lucide-react";
-import {
-  type Dispatch,
-  type SetStateAction,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   AegisModal,
@@ -17,6 +11,7 @@ import {
   DialogClose,
 } from "@/components/aegis/aegis-modal";
 import { Field } from "@/components/aegis/field";
+import { TaxPicker } from "@/components/aegis/tax-picker";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -74,15 +69,7 @@ export function BondCatalogFormModal({
     }
   }, [open, row]);
 
-  const rateError = useMemo(() => {
-    if (!form.defaultRate.trim()) return null;
-    const n = Number(form.defaultRate);
-    if (!Number.isFinite(n)) return "Debe ser un número";
-    if (n < 0 || n > 100) return "Entre 0 y 100";
-    return null;
-  }, [form.defaultRate]);
-
-  const canSubmit = form.name.trim().length > 0 && rateError === null;
+  const canSubmit = form.name.trim().length > 0;
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((s) => ({ ...s, [key]: value }));
@@ -158,7 +145,7 @@ export function BondCatalogFormModal({
               className="sm:col-span-2"
             />
             <Field
-              label="Código"
+              label="Abreviatura"
               htmlFor="bond-code"
               placeholder="Ej. SERIEDAD, CUMPL"
               maxLength={20}
@@ -166,25 +153,17 @@ export function BondCatalogFormModal({
               disabled={isPending}
               onChange={(v) => update("code", v.toUpperCase())}
             />
-            <Field
-              label="Tasa por defecto (%)"
-              htmlFor="bond-rate"
-              type="number"
-              inputMode="decimal"
-              min={0}
-              max={100}
-              step="0.01"
-              placeholder="Ej. 2.5"
-              value={form.defaultRate}
-              disabled={isPending}
-              onChange={(v) => update("defaultRate", v)}
-              inputClassName={rateError ? "border-destructive" : ""}
-            />
-            {rateError && (
-              <p className="text-xs text-destructive sm:col-span-2 -mt-1">
-                {rateError}
-              </p>
-            )}
+            <div className="grid w-full items-center gap-1">
+              <Label htmlFor="bond-rate" className="text-xs line-clamp-1">
+                Tasa por defecto
+              </Label>
+              <TaxPicker
+                placeholder="Selecciona una tasa"
+                disabled={isPending}
+                value={form.defaultRate}
+                onChange={(v) => update("defaultRate", v)}
+              />
+            </div>
             <div className="sm:col-span-2">
               <Label
                 htmlFor="bond-description"
@@ -195,11 +174,11 @@ export function BondCatalogFormModal({
               <Textarea
                 id="bond-description"
                 maxLength={500}
-                rows={3}
                 placeholder="Breve descripción del alcance del amparo…"
                 value={form.description}
                 disabled={isPending}
                 onChange={(e) => update("description", e.target.value)}
+                className="h-24 resize-none"
               />
             </div>
           </div>

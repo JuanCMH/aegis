@@ -91,7 +91,7 @@ export function BondsCatalogTable({
           </p>
           <p className="mt-1 max-w-sm text-xs text-aegis-steel">
             {filter.trim()
-              ? "Prueba con otro nombre, código o descripción."
+              ? "Prueba con otro nombre, abreviatura o descripción."
               : "Define los amparos o fianzas que cotiza y emite tu agencia."}
           </p>
         </div>
@@ -108,7 +108,7 @@ export function BondsCatalogTable({
               Amparo
             </TableHead>
             <TableHead className="h-10 text-xs font-medium text-aegis-steel">
-              Código
+              Abreviatura
             </TableHead>
             <TableHead className="h-10 text-xs font-medium text-aegis-steel">
               Tasa

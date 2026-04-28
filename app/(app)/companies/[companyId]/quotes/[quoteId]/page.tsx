@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft, FileText, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Hint } from "@/components/aegis/hint";
 import { Separator } from "@/components/ui/separator";
@@ -29,7 +29,7 @@ const QuoteIdPage = () => {
 
   if (isLoading || !quote) {
     return (
-      <main className="flex h-full w-full flex-1 flex-col">
+      <main className="flex h-svh w-full flex-col overflow-hidden md:h-[calc(100svh-1rem)]">
         <header className="flex h-12 shrink-0 items-center gap-2 border-b">
           <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
             <SidebarTrigger className="-ml-1" />
@@ -45,7 +45,7 @@ const QuoteIdPage = () => {
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="rounded-xl border border-border/40 bg-card/60 p-4"
+                className="rounded-xl border border-border/60 bg-card/90 p-4 backdrop-blur-sm"
               >
                 <Skeleton className="mb-3 h-4 w-32" />
                 <Skeleton className="mb-2 h-9 w-full" />
@@ -54,7 +54,7 @@ const QuoteIdPage = () => {
             ))}
           </div>
           <aside className="lg:col-span-1">
-            <div className="rounded-xl border border-border/40 bg-card/60 p-4">
+            <div className="rounded-xl border border-border/60 bg-card/90 p-4 backdrop-blur-sm">
               <Skeleton className="mb-3 h-4 w-24" />
               <Skeleton className="mb-2 h-6 w-full" />
               <Skeleton className="mb-2 h-6 w-full" />
@@ -67,10 +67,13 @@ const QuoteIdPage = () => {
   }
 
   const status = quote.status ?? "draft";
-  const readOnly = status === "converted";
+  // Only the genuine `convertToPolicy` flow sets `convertedAt`. Quotes
+  // manually linked to a policy at creation are still editable.
+  const readOnly = status === "converted" && quote.convertedAt != null;
+  const linkedPolicy = quote.policy ?? null;
 
   return (
-    <main className="flex h-full w-full flex-1 flex-col">
+    <main className="flex h-svh w-full flex-col overflow-hidden md:h-[calc(100svh-1rem)]">
       <header className="flex h-12 shrink-0 items-center gap-2 border-b">
         <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
           <SidebarTrigger className="-ml-1" />
@@ -83,6 +86,25 @@ const QuoteIdPage = () => {
               {quote.quoteNumber ?? "Cotización"}
             </h1>
             <QuoteStatusBadge status={status} />
+            {linkedPolicy && (
+              <Hint label="Ver póliza vinculada" align="start">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 gap-1.5 border-aegis-sapphire/30 bg-aegis-sapphire/5 px-2 text-aegis-sapphire hover:bg-aegis-sapphire/10 hover:text-aegis-sapphire"
+                  onClick={() =>
+                    router.push(
+                      `/companies/${companyId}/policies/${linkedPolicy._id}`,
+                    )
+                  }
+                >
+                  <ShieldCheck className="size-3.5" />
+                  <span className="font-mono text-xs tabular-nums">
+                    {linkedPolicy.policyNumber}
+                  </span>
+                </Button>
+              </Hint>
+            )}
           </div>
           <div className="ml-auto flex items-center gap-2">
             {quote.documentUrl && (

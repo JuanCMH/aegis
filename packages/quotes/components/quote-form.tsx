@@ -41,6 +41,7 @@ import {
 import ResultsCard from "./results-card";
 import { QuoteTypeToggle } from "./quote-type-toggle";
 import { ClientLinkPicker } from "./client-link-picker";
+import { PolicyLinkPicker } from "./policy-link-picker";
 import { QuoteProgressStepper } from "./quote-progress-stepper";
 import { SavedIndicator } from "./saved-indicator";
 import { PartiesSection } from "./form-sections/parties-section";
@@ -163,10 +164,14 @@ export function QuoteForm({
         : [],
   );
   const [expenses, setExpenses] = useState<number>(initial?.expenses ?? 0);
-  const [calculateExpensesTaxes, setCalculateExpensesTaxes] =
-    useState<boolean>(initial?.calculateExpensesTaxes ?? false);
+  const [calculateExpensesTaxes, setCalculateExpensesTaxes] = useState<boolean>(
+    initial?.calculateExpensesTaxes ?? false,
+  );
   const [clientId, setClientId] = useState<Id<"clients"> | undefined>(
     initial?.clientId ?? undefined,
+  );
+  const [policyId, setPolicyId] = useState<Id<"policies"> | undefined>(
+    initial?.policyId ?? undefined,
   );
   const [notes, setNotes] = useState<string>(initial?.notes ?? "");
   const [activeStep, setActiveStep] = useState<QuoteCompletionStepId>("tipo");
@@ -205,10 +210,7 @@ export function QuoteForm({
       performanceBonds.map((b) => ({
         insuredValue: b.insuredValue,
         rate: b.rate,
-        days: Math.max(
-          differenceInCalendarDays(b.endDate, b.startDate),
-          0,
-        ),
+        days: Math.max(differenceInCalendarDays(b.endDate, b.startDate), 0),
       })),
     );
   }, [quoteType, bidBond, performanceBonds]);
@@ -260,7 +262,7 @@ export function QuoteForm({
               bondId: b.id,
             })),
     }),
-    [quoteType, contract, bidBond, performanceBonds, clientId],
+    [quoteType, contract, bidBond, performanceBonds, clientId, policyId],
   );
   const steps = useMemo(() => computeCompletionSteps(formValues), [formValues]);
   const ready = isQuoteReadyToSend(formValues);
@@ -319,6 +321,7 @@ export function QuoteForm({
       contractEnd: contract.contractEnd.getTime(),
       agreement: contract.agreement,
       clientId,
+      policyId,
       notes: notes.trim() || undefined,
     };
   };
@@ -360,7 +363,7 @@ export function QuoteForm({
     return null;
   };
 
-  const submitCreate = (status: "draft" | "sent") => {
+  const submitCreate = (status: "draft" | "sent" | "converted") => {
     const err = validate();
     if (err) {
       toast.error(err);
@@ -376,7 +379,9 @@ export function QuoteForm({
           toast.success(
             status === "draft"
               ? "Borrador guardado"
-              : "Cotización creada",
+              : status === "converted"
+                ? "Cotización vinculada"
+                : "Cotización creada",
           );
           if (onCreated) {
             onCreated(newId);
@@ -478,7 +483,8 @@ export function QuoteForm({
         else submitUpdate();
       } else if (e.key === "Enter") {
         e.preventDefault();
-        if (mode === "create" && ready) submitCreate("sent");
+        if (mode === "create" && ready)
+          submitCreate(policyId ? "converted" : "sent");
       }
     };
     window.addEventListener("keydown", handler);
@@ -489,116 +495,135 @@ export function QuoteForm({
   const isPending = isCreating || isUpdating;
 
   return (
-    <div className="flex flex-1 flex-col">
-      {/* Stepper header */}
-      <div className="sticky top-12 z-10 flex flex-wrap items-center justify-between gap-3 border-b bg-background/80 px-4 py-2 backdrop-blur lg:px-6">
-        <QuoteProgressStepper
-          steps={steps}
-          activeId={activeStep}
-          onStepClick={handleStepClick}
-          className="flex-1"
-        />
-        <div className="flex items-center gap-3">
-          <SavedIndicator lastSavedAt={lastSavedAt} saving={isPending} />
-          {headerExtras && (
-            <div className="flex items-center gap-2">{headerExtras}</div>
-          )}
-        </div>
-      </div>
-
-      <div className="grid flex-1 gap-4 px-4 py-4 lg:grid-cols-3 lg:px-6">
-        <div className="space-y-4 lg:col-span-2">
-          <Section
-            id="tipo"
-            title="Tipo de cotización"
-            number={1}
-            sectionRef={refs.tipo}
-          >
-            <QuoteTypeToggle
-              value={quoteType}
-              onChange={setQuoteType}
-              hasUnsavedData={hasUnsavedData}
-              disabled={readOnly}
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="grid min-h-0 flex-1 lg:grid-cols-3">
+        {/* Left column: stepper (fixed) + scrollable content */}
+        <div className="flex min-h-0 flex-col lg:col-span-2 lg:border-r lg:border-border/40">
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border/40 bg-background/80 px-4 py-2 backdrop-blur lg:px-6">
+            <QuoteProgressStepper
+              steps={steps}
+              activeId={activeStep}
+              onStepClick={handleStepClick}
+              className="flex-1"
             />
-          </Section>
+            <div className="flex items-center gap-3">
+              <SavedIndicator lastSavedAt={lastSavedAt} saving={isPending} />
+              {headerExtras && (
+                <div className="flex items-center gap-2">{headerExtras}</div>
+              )}
+            </div>
+          </div>
 
-          <Section
-            id="cliente"
-            title="Cliente (opcional)"
-            number={2}
-            optional
-            sectionRef={refs.cliente}
-          >
-            <ClientLinkPicker
-              value={clientId}
-              onChange={setClientId}
-              readOnly={readOnly}
-            />
-          </Section>
+          <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 lg:px-6">
+            <Section
+              id="tipo"
+              title="Tipo de cotización"
+              number={1}
+              sectionRef={refs.tipo}
+            >
+              <QuoteTypeToggle
+                value={quoteType}
+                onChange={setQuoteType}
+                hasUnsavedData={hasUnsavedData}
+                disabled={readOnly}
+              />
+            </Section>
 
-          <Section
-            id="partes"
-            title="Partes"
-            number={3}
-            sectionRef={refs.partes}
-          >
-            <PartiesSection
-              value={contract}
-              onChange={setContract}
-              clientLinked={Boolean(clientId)}
-              readOnly={readOnly}
-            />
-          </Section>
+            <Section
+              id="cliente"
+              title="Vínculos (opcional)"
+              number={2}
+              optional
+              sectionRef={refs.cliente}
+            >
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground/70">
+                    Cliente
+                  </Label>
+                  <ClientLinkPicker
+                    value={clientId}
+                    onChange={setClientId}
+                    readOnly={readOnly}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground/70">
+                    Póliza
+                  </Label>
+                  <PolicyLinkPicker
+                    value={policyId}
+                    onChange={setPolicyId}
+                    readOnly={readOnly}
+                  />
+                </div>
+              </div>
+            </Section>
 
-          <Section
-            id="contrato"
-            title="Contrato"
-            number={4}
-            sectionRef={refs.contrato}
-          >
-            <ContractSection
-              value={contract}
-              onChange={setContract}
-              readOnly={readOnly}
-            />
-          </Section>
+            <Section
+              id="partes"
+              title="Partes"
+              number={3}
+              sectionRef={refs.partes}
+            >
+              <PartiesSection
+                value={contract}
+                onChange={setContract}
+                clientLinked={Boolean(clientId)}
+                readOnly={readOnly}
+              />
+            </Section>
 
-          <Section
-            id="amparos"
-            title="Amparos"
-            number={5}
-            sectionRef={refs.amparos}
-          >
-            <BondsSection
-              quoteType={quoteType}
-              companyId={companyId}
-              contractData={contract}
-              bidBond={bidBond}
-              performanceBonds={performanceBonds}
-              onBidBondChange={setBidBond}
-              onPerformanceBondsChange={setPerformanceBonds}
-              readOnly={readOnly}
-            />
-          </Section>
+            <Section
+              id="contrato"
+              title="Contrato"
+              number={4}
+              sectionRef={refs.contrato}
+            >
+              <ContractSection
+                value={contract}
+                onChange={setContract}
+                readOnly={readOnly}
+              />
+            </Section>
 
-          <div className="rounded-xl border border-border/40 bg-card/80 p-4">
-            <Label htmlFor="quote-notes" className="text-xs">
-              NOTAS INTERNAS
-            </Label>
-            <Textarea
-              id="quote-notes"
-              placeholder="Comentarios visibles solo dentro del equipo..."
-              value={notes}
-              readOnly={readOnly}
-              onChange={(e) => setNotes(e.target.value)}
-              className="mt-1 min-h-16 resize-y"
-            />
+            <Section
+              id="amparos"
+              title="Amparos"
+              number={5}
+              sectionRef={refs.amparos}
+            >
+              <BondsSection
+                quoteType={quoteType}
+                companyId={companyId}
+                contractData={contract}
+                bidBond={bidBond}
+                performanceBonds={performanceBonds}
+                onBidBondChange={setBidBond}
+                onPerformanceBondsChange={setPerformanceBonds}
+                readOnly={readOnly}
+              />
+            </Section>
+
+            <div className="rounded-xl border border-border/60 bg-card/90 p-4 backdrop-blur-sm">
+              <Label htmlFor="quote-notes" className="text-xs">
+                NOTAS INTERNAS
+              </Label>
+              <Textarea
+                id="quote-notes"
+                placeholder="Comentarios visibles solo dentro del equipo..."
+                value={notes}
+                readOnly={readOnly}
+                onChange={(e) => setNotes(e.target.value)}
+                className="mt-1 min-h-16 resize-y"
+              />
+            </div>
           </div>
         </div>
 
-        <aside className="space-y-3 lg:col-span-1">
+        {/* Right column: results (independent scroll if needed) */}
+        <aside className="space-y-3 overflow-y-auto px-4 py-4 lg:col-span-1 lg:px-6">
           <ResultsCard
-            sticky
             premium={totals.premium}
             vat={totals.vat}
             total={totals.total}
@@ -612,9 +637,9 @@ export function QuoteForm({
         </aside>
       </div>
 
-      {/* Sticky footer */}
+      {/* Footer */}
       {!readOnly && (
-        <footer className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-2 border-t bg-background/90 px-4 py-3 backdrop-blur lg:px-6">
+        <footer className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-border/40 bg-background/90 px-4 py-3 backdrop-blur lg:px-6">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <CircleCheck
               className={cn(
@@ -644,18 +669,14 @@ export function QuoteForm({
                 <Button
                   type="button"
                   disabled={isPending || !ready}
-                  onClick={() => submitCreate("sent")}
+                  onClick={() => submitCreate(policyId ? "converted" : "sent")}
                 >
                   <Send />
-                  Cotizar
+                  {policyId ? "Vincular y archivar" : "Cotizar"}
                 </Button>
               </>
             ) : (
-              <Button
-                type="button"
-                disabled={isPending}
-                onClick={submitUpdate}
-              >
+              <Button type="button" disabled={isPending} onClick={submitUpdate}>
                 <Save />
                 Guardar cambios
               </Button>
@@ -688,7 +709,7 @@ function Section({
     <section
       id={`section-${id}`}
       ref={sectionRef as React.RefObject<HTMLElement>}
-      className="rounded-xl border border-border/40 bg-card/60 p-4"
+      className="rounded-xl border border-border/60 bg-card/90 p-4 backdrop-blur-sm"
     >
       <header className="mb-3 flex items-center gap-2">
         <span className="flex size-6 items-center justify-center rounded-full bg-aegis-sapphire/10 text-[11px] font-semibold text-aegis-sapphire">

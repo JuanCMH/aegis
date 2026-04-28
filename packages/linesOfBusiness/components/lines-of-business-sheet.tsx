@@ -85,7 +85,7 @@ export function LinesOfBusinessSheet() {
               <div className="relative w-full sm:max-w-xs">
                 <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-aegis-steel" />
                 <Input
-                  placeholder="Buscar por nombre o código"
+                  placeholder="Buscar por nombre o abreviatura"
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
                   className="w-full pl-9"

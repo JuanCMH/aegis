@@ -12,6 +12,14 @@ aseguradoras sin eliminar histórico. Las pólizas guardan el **nombre**
 (string), por lo que eliminar una aseguradora no afecta las pólizas
 existentes — solo impide seleccionarla en nuevas pólizas.
 
+Incluye un flujo de **importación masiva del catálogo oficial colombiano**
+(35 compañías autorizadas por la Superintendencia Financiera, fuente
+Fasecolda) precargado en
+`packages/insurers/constants/colombia-insurers.ts`. La importación se
+hace desde el modal `ImportColombiaInsurersModal` y la mutación
+`insurers.bulkCreate` (deduplica por nombre, retorna `{ created, skipped }`)
+en `convex/insurers.ts`.
+
 Fuera de alcance:
 
 - Upload de logo (futuro enhancement).
@@ -35,12 +43,15 @@ Específicas:
 |-----------------------------------------------|--------------------------------------------------------------------|
 | Sidebar › Agencia › Aseguradoras (sheet)      | `packages/insurers/components/insurers-sheet.tsx`                  |
 
-| Componente clave        | Archivo                                                        |
-|-------------------------|----------------------------------------------------------------|
-| `InsurerList`           | `packages/insurers/components/insurer-list.tsx`                |
-| `InsurerCard`           | `packages/insurers/components/insurer-card.tsx`                |
-| `InsurerFormModal`      | `packages/insurers/components/modals/insurer-form-modal.tsx`   |
-| `insurers.getByCompany` | `convex/insurers.ts`                                           |
+| Componente clave             | Archivo                                                                              |
+|------------------------------|--------------------------------------------------------------------------------------|
+| `InsurerList`                | `packages/insurers/components/insurer-list.tsx`                                      |
+| `InsurerCard`                | `packages/insurers/components/insurer-card.tsx`                                      |
+| `InsurerFormModal`           | `packages/insurers/components/modals/insurer-form-modal.tsx`                         |
+| `ImportColombiaInsurersModal`| `packages/insurers/components/modals/import-colombia-insurers-modal.tsx`             |
+| `COLOMBIA_INSURERS` (seed)   | `packages/insurers/constants/colombia-insurers.ts`                                   |
+| `insurers.getByCompany`      | `convex/insurers.ts`                                                                 |
+| `insurers.bulkCreate`        | `convex/insurers.ts`                                                                 |
 
 ## 4. Escenarios happy-path
 
@@ -109,6 +120,23 @@ Específicas:
 | 2 | Confirmar                                   | Toast "Aseguradora eliminada", card desaparece                        |
 | 3 | Verificar pólizas históricas                | El nombre sigue apareciendo correctamente (no se rompe integridad)    |
 
+### 4.8 Importar catálogo de Colombia (bulk)
+
+**Cuenta**: `owner@aegis.test` (requiere `insurers_manage`).
+
+| # | Acción                                                                  | Resultado esperado                                                                                  |
+|---|-------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| 1 | Click "Importar Colombia" en la barra de acciones del sheet            | Modal `AegisModal` (max-w-2xl) con icon `DownloadCloud` sapphire                                     |
+| 2 | Observar KPI cards superiores                                          | "Seleccionadas X / Y" en sapphire mono · "Ya en tu catálogo Z" en steel mono                         |
+| 3 | Observar listado                                                       | 35 filas con checkbox + nombre + (NIT mono opcional) + Badge "Nueva" sapphire o "Existente" gris    |
+| 4 | Verificar selección por defecto                                        | Todas las **disponibles** quedan preseleccionadas; las "Existente" están disabled y sin marcar      |
+| 5 | Escribir "sura" en el buscador (sin acentos)                           | Solo "Seguros Generales Suramericana (Sura)" visible; contador "Mostrando 1 de 35"                  |
+| 6 | Click "Deseleccionar todo"                                             | Botones cambia label a "Seleccionar todo"; el contador "Seleccionadas" baja en consecuencia         |
+| 7 | Click "Seleccionar todo"                                               | Marca solo los visibles disponibles; vuelve label a "Deseleccionar todo"                            |
+| 8 | Limpiar buscador, dejar 5 marcadas                                     | Footer muestra "Importar 5 aseguradoras"                                                            |
+| 9 | Click "Importar 5 aseguradoras"                                        | Toast "Se importaron 5 aseguradoras", modal cierra, listado refresca y las 5 aparecen ordenadas     |
+| 10| Reabrir el modal                                                       | Las recién importadas aparecen como "Existente" disabled; el resto siguen "Nueva" preseleccionadas  |
+
 ## 5. Escenarios de error / edge cases
 
 | #   | Acción                                                          | Resultado esperado                                                    |
@@ -127,6 +155,12 @@ Específicas:
 | 5.12| Eliminar la última aseguradora                                  | Empty state con CTA (si `insurers_manage`)                            |
 | 5.13| Cambiar scope a "Todas" sin aseguradoras archivadas             | Mismo listado, no cambia                                              |
 | 5.14| URL website sin protocolo `liberty.co`                          | Link anchor agrega `https://` al click                                |
+| 5.15| Notas internas con > 500 chars                                  | Textarea limita a 500; altura fija (`h-24 resize-none`), sin handle de resize |
+| 5.16| Importar Colombia con 0 selecciones                             | Botón footer disabled con texto "Selecciona aseguradoras"             |
+| 5.17| Importar Colombia cuando todas las 35 ya existen                | KPIs muestran 0/0; botón disabled; toast info al intentar importar     |
+| 5.18| Importar Colombia con nombre duplicado en BD durante el bulk    | `bulkCreate` deduplica server-side; retorna `{ created, skipped }` y el toast incluye "X omitidas por duplicado" |
+| 5.19| Buscar "surá" con acento                                        | Mismo resultado que "sura" (búsqueda ignora diacríticos)               |
+| 5.20| Usuario sin `insurers_manage` abre el sheet                     | Botón "Importar Colombia" oculto (gated por `RoleGate`)               |
 
 ## 6. Matriz de permisos
 
@@ -135,8 +169,10 @@ Específicas:
 | Abrir sheet "Aseguradoras"        | ✅    | ✅    | ✅     | ✅         | ✅         | ❌ (sin sidebar) |
 | Ver cards                         | ✅    | ✅    | ✅     | ✅         | ✅         | ❌       |
 | Botón "Nueva aseguradora"         | ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |
+| Botón "Importar Colombia"         | ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |
 | Menú (⋯) en card                  | ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |
 | Llamar `insurers.create` (API)    | ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |
+| Llamar `insurers.bulkCreate` (API)| ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |
 | Llamar `insurers.update` (API)    | ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |
 | Llamar `insurers.setActive` (API) | ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |
 | Llamar `insurers.remove` (API)    | ✅    | ✅    | ❌     | ❌         | ❌         | ❌       |
@@ -157,6 +193,9 @@ Leyenda: ✅ visible+funcional · ⚠️ visible pero bloqueado · ❌ oculto/40
 - [ ] NIT en mono font (`font-mono`).
 - [ ] Confirm destructivo con variant `critical`.
 - [ ] Empty state con icon en circle `bg-aegis-sapphire/10`.
+- [ ] Textarea "Notas internas" con `h-24 resize-none` (sin atributo `rows`, sin handle de resize).
+- [ ] Botón "Importar Colombia" usa variant `outline` con hover sapphire (`hover:border-aegis-sapphire/30 hover:bg-aegis-sapphire/5`).
+- [ ] Modal de importación: header sapphire con icon `DownloadCloud`; KPIs en `font-mono`; badges "Nueva" sapphire / "Existente" gris.
 - [ ] Sin `h-indigo`, `bg-rose-500`, `text-rose-500` en DOM.
 - [ ] Dark mode coherente.
 
@@ -167,8 +206,14 @@ Leyenda: ✅ visible+funcional · ⚠️ visible pero bloqueado · ❌ oculto/40
   nueva póliza debería ofrecer sólo las activas (`getByCompany({ includeInactive: false })`).
 - **Quotes**: similar al flujo de pólizas, las cotizaciones no
   referencian por id — sólo por nombre si aplica.
-- **Lines of Business**: coexiste como otro catálogo independiente.
+- **Lines of Business**: coexiste como otro catalógo independiente.
 - **Roles**: al crear un rol personalizado, los permisos
-  `insurers_view` / `insurers_manage` controlan el acceso.
+  `insurers_view` / `insurers_manage` controlan el acceso. La importación
+  bulk requiere `insurers_manage`.
+- **Importar Colombia**: el seed (`COLOMBIA_INSURERS`) es la única fuente
+  de verdad para los datos precargados. Cualquier ajuste de NIT, web,
+  teléfono, etc. debe hacerse allí para que las próximas importaciones
+  reflejen el cambio. La mutación `bulkCreate` es **idempotente** por
+  nombre.
 - **Logs** (futuro): registrar `insurer_created`, `insurer_updated`,
-  `insurer_archived`, `insurer_deleted`.
+  `insurer_archived`, `insurer_deleted`, `insurer_bulk_imported`.

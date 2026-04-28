@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, Search, UserCircle, X } from "lucide-react";
+import { Check, ChevronDown, Search, ShieldCheck, X } from "lucide-react";
 import { usePaginatedQuery, useQuery } from "convex/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,28 +18,26 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 
-interface ClientPickerProps {
-  /** Currently selected clientId, or undefined for "no client". */
-  value?: Id<"clients">;
-  onChange: (id: Id<"clients"> | undefined) => void;
+interface PolicyLinkPickerProps {
+  value?: Id<"policies">;
+  onChange: (id: Id<"policies"> | undefined) => void;
   readOnly?: boolean;
-  /** Optional pre-resolved label for the selected client (avoids re-fetching). */
   selectedLabel?: string;
   selectedSubLabel?: string;
 }
 
 /**
- * Selector de cliente para el header del formulario de pólizas. No es un
- * `TemplateField` porque `policies.clientId` es una columna indexada de
- * primer nivel (relación), no parte del payload dinámico `data`.
+ * Selector de póliza para vincular cotizaciones a pólizas existentes. Búsqueda
+ * por número de póliza con search index `search_policyNumber`. No carga datos
+ * por defecto: solo dispara la query cuando hay un término ingresado.
  */
-export function ClientPicker({
+export function PolicyLinkPicker({
   value,
   onChange,
   readOnly,
   selectedLabel,
   selectedSubLabel,
-}: ClientPickerProps) {
+}: PolicyLinkPickerProps) {
   const companyId = useCompanyId();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -48,33 +46,30 @@ export function ClientPicker({
 
   const trimmed = debouncedSearch.trim();
   const { results, status } = usePaginatedQuery(
-    api.clients.getByCompany,
+    api.policies.getByCompany,
     trimmed ? { companyId, search: trimmed } : "skip",
     { initialNumItems: 25 },
   );
   const isLoading = trimmed.length > 0 && status === "LoadingFirstPage";
   const showHint = trimmed.length === 0;
 
-  // Resolve the selected client even if it isn't in the current search results
   const selectedFromQuery = useQuery(
-    api.clients.getById,
+    api.policies.getById,
     value ? { id: value } : "skip",
   );
 
-  // Find the selected client in results to expose name/id (if no label was passed in)
   const selected = useMemo(() => {
     if (!value) return null;
     const found = (results ?? []).find((r) => r._id === value);
     return found ?? selectedFromQuery ?? null;
   }, [results, value, selectedFromQuery]);
 
-  const displayLabel = selectedLabel ?? selected?.name ?? null;
+  const displayLabel = selectedLabel ?? selected?.policyNumber ?? null;
   const displaySubLabel =
-    selectedSubLabel ?? selected?.identificationNumber ?? null;
+    selectedSubLabel ?? (selected ? selected.status : null);
 
   useEffect(() => {
     if (open) {
-      // Focus the search input when popover opens
       requestAnimationFrame(() => inputRef.current?.focus());
     } else {
       setSearch("");
@@ -94,23 +89,25 @@ export function ClientPicker({
             readOnly && "cursor-default opacity-100",
           )}
           aria-label={
-            displayLabel ? `Cliente: ${displayLabel}` : "Seleccionar cliente"
+            displayLabel ? `Póliza: ${displayLabel}` : "Seleccionar póliza"
           }
         >
           <span className="flex min-w-0 items-center gap-2">
-            <UserCircle className="size-4 shrink-0 text-muted-foreground" />
+            <ShieldCheck className="size-4 shrink-0 text-muted-foreground" />
             {displayLabel ? (
               <span className="flex min-w-0 flex-col items-start leading-tight">
-                <span className="truncate text-sm">{displayLabel}</span>
+                <span className="truncate text-sm tabular-nums font-mono">
+                  {displayLabel}
+                </span>
                 {displaySubLabel && (
-                  <span className="truncate text-[10px] tabular-nums text-muted-foreground">
+                  <span className="truncate text-[10px] uppercase tracking-wider text-muted-foreground">
                     {displaySubLabel}
                   </span>
                 )}
               </span>
             ) : (
               <span className="truncate text-sm text-muted-foreground">
-                Sin cliente
+                Sin póliza
               </span>
             )}
           </span>
@@ -132,7 +129,7 @@ export function ClientPicker({
                   }
                 }}
                 className="cursor-pointer rounded-sm p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-                aria-label="Quitar cliente"
+                aria-label="Quitar póliza"
               >
                 <X className="size-3.5" />
               </span>
@@ -154,7 +151,7 @@ export function ClientPicker({
             ref={inputRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nombre o identificación…"
+            placeholder="Buscar por número de póliza…"
             className="h-9 rounded-none border-0 pl-8 pr-2 shadow-none focus-visible:ring-0"
           />
         </div>
@@ -164,7 +161,7 @@ export function ClientPicker({
               <Search className="size-5 text-muted-foreground/60" />
               <p className="text-xs font-medium">Empieza a buscar</p>
               <p className="text-[11px] text-muted-foreground">
-                Escribe nombre o identificación
+                Escribe el número de póliza
               </p>
             </div>
           ) : isLoading ? (
@@ -174,7 +171,7 @@ export function ClientPicker({
             </div>
           ) : (results ?? []).length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-1 py-8 text-center">
-              <UserCircle className="size-6 text-muted-foreground/60" />
+              <ShieldCheck className="size-6 text-muted-foreground/60" />
               <p className="text-xs font-medium">Sin resultados</p>
               <p className="text-[11px] text-muted-foreground">
                 Prueba otro término
@@ -197,13 +194,15 @@ export function ClientPicker({
                         active && "bg-accent/30",
                       )}
                     >
-                      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-aegis-sapphire/10 text-[10px] font-medium text-aegis-sapphire">
-                        {row.name?.charAt(0).toUpperCase() || "?"}
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-aegis-sapphire/10 text-aegis-sapphire">
+                        <ShieldCheck className="size-3.5" />
                       </span>
                       <span className="flex min-w-0 flex-1 flex-col leading-tight">
-                        <span className="truncate text-sm">{row.name}</span>
-                        <span className="truncate text-[10px] tabular-nums text-muted-foreground">
-                          {row.identificationNumber}
+                        <span className="truncate text-sm tabular-nums font-mono">
+                          {row.policyNumber}
+                        </span>
+                        <span className="truncate text-[10px] uppercase tracking-wider text-muted-foreground">
+                          {row.status}
                         </span>
                       </span>
                       {active && (

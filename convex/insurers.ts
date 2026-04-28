@@ -220,3 +220,70 @@ export const remove = mutation({
     return args.id;
   },
 });
+
+export const bulkCreate = mutation({
+  args: {
+    companyId: v.id("companies"),
+    insurers: v.array(
+      v.object({
+        name: v.string(),
+        taxId: v.optional(v.string()),
+        website: v.optional(v.string()),
+        email: v.optional(v.string()),
+        phone: v.optional(v.string()),
+        notes: v.optional(v.string()),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) throw new ConvexError(insurerErrors.unauthorized);
+
+    const member = await populateMember(ctx, userId, args.companyId);
+    if (!member) throw new ConvexError(insurerErrors.companyNotFound);
+
+    const canManage = await checkPermission({
+      ctx,
+      userId,
+      companyId: args.companyId,
+      permission: "insurers_manage",
+    });
+    if (!canManage) throw new ConvexError(insurerErrors.permissionDenied);
+
+    const existing = await ctx.db
+      .query("insurers")
+      .withIndex("companyId", (q) => q.eq("companyId", args.companyId))
+      .collect();
+    const taken = new Set(existing.map((ins) => ins.name.trim().toLowerCase()));
+
+    let created = 0;
+    let skipped = 0;
+    for (const item of args.insurers) {
+      const name = normaliseName(item.name);
+      if (!name) {
+        skipped++;
+        continue;
+      }
+      const key = name.toLowerCase();
+      if (taken.has(key)) {
+        skipped++;
+        continue;
+      }
+      taken.add(key);
+
+      await ctx.db.insert("insurers", {
+        companyId: args.companyId,
+        name,
+        taxId: item.taxId?.trim() || undefined,
+        website: item.website?.trim() || undefined,
+        email: item.email?.trim() || undefined,
+        phone: item.phone?.trim() || undefined,
+        notes: item.notes?.trim() || undefined,
+        isActive: true,
+      });
+      created++;
+    }
+
+    return { created, skipped };
+  },
+});

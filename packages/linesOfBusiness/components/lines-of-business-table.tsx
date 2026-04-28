@@ -91,7 +91,7 @@ export function LinesOfBusinessTable({
           </p>
           <p className="mt-1 max-w-sm text-xs text-aegis-steel">
             {filter.trim()
-              ? "Prueba con otro nombre, código o descripción."
+              ? "Prueba con otro nombre, abreviatura o descripción."
               : "Define los ramos o líneas de negocio con los que trabaja tu agencia."}
           </p>
         </div>
@@ -108,7 +108,7 @@ export function LinesOfBusinessTable({
               Ramo
             </TableHead>
             <TableHead className="h-10 text-xs font-medium text-aegis-steel">
-              Código
+              Abreviatura
             </TableHead>
             <TableHead className="h-10 text-xs font-medium text-aegis-steel">
               Comisión

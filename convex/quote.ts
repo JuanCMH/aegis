@@ -226,6 +226,7 @@ export const create = mutation({
     quoteBonds: v.array(quoteBondInput),
     status: v.optional(quoteStatusLiteral),
     clientId: v.optional(v.id("clients")),
+    policyId: v.optional(v.id("policies")),
     notes: v.optional(v.string()),
     quoteNumber: v.optional(v.string()),
   },
@@ -264,6 +265,13 @@ export const create = mutation({
       }
     }
 
+    if (args.policyId) {
+      const policy = await ctx.db.get(args.policyId);
+      if (!policy || policy.companyId !== args.companyId) {
+        throw new ConvexError(quoteErrors.notFound);
+      }
+    }
+
     const quoteNumber =
       args.quoteNumber ?? (await generateQuoteNumber(ctx.db, args.companyId));
 
@@ -286,8 +294,13 @@ export const create = mutation({
       status,
       quoteNumber,
       clientId: args.clientId,
+      policyId: args.policyId,
       notes: args.notes,
       sentAt: status === "sent" ? now : undefined,
+      // Note: when the user manually links a policy at creation time we do
+      // NOT set `convertedAt`. That timestamp is reserved for genuine
+      // `convertToPolicy` flows. The detail page uses its absence to keep
+      // the form editable for manually-linked quotes.
     });
 
     for (const qb of args.quoteBonds) {
@@ -327,6 +340,7 @@ export const update = mutation({
     documentId: v.optional(v.id("_storage")),
     quoteBonds: v.array(quoteBondInput),
     clientId: v.optional(v.id("clients")),
+    policyId: v.optional(v.id("policies")),
     notes: v.optional(v.string()),
     quoteNumber: v.optional(v.string()),
   },
@@ -342,7 +356,10 @@ export const update = mutation({
     const quote = await ctx.db.get(args.id);
     if (!quote) throw new ConvexError(quoteErrors.notFound);
 
-    if (getStatus(quote) === "converted")
+    // Only block edits on quotes converted via `convertToPolicy` (which sets
+    // `convertedAt`). Manually-linked quotes (`status==="converted"` without
+    // `convertedAt`) remain editable.
+    if (getStatus(quote) === "converted" && quote.convertedAt)
       throw new ConvexError(quoteErrors.alreadyConverted);
 
     await ensureMemberAndPermission(
@@ -361,6 +378,13 @@ export const update = mutation({
       const client = await ctx.db.get(args.clientId);
       if (!client || client.companyId !== quote.companyId) {
         throw new ConvexError(quoteErrors.clientNotFound);
+      }
+    }
+
+    if (args.policyId) {
+      const policy = await ctx.db.get(args.policyId);
+      if (!policy || policy.companyId !== quote.companyId) {
+        throw new ConvexError(quoteErrors.notFound);
       }
     }
 
@@ -388,6 +412,7 @@ export const update = mutation({
       quoteType: args.quoteType,
       ...(args.documentId !== undefined ? { documentId: args.documentId } : {}),
       clientId: args.clientId,
+      policyId: args.policyId,
       notes: args.notes,
       ...(args.quoteNumber !== undefined
         ? { quoteNumber: args.quoteNumber }

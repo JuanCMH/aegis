@@ -59,9 +59,11 @@ export default function QuotesPage() {
   const companyId = useCompanyId();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchField, setSearchField] = useState<QuoteSearchField>("contractor");
+  const [searchField, setSearchField] =
+    useState<QuoteSearchField>("contractor");
   const [status, setStatus] = useState<QuoteStatus | undefined>(undefined);
-  const [filters, setFilters] = useState<QuoteAdvancedFilterState>(EMPTY_FILTERS);
+  const [filters, setFilters] =
+    useState<QuoteAdvancedFilterState>(EMPTY_FILTERS);
   const [convertQuote, setConvertQuote] = useState<Doc<"quotes"> | null>(null);
 
   const queryArgs = useMemo(() => {
@@ -75,7 +77,11 @@ export default function QuotesPage() {
     };
   }, [companyId, searchTerm, searchField, status, filters]);
 
-  const { results, status: pagStatus, loadMore } = usePaginatedQuotes(queryArgs);
+  const {
+    results,
+    status: pagStatus,
+    loadMore,
+  } = usePaginatedQuotes(queryArgs);
 
   // Stats are scoped to the same period (so the Status filter chip counts and
   // the period summary card reflect the period the user is exploring).

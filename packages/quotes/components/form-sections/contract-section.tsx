@@ -70,9 +70,7 @@ export function ContractSection({
           <CurrencyInput
             placeholder="$200.000.000"
             readOnly={readOnly}
-            value={
-              value.contractValue === 0 ? "" : String(value.contractValue)
-            }
+            value={value.contractValue === 0 ? "" : String(value.contractValue)}
             onChange={(v) =>
               onChange({
                 ...value,

@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Plus, Search } from "lucide-react";
+import { Building2, DownloadCloud, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ import {
 import { useCompanyId } from "@/packages/companies/store/use-company-id";
 import { useGetInsurers } from "@/packages/insurers/api";
 import { InsurerList } from "@/packages/insurers/components/insurer-list";
+import { ImportColombiaInsurersModal } from "@/packages/insurers/components/modals/import-colombia-insurers-modal";
 import { InsurerFormModal } from "@/packages/insurers/components/modals/insurer-form-modal";
 import { useInsurersSheet } from "@/packages/insurers/store/use-insurers-sheet";
 import type { InsurerDoc } from "@/packages/insurers/types";
@@ -33,6 +34,7 @@ export function InsurersSheet() {
   const [filter, setFilter] = useState("");
   const [scope, setScope] = useState<"active" | "all">("active");
   const [formOpen, setFormOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<InsurerDoc | null>(null);
 
   const { data: insurers, isLoading } = useGetInsurers({
@@ -81,22 +83,38 @@ export function InsurersSheet() {
           </SheetHeader>
 
           <div className="flex flex-1 flex-col gap-4 p-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="relative w-full sm:max-w-xs">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-aegis-steel" />
-                <Input
-                  placeholder="Buscar por nombre o NIT"
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  className="w-full pl-9"
-                />
-              </div>
+            <div className="flex flex-col gap-3">
+              <RoleGate permission="insurers_manage">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => setImportOpen(true)}
+                    className="gap-1.5 border-border/40 hover:border-aegis-sapphire/30 hover:bg-aegis-sapphire/5 transition-colors"
+                  >
+                    <DownloadCloud className="size-4" />
+                    Importar Colombia
+                  </Button>
+                  <Button onClick={openCreate}>
+                    <Plus className="size-4" />
+                    Nueva aseguradora
+                  </Button>
+                </div>
+              </RoleGate>
               <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-aegis-steel" />
+                  <Input
+                    placeholder="Buscar por nombre o NIT"
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    className="w-full pl-9"
+                  />
+                </div>
                 <Select
                   value={scope}
                   onValueChange={(v) => setScope(v as "active" | "all")}
                 >
-                  <SelectTrigger className="w-36">
+                  <SelectTrigger className="w-36 shrink-0">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -104,12 +122,6 @@ export function InsurersSheet() {
                     <SelectItem value="all">Todas</SelectItem>
                   </SelectContent>
                 </Select>
-                <RoleGate permission="insurers_manage">
-                  <Button onClick={openCreate}>
-                    <Plus className="size-4" />
-                    Nueva aseguradora
-                  </Button>
-                </RoleGate>
               </div>
             </div>
 
@@ -129,6 +141,13 @@ export function InsurersSheet() {
         setOpen={setFormOpen}
         companyId={companyId}
         insurer={editing}
+      />
+
+      <ImportColombiaInsurersModal
+        open={importOpen}
+        setOpen={setImportOpen}
+        companyId={companyId}
+        existing={insurers}
       />
     </>
   );

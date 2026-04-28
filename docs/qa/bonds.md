@@ -7,9 +7,11 @@
 
 Catálogo de amparos / fianzas que la agencia cotiza y emite (Seriedad de
 oferta, Cumplimiento, Manejo, Anticipo, Salarios y prestaciones, etc.).
-Cada amparo puede tener **código corto** (auto-uppercase), **tasa por
-defecto** (%) que se precarga en nuevas cotizaciones, **descripción** y
-estado **archivado** para ocultar sin eliminar.
+Cada amparo puede tener una **abreviatura** corta (auto-uppercase, máx.
+20 caracteres), una **tasa por defecto** seleccionada desde un picker de
+tasas válidas (0.05% – 0.40% en pasos de 0.01%) que se precarga en
+nuevas cotizaciones, una **descripción** y estado **archivado** para
+ocultar sin eliminar.
 
 Los documentos existentes del flujo de cotización (`quoteBonds`) guardan
 el `bondId` opcional + snapshot de `name` / `rate`, por lo que el catálogo
@@ -23,9 +25,9 @@ Ver `docs/qa/_shared.md`.
 Específicas:
 
 - `Agencia Demo` con amparos seed:
-  - "Seriedad de oferta" (código SERIEDAD, tasa 1%)
-  - "Cumplimiento" (código CUMPL, tasa 2.5%)
-  - "Manejo" (código MANEJO, tasa 1.5%)
+  - "Seriedad de oferta" (abreviatura SERIEDAD, tasa 0.10%)
+  - "Cumplimiento" (abreviatura CUMPL, tasa 0.25%)
+  - "Manejo" (abreviatura MANEJO, tasa 0.15%)
 
 ## 3. Mapa de rutas y componentes
 
@@ -49,7 +51,7 @@ Específicas:
 | # | Acción                            | Resultado esperado                                           |
 |---|-----------------------------------|--------------------------------------------------------------|
 | 1 | Navegar                           | Header con icon `ShieldCheck` amber; 3 filas en la tabla     |
-| 2 | Observar columnas                 | Amparo (icon+nombre+desc), Código (mono), Tasa (mono %), Estado (badge Activo emerald), menú (⋯) |
+| 2 | Observar columnas                 | Amparo (icon+nombre+desc), Abreviatura (mono), Tasa (mono %), Estado (badge Activo emerald), menú (⋯) |
 | 3 | Orden                             | Alfabético case-insensitive por `name` (Cumplimiento, Manejo, Seriedad) |
 
 ### 4.2 Crear amparo nuevo
@@ -58,17 +60,17 @@ Específicas:
 |---|-------------------------------------------------------------|-----------------------------------------------------------|
 | 1 | Click "Nuevo amparo"                                        | Modal con header amber abre, autofocus en Nombre          |
 | 2 | Escribir "Anticipo"                                         | Field acepta                                              |
-| 3 | Escribir "ant" en Código                                    | Input convierte a "ANT" en tiempo real (uppercase)        |
-| 4 | Escribir "2.5" en Tasa                                      | Número válido, sin error                                  |
+| 3 | Escribir "ant" en Abreviatura                               | Input convierte a "ANT" en tiempo real (uppercase)        |
+| 4 | Abrir el select "Tasa por defecto" y elegir 0.20%            | Selector muestra 36 opciones (0.05% – 0.40%); valor seleccionado |
 | 5 | Click "Crear amparo"                                        | Toast "Amparo creado", modal cierra, fila aparece ordenada|
 
 ### 4.3 Editar amparo
 
 | # | Acción                                                      | Resultado esperado                                        |
 |---|-------------------------------------------------------------|-----------------------------------------------------------|
-| 1 | Fila "Manejo" → menú → "Editar"                             | Modal abre con valores prellenados                         |
-| 2 | Cambiar tasa de 1.5 a 1.75                                  | Campo acepta                                               |
-| 3 | Click "Guardar cambios"                                     | Toast "Amparo actualizado", tabla refleja "1.75%"         |
+| 1 | Fila "Manejo" → menú → "Editar"                             | Modal abre con valores prellenados (select muestra 0.15%) |
+| 2 | Cambiar tasa de 0.15% a 0.18%                               | Select acepta y muestra el nuevo valor                    |
+| 3 | Click "Guardar cambios"                                     | Toast "Amparo actualizado", tabla refleja "0.18%"         |
 
 ### 4.4 Archivar y restaurar
 
@@ -83,7 +85,7 @@ Específicas:
 | # | Acción                                                      | Resultado esperado                                        |
 |---|-------------------------------------------------------------|-----------------------------------------------------------|
 | 1 | Escribir "cum"                                              | Sólo "Cumplimiento" visible                                |
-| 2 | Escribir "SERIEDAD"                                         | Match por código                                           |
+| 2 | Escribir "SERIEDAD"                                         | Match por abreviatura                                      |
 | 3 | Escribir "xyz"                                              | Empty state con CTA si tiene `bonds_manage`               |
 
 ### 4.6 Eliminar amparo
@@ -100,18 +102,17 @@ Específicas:
 |------|-------------------------------------------------------------|-----------------------------------------------------------|
 | 5.1  | Crear con nombre vacío                                      | Botón disabled (trim)                                     |
 | 5.2  | Crear con nombre duplicado (case-insensitive)               | Toast "Ya existe un amparo con ese nombre"                |
-| 5.3  | Crear con código duplicado                                  | Toast "Ya existe un amparo con ese código"                |
-| 5.4  | Tasa = -5                                                   | Inline error "Entre 0 y 100", botón disabled              |
-| 5.5  | Tasa = 150                                                  | Mismo error inline                                        |
-| 5.6  | Tasa = "abc"                                                | Inline error "Debe ser un número"                         |
-| 5.7  | Tasa vacía                                                  | Acepta (se guarda undefined)                              |
-| 5.8  | Nombre > 80 chars                                           | Input limita a 80                                         |
-| 5.9  | Código > 20 chars                                           | Input limita a 20                                         |
-| 5.10 | Editar sin cambios                                          | Mutation idempotente; toast "Amparo actualizado"          |
-| 5.11 | Doble click "Crear"                                         | Botón disabled mientras `isPending`                       |
-| 5.12 | Usuario sin `bonds_manage`                                  | "Nuevo amparo" oculto; menú (⋯) oculto en filas           |
-| 5.13 | Usuario sin `bonds_view`                                    | Query devuelve `[]`, empty state                          |
-| 5.14 | Eliminar último amparo                                      | Empty state con CTA (si `_manage`)                        |
+| 5.3  | Crear con abreviatura duplicada                             | Toast "Ya existe un amparo con esa abreviatura"           |
+| 5.4  | Tasa por defecto sin seleccionar                            | Acepta (se guarda undefined; el usuario la fija al cotizar) |
+| 5.5  | Reabrir un amparo con `defaultRate` legacy fuera del rango  | Picker muestra el valor recibido sin error; el usuario puede ajustar a una tasa válida |
+| 5.6  | Nombre > 80 chars                                           | Input limita a 80                                         |
+| 5.7  | Abreviatura > 20 chars                                      | Input limita a 20                                         |
+| 5.8  | Descripción > 500 chars                                     | Textarea limita a 500; altura fija (`h-24 resize-none`), sin handle de resize |
+| 5.9  | Editar sin cambios                                          | Mutation idempotente; toast "Amparo actualizado"          |
+| 5.10 | Doble click "Crear"                                         | Botón disabled mientras `isPending`                       |
+| 5.11 | Usuario sin `bonds_manage`                                  | "Nuevo amparo" oculto; menú (⋯) oculto en filas           |
+| 5.12 | Usuario sin `bonds_view`                                    | Query devuelve `[]`, empty state                          |
+| 5.13 | Eliminar último amparo                                      | Empty state con CTA (si `_manage`)                        |
 
 ## 6. Matriz de permisos
 
@@ -135,9 +136,11 @@ Específicas:
 - [ ] Badge "Activo" usa `border-aegis-emerald/30 bg-aegis-emerald/10 text-aegis-emerald`.
 - [ ] Badge "Archivado" usa `bg-aegis-slate/10 text-aegis-steel`.
 - [ ] Fila archivada con `opacity-70`.
-- [ ] Código en `font-mono`.
+- [ ] Abreviatura en `font-mono`.
 - [ ] Tasa en `font-mono` con sufijo %.
 - [ ] Modal header con icon `ShieldCheck` sobre fondo amber (override del default sapphire).
+- [ ] Campo "Tasa por defecto" usa `TaxPicker` (`@/components/aegis/tax-picker`), no input numérico libre.
+- [ ] Textarea de descripción con `h-24 resize-none` (sin handle de resize, sin atributo `rows`).
 - [ ] Confirm eliminación tipo `critical` (destructive).
 - [ ] Empty state con icon en circle `bg-aegis-amber/10`.
 - [ ] Sin tokens legacy en DOM (`h-indigo`, `bg-rose-500`, `text-rose-500`).

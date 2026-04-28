@@ -45,8 +45,7 @@ export function PerformanceBondPicker({
     return list.filter((b) => b.name.toLowerCase().includes(q));
   }, [bonds, search]);
 
-  const isSelected = (id: Id<"bonds">) =>
-    selected.some((b) => b.id === id);
+  const isSelected = (id: Id<"bonds">) => selected.some((b) => b.id === id);
 
   const handleAdd = (bondId: Id<"bonds">, bondName: string) => {
     if (readOnly) return;

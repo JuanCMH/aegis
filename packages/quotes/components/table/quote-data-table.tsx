@@ -3,13 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  Check,
-  FileText,
-  Plus,
-  Search,
-  SlidersHorizontal,
-} from "lucide-react";
+import { Check, FileText, Plus, Search, SlidersHorizontal } from "lucide-react";
 import {
   type ColumnDef,
   flexRender,
@@ -163,8 +157,7 @@ export function QuoteDataTable({
             </span>
           ) : (
             <span className="tabular-nums">
-              {data.length}{" "}
-              {data.length === 1 ? "cotización" : "cotizaciones"}
+              {data.length} {data.length === 1 ? "cotización" : "cotizaciones"}
               {!isDone ? "+" : ""}
             </span>
           )}

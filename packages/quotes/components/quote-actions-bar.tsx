@@ -15,10 +15,7 @@ import { useConfirm } from "@/components/hooks/use-confirm";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { RoleGate } from "@/packages/roles/components/role-gate";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
-import {
-  useRemoveQuote,
-  useSetQuoteStatus,
-} from "../api";
+import { useRemoveQuote, useSetQuoteStatus } from "../api";
 import type { QuoteStatus } from "../types";
 import { QuoteStatusBadge } from "./quote-status-badge";
 
@@ -42,7 +39,12 @@ const STATUS_ACTIONS: Record<
   }>
 > = {
   draft: [
-    { to: "sent", label: "Marcar como enviada", icon: Send, variant: "default" },
+    {
+      to: "sent",
+      label: "Marcar como enviada",
+      icon: Send,
+      variant: "default",
+    },
   ],
   sent: [
     {
@@ -123,10 +125,7 @@ export function QuoteActionsBar({
     confirmText: "Cambiar",
   });
 
-  const handleStatus = async (
-    to: QuoteStatus,
-    needsConfirm: boolean,
-  ) => {
+  const handleStatus = async (to: QuoteStatus, needsConfirm: boolean) => {
     if (needsConfirm) {
       const ok = await confirmStatus();
       if (!ok) return;

@@ -73,7 +73,9 @@ export function BidBondCard({
   };
 
   return (
-    <div className={cn("rounded-xl border border-border/40 bg-card/80", className)}>
+    <div
+      className={cn("rounded-xl border border-border/40 bg-card/80", className)}
+    >
       <header className="flex items-center justify-between gap-3 p-4">
         <div className="flex items-center gap-2">
           <div className="flex size-8 items-center justify-center rounded-lg border border-aegis-amber/20 bg-aegis-amber/10 text-aegis-amber">

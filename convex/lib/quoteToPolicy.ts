@@ -26,7 +26,12 @@ const TIPO_CONTRATO_ALIASES = [
   "tipo contrato",
 ];
 const OBJETO_ALIASES = ["objeto", "agreement", "descripcion", "descripción"];
-const FECHA_INICIO_ALIASES = ["fecha_inicio", "fecha inicio", "inicio", "vigencia_desde"];
+const FECHA_INICIO_ALIASES = [
+  "fecha_inicio",
+  "fecha inicio",
+  "inicio",
+  "vigencia_desde",
+];
 const FECHA_FIN_ALIASES = ["fecha_fin", "fecha fin", "fin", "vigencia_hasta"];
 
 /**

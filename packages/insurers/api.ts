@@ -17,3 +17,5 @@ export const useUpdateInsurer = () => useMutate(route.update);
 export const useSetInsurerActive = () => useMutate(route.setActive);
 
 export const useRemoveInsurer = () => useMutate(route.remove);
+
+export const useBulkCreateInsurers = () => useMutate(route.bulkCreate);

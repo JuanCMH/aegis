@@ -164,7 +164,7 @@ export function LineOfBusinessFormModal({
               className="sm:col-span-2"
             />
             <Field
-              label="Código"
+              label="Abreviatura"
               htmlFor="lob-code"
               placeholder="Ej. AUTO, VIDA"
               maxLength={20}
@@ -198,11 +198,11 @@ export function LineOfBusinessFormModal({
               <Textarea
                 id="lob-description"
                 maxLength={500}
-                rows={3}
                 placeholder="Breve descripción del alcance del ramo…"
                 value={form.description}
                 disabled={isPending}
                 onChange={(e) => update("description", e.target.value)}
+                className="h-24 resize-none"
               />
             </div>
           </div>
