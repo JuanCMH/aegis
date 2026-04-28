@@ -156,7 +156,14 @@ export const getById = query({
     const member = await populateMember(ctx, userId, args.id);
     if (!member) return null;
 
-    return await ctx.db.get(args.id);
+    const company = await ctx.db.get(args.id);
+    if (!company) return null;
+
+    const logoUrl = company.logo
+      ? await ctx.storage.getUrl(company.logo)
+      : null;
+
+    return { ...company, logoUrl };
   },
 });
 
@@ -166,15 +173,40 @@ export const getByIdPublic = query({
   },
   handler: async (ctx, args) => {
     if (!args.id) return null;
-    return await ctx.db.get(args.id);
+    const company = await ctx.db.get(args.id);
+    if (!company) return null;
+    const logoUrl = company.logo
+      ? await ctx.storage.getUrl(company.logo)
+      : null;
+    return { ...company, logoUrl };
   },
 });
 
 export const update = mutation({
   args: {
     id: v.id("companies"),
-    name: v.string(),
-    active: v.boolean(),
+    name: v.optional(v.string()),
+    active: v.optional(v.boolean()),
+    legalName: v.optional(v.string()),
+    taxIdType: v.optional(
+      v.union(
+        v.literal("nit"),
+        v.literal("cc"),
+        v.literal("ce"),
+        v.literal("passport"),
+      ),
+    ),
+    taxIdNumber: v.optional(v.string()),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    whatsapp: v.optional(v.string()),
+    website: v.optional(v.string()),
+    country: v.optional(v.string()),
+    department: v.optional(v.string()),
+    city: v.optional(v.string()),
+    address: v.optional(v.string()),
+    primaryColor: v.optional(v.string()),
+    secondaryColor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -191,7 +223,51 @@ export const update = mutation({
     const company = await ctx.db.get(args.id);
     if (!company) throw new ConvexError(companyErrors.notFound);
 
-    await ctx.db.patch(args.id, { name: args.name, active: args.active });
+    const { id, ...rest } = args;
+    const patch = Object.fromEntries(
+      Object.entries(rest).filter(([_, v]) => v !== undefined),
+    );
+
+    if (Object.keys(patch).length > 0) {
+      await ctx.db.patch(id, patch);
+    }
+
+    return id;
+  },
+});
+
+export const setLogo = mutation({
+  args: {
+    id: v.id("companies"),
+    logo: v.union(v.id("_storage"), v.null()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) throw new ConvexError(companyErrors.unauthorized);
+
+    const hasPermission = await checkPermission({
+      ctx,
+      userId,
+      permission: "company_edit",
+      companyId: args.id,
+    });
+    if (!hasPermission) throw new ConvexError(companyErrors.permissionDenied);
+
+    const company = await ctx.db.get(args.id);
+    if (!company) throw new ConvexError(companyErrors.notFound);
+
+    // Borra el logo previo del storage para no acumular basura.
+    if (company.logo && company.logo !== args.logo) {
+      try {
+        await ctx.storage.delete(company.logo);
+      } catch {
+        /* archivo ya borrado o no existe; ignorar. */
+      }
+    }
+
+    await ctx.db.patch(args.id, {
+      logo: args.logo === null ? undefined : args.logo,
+    });
 
     return args.id;
   },

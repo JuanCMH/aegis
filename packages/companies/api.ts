@@ -8,6 +8,8 @@ export const useCreateCompany = () => useMutate(route.create);
 
 export const useUpdateCompany = () => useMutate(route.update);
 
+export const useSetCompanyLogo = () => useMutate(route.setLogo);
+
 export const useRemoveCompany = () => useMutate(route.remove);
 
 export const useJoinCompany = () => useMutate(route.join);

@@ -102,6 +102,28 @@ const schema = defineSchema({
     logo: v.optional(v.id("_storage")),
     primaryColor: v.optional(v.union(...customColors)),
     secondaryColor: v.optional(v.union(...customColors)),
+    // Identidad ampliada
+    legalName: v.optional(v.string()),
+    // Identificación tributaria
+    taxIdType: v.optional(
+      v.union(
+        v.literal("nit"),
+        v.literal("cc"),
+        v.literal("ce"),
+        v.literal("passport"),
+      ),
+    ),
+    taxIdNumber: v.optional(v.string()),
+    // Contacto
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    whatsapp: v.optional(v.string()),
+    website: v.optional(v.string()),
+    // Ubicación
+    country: v.optional(v.string()),
+    department: v.optional(v.string()),
+    city: v.optional(v.string()),
+    address: v.optional(v.string()),
   })
     .index("userId", ["userId"])
     .index("joinCode", ["joinCode"]),
